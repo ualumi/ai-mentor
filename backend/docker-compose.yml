@@ -23,9 +23,21 @@ services:
     networks:
       - mentor-net
 
+  mentor_service:
+    build:
+      context: ./mentor_service
+    container_name: mentor_service
+    ports:
+      - "8001:8001"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - redis
+    networks:
+      - mentor-net
+
 networks:
   mentor-net:
     driver: bridge
-  default:
-    external: false
-    name: mentor-net
+
