@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import {ArrowUp} from 'lucide-react';
 
 function InputForm() {
   const [message, setMessage] = useState("");
@@ -48,24 +49,24 @@ function InputForm() {
   };
 
   return (
-    <div className="p-4 flex flex-col gap-3 max-w-md mx-auto">
-      <h2 className="text-lg font-semibold">
+    <div className="inputform">
+      {/*<h2 className="text-lg font-semibold">
         WebSocket клиент {connected ? "🟢 Подключен" : "🔴 Отключен"}
-      </h2>
+      </h2>*/}
 
-      <form onSubmit={handleSend} className="flex gap-2">
+      <form onSubmit={handleSend} className="form">
         <input
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          placeholder="Введите код, например print('Hello')"
-          className="border p-2 flex-1 rounded"
+          placeholder="Введите"
+          className="inputtext"
         />
         <button
           type="submit"
           className="bg-blue-500 text-white px-4 py-2 rounded"
         >
-          Отправить
+          <ArrowUp />
         </button>
       </form>
 
