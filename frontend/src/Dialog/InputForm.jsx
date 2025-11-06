@@ -72,7 +72,7 @@ function InputForm() {
 
       {response && (
         <div className="border p-2 bg-gray-100 rounded">
-          <b>Ответ от сервера:</b>
+          <b>ИИ-ментор:</b>
           <pre>{response}</pre>
         </div>
       )}

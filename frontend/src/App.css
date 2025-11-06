@@ -96,7 +96,13 @@
   align-items: flex-end;
     border-left: 2px solid;
   border-color: #232524;
+  flex-direction: column-reverse;
 
+}
+
+.message {
+  display: flex;
+  align-items: flex-start;
 }
 
 .inputtext {
@@ -130,10 +136,13 @@
 .codenav {
   border-bottom: 2px solid;
   border-color: #232524;
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  gap: 5px;
 }
 
 .buttonfile {
-  margin: 5px;
   background-color: #23292E;
   display: flex;
   justify-content: space-between;

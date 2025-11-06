@@ -37,7 +37,38 @@ services:
     networks:
       - mentor-net
 
+  db:
+    image: postgres:15
+    container_name: db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: users_db
+    ports:
+      - "5432:5432"
+    networks:
+      - mentor-net
+
+  user_service:
+    build:
+      context: ./user_service
+    container_name: user_service
+    ports:
+      - "8002:8002"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/users_db
+      SECRET_KEY: supersecret
+    depends_on:
+      - db
+    networks:
+      - mentor-net
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
 networks:
   mentor-net:
     driver: bridge
 
+volumes:
+  pgdata:
