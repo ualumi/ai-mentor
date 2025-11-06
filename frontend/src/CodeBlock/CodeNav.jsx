@@ -6,7 +6,7 @@ function CodeNav() {
   return (
     <>
         <div className='codenav'>
-          <a><SquareTerminal size={32} /></a>
+          {/*<a><SquareTerminal size={32} /></a>*/}
             <ButtonFile></ButtonFile>
         </div>
         

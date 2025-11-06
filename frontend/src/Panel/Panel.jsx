@@ -6,7 +6,7 @@ function Panel() {
     <>
         <div className='panel'>
             <ButtonNew></ButtonNew>
-            <p>Your Directories here</p>
+            {/*<p>Your Directories here</p>*/}
         </div>
         
     </>

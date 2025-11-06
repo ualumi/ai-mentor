@@ -63,12 +63,16 @@
     border-bottom: 2px solid;
   border-color: #232524;
   max-height: 100px ;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  align-items: center;
 }
 
 .window {
   /*padding: 0px 50px 0px 50px;*/
   display: grid;
-  grid-template-columns: 100px 1fr 2.5fr 1fr;
+  grid-template-columns: 100px 1fr 2.5fr 1.5fr;
   width: 100%;
   height: 100%;
   
@@ -93,20 +97,38 @@
   display: flex;
   height: 100%;
   width: 100%;
-  align-items: flex-end;
-    border-left: 2px solid;
+  /*align-items: flex-end;*/
+  border-left: 2px solid;
   border-color: #232524;
-  flex-direction: column-reverse;
+  flex-direction: column;
+  flex: 1;
+}
 
+.messages-container {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .message {
-  display: flex;
+  
   align-items: flex-start;
+  background: #23292E;
+  
+  justify-content: start;
+  flex-direction: row;
+}
+
+pre{
+  display: flex;
+  color: white;
 }
 
 .inputtext {
   min-height:45px ;
+  display: flex;
+  flex: 1;
 }
 
 .panel {
