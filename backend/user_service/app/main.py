@@ -28,7 +28,7 @@ async def startup():
     print("✅ База данных инициализирована")
 
 # Подключаем роутер авторизации
-app.include_router(auth.router, prefix="/auth", tags=["auth"])
+app.include_router(auth.router)
 
 @app.get("/health")
 async def health():

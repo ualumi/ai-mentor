@@ -1,4 +1,4 @@
-import requests
+'''import requests
 
 BASE_URL = "http://localhost:8002"
 
@@ -25,4 +25,25 @@ data = {
 
 response = httpx.post(url, json=data)
 print("Статус:", response.status_code)
-print("Ответ JSON:", response.json())
+print("Ответ JSON:", response.json())'''
+import requests
+import httpx
+
+r = requests.post(
+    "http://localhost:8002/auth/register",
+    json={
+        "username": "test_user",
+        "email": "test_user@example.com",
+        "password": "123456"
+    },
+)
+print(r.status_code, r.text)
+
+response = httpx.post(
+    "http://localhost:8002/auth/login",
+    json={
+        "email": "test_user@example.com",
+        "password": "123456"
+    }
+)
+print(response.status_code, response.json())

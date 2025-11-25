@@ -67,21 +67,21 @@ async def login_user(data: LoginRequest, db: AsyncSession = Depends(get_db)):
     token = create_access_token({"sub": str(user.id)})
     return TokenResponse(access_token=token)'''
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from pydantic import BaseModel, constr
 from app.core.models import User
 from app.core.database import get_db
-from app.core.security import hash_password, verify_password, create_access_token
+from app.core.security import hash_password, verify_password, create_access_token, verify_access_token
 
-router = APIRouter()
+router = APIRouter(prefix="/auth", tags=["auth"])
 
 # ----- Схемы -----
 class RegisterRequest(BaseModel):
     username: constr(min_length=1, max_length=50)
     email: constr(max_length=120)
-    password: constr(min_length=6, max_length=255)  # max 255 символов, обрежем при хэшировании
+    password: constr(min_length=6, max_length=255)
 
 
 class LoginRequest(BaseModel):
@@ -130,3 +130,25 @@ async def login_user(data: LoginRequest, db: AsyncSession = Depends(get_db)):
 
     token = create_access_token({"sub": str(user.id)})
     return TokenResponse(access_token=token)
+
+
+# ----- Проверка токена -----
+from fastapi import Header
+
+@router.get("/verify-token")
+async def verify_token_endpoint(authorization: str = Header(None)):
+    if not authorization:
+        raise HTTPException(status_code=401, detail="Missing Authorization header")
+
+    scheme, _, token = authorization.partition(" ")
+
+    if scheme.lower() != "bearer" or not token:
+        raise HTTPException(status_code=401, detail="Invalid Authorization format")
+
+    # Проверяем токен
+    token_data = verify_access_token(token)
+
+    return {
+        "user_id": token_data.get("sub"),
+        "email": token_data.get("email")
+    }
