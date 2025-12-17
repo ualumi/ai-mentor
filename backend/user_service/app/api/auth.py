@@ -198,10 +198,32 @@ async def login(data: LoginRequest, db: AsyncSession = Depends(get_db)):
     except ValueError:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-@router.get("/verify-token")
+'''@router.get("/verify-token")
 async def verify_token(authorization: str):
     scheme, _, token = authorization.partition(" ")
     if scheme.lower() != "bearer":
         raise HTTPException(status_code=401)
 
-    return await verify_token_query(token)
+    return await verify_token_query(token)'''
+
+from fastapi import APIRouter, HTTPException, Query
+from app.core.security import verify_access_token
+
+
+@router.get("/verify-token")
+async def verify_token(token: str = Query(...)):
+    """
+    Принимает чистый токен из ?token=...
+    Имя переменной 'token' теперь совпадает с тем, что шлет websocket_service
+    """
+    # Мы не используем partition, так как нам прилетает чистый JWT без "Bearer"
+    try:
+        payload = verify_access_token(token)
+        # Возвращаем данные, которые нужны воркеру
+        return {
+            "status": "ok",
+            "user_id": payload.get("sub"),
+            "email": payload.get("email")
+        }
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid token")

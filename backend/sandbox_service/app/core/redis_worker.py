@@ -29,5 +29,17 @@ async def sandbox_worker():
             result_text += f"Error:\n{result_dict['stderr']}\n"
         result_text += f"Return code: {result_dict['returncode']}"
 
-        # Отправляем результат обратно в WebSocket-сервис
+        #new
+        await redis.publish(
+            "code_results",
+            json.dumps({
+                "user_id": user_id,
+                "code": code,
+                "sandbox_result": result_dict
+            })
+        )
+
+'''        # Отправляем результат обратно в WebSocket-сервис
         await redis.publish(CHANNEL_RESULTS, json.dumps({"user_id": user_id, "result": result_text}))
+'''
+        

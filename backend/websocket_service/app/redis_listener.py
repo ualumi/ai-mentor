@@ -44,10 +44,15 @@ from app.core.websocket_manager import manager
 # Каналы Redis
 CHANNEL_MENTOR_OUT = "mentor_out"       # подсказки ИИ-ментора
 CHANNEL_RESULTS = "code_results"        # результаты выполнения кода песочницей
+#new
+CHANNEL_MENTOR_RESPONSE = "mentor_response"
 
 async def redis_listener():
     pubsub = redis.pubsub()
     await pubsub.subscribe(CHANNEL_MENTOR_OUT, CHANNEL_RESULTS)
+    #new
+    await pubsub.subscribe(CHANNEL_RESULTS, CHANNEL_MENTOR_RESPONSE)
+
     print("🔄 Redis listener запущен (websocket-service слушает mentor_out и code_results)")
 
     async for message in pubsub.listen():
@@ -69,6 +74,13 @@ async def redis_listener():
                 if not user_id or result is None:
                     continue
                 await manager.send_personal_message(f"Песочница:\n{result}", user_id)
+            
+            #new
+            elif message["channel"] == CHANNEL_MENTOR_RESPONSE:
+                hint = payload.get("hint")
+                await manager.send_personal_message(
+                    f"ИИ-ментор: {hint}", user_id
+                )
 
         except Exception as e:
             print(f"Redis listener error: {e}")

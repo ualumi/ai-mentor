@@ -3,7 +3,8 @@ from app.core.redis_client import redis
 from app.utils.hint_logic import generate_hint
 
 CHANNEL_IN = "mentor_in"
-CHANNEL_OUT = "mentor_out"
+CHANNEL_OUT = "mentor_response"
+
 
 async def mentor_worker():
     pubsub = redis.pubsub()

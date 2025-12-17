@@ -81,6 +81,22 @@ services:
     networks:
       - mentor-net
 
+  learning_service:
+    build: ./learning_service
+    container_name: learning_service
+    ports:
+      - "8004:8004"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - redis
+      - sandbox_service
+      - mentor_service
+    networks:
+      - mentor-net
+
+
 networks:
   mentor-net:
     driver: bridge
