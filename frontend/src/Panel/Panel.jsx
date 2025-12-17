@@ -1,11 +1,12 @@
 import '../App.css'
 import ButtonNew from './ButtonNew'
+import FilesTasksSwitcher from './FilesTasksSwitcher'
 
 function Panel() {
   return (
     <>
         <div className='panel'>
-            <ButtonNew></ButtonNew>
+            <FilesTasksSwitcher></FilesTasksSwitcher>
             {/*<p>Your Directories here</p>*/}
         </div>
         

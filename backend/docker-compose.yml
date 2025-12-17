@@ -20,6 +20,7 @@ services:
       REDIS_PORT: 6379
     depends_on:
       - redis
+      - user_service
     networks:
       - mentor-net
 
@@ -65,6 +66,20 @@ services:
       - mentor-net
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  sandbox_service:
+    build:
+      context: ./sandbox_service
+    container_name: sandbox_service
+    ports:
+      - "8003:8003"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - redis
+    networks:
+      - mentor-net
 
 networks:
   mentor-net:
