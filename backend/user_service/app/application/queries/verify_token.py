@@ -1,7 +1,7 @@
-'''from app.core.security import verify_access_token
+from app.core.security import verify_access_token
 
 async def verify_token_query(token: str):
-    return verify_access_token(token)'''
+    return verify_access_token(token)
 
 '''from fastapi import Header
 from app.core.security import verify_access_token
@@ -10,7 +10,7 @@ from app.core.security import verify_access_token
 async def verify_token_query(token: str = Header(...)):
     return verify_access_token(token)'''
 
-from fastapi import Query, HTTPException
+'''from fastapi import Query, HTTPException
 from app.core.security import verify_access_token
 
 async def verify_token_query(token: str = Query(...)):
@@ -25,3 +25,4 @@ async def verify_token_query(token: str = Query(...)):
         "user_id": payload.get("sub"), 
         "email": payload.get("email")
     }
+'''

@@ -9,35 +9,6 @@ services:
     networks:
       - mentor-net
 
-  websocket_service:
-    build: 
-      context: ./websocket_service
-    container_name: websocket_service
-    ports:
-      - "8000:8000"
-    environment:
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-    depends_on:
-      - redis
-      - user_service
-    networks:
-      - mentor-net
-
-  mentor_service:
-    build:
-      context: ./mentor_service
-    container_name: mentor_service
-    ports:
-      - "8001:8001"
-    environment:
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-    depends_on:
-      - redis
-    networks:
-      - mentor-net
-
   db:
     image: postgres:15
     container_name: db
@@ -67,12 +38,55 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+
+  learning_service:
+    build: ./learning_service
+    container_name: learning_service
+    environment:
+      - REDIS_URL=redis://redis:6379
+    ports:
+      - "8001:8001"
+    depends_on:
+      - redis
+      - user_service
+    networks:
+        - mentor-net
+  
+  scaffolding_service:
+    build: ./scaffolding_service
+    container_name: scaffolding_service
+    environment:
+      - REDIS_URL=redis://redis:6379
+    ports:
+      - "8003:8003"
+    depends_on:
+      - redis
+      - learning_service
+      - user_service
+    networks:
+        - mentor-net
+
+  task_manager1:
+    build: 
+      context: ./task_manager1
+    container_name: task_manager1
+    ports:
+      - "8004:8004"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - redis
+      - user_service
+    networks:
+      - mentor-net
+
   sandbox_service:
     build:
       context: ./sandbox_service
     container_name: sandbox_service
     ports:
-      - "8003:8003"
+      - "8005:8005"
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -81,20 +95,34 @@ services:
     networks:
       - mentor-net
 
-  learning_service:
-    build: ./learning_service
-    container_name: learning_service
+  mentor_service:
+    build:
+      context: ./mentor_service
+    container_name: mentor_service
     ports:
-      - "8004:8004"
+      - "8006:8006"
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379
     depends_on:
       - redis
-      - sandbox_service
-      - mentor_service
     networks:
       - mentor-net
+
+  analitics_service:
+    build:
+      context: ./analitics_service
+    container_name: analitics_service
+    ports:
+      - "8007:8007"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - redis
+    networks:
+      - mentor-net
+
 
 
 networks:

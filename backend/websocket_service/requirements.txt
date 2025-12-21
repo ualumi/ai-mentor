@@ -1,5 +1,0 @@
-asyncio
-fastapi
-uvicorn[standard]
-redis>=5.0
-aiohttp

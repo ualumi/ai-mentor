@@ -3,10 +3,11 @@ import tempfile
 import os
 
 async def run_code(code: str, timeout: int = 5) -> dict:
+    print(
     """
     Запуск кода в изолированном временном файле через subprocess.
     Возвращает stdout, stderr и статус.
-    """
+    """)
     with tempfile.NamedTemporaryFile("w", suffix=".py", delete=False) as tmp_file:
         tmp_file.write(code)
         tmp_file_path = tmp_file.name
@@ -18,6 +19,7 @@ async def run_code(code: str, timeout: int = 5) -> dict:
             text=True,
             timeout=timeout
         )
+        print('works')
         return {
             "stdout": result.stdout,
             "stderr": result.stderr,

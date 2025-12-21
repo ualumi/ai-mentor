@@ -3,8 +3,7 @@ from app.core.redis_client import redis
 from app.utils.hint_logic import generate_hint
 
 CHANNEL_IN = "mentor_in"
-CHANNEL_OUT = "mentor_response"
-
+CHANNEL_OUT = "mentor_out"
 
 async def mentor_worker():
     pubsub = redis.pubsub()
@@ -16,17 +15,17 @@ async def mentor_worker():
             continue
         try:
             payload = json.loads(message["data"])
-            user_id = payload.get("user_id")
+            session_id = payload.get("session_id")
             code = payload.get("code")
 
-            if not user_id or not code:
+            if not session_id or not code:
                 continue
 
             hint = await generate_hint(code)
 
-            response = {"user_id": user_id, "hint": hint}
+            response = {"session_id": session_id, "hint": hint}
             await redis.publish(CHANNEL_OUT, json.dumps(response))
-            print(f"💡 Отправлена подсказка пользователю {user_id}")
+            print(f"💡 Отправлена подсказка пользователю {session_id}, {response}")
 
         except Exception as e:
             print(f"Mentor worker error: {e}")

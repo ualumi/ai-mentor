@@ -12,11 +12,13 @@ async def sandbox_worker():
     
     async for message in pubsub.listen():
         if message["type"] != "message":
+            print("Плучено сообщение")
             continue
 
         data = json.loads(message["data"])
-        user_id = data["user_id"]
         code = data["code"]
+        session_id = data["session_id"]
+        step_id = data["step_id"]
 
         # 🔹 Выполнение кода через уже существующий run_code
         result_dict = await run_code(code)
@@ -33,9 +35,10 @@ async def sandbox_worker():
         await redis.publish(
             "code_results",
             json.dumps({
-                "user_id": user_id,
+                "session_id": session_id,
                 "code": code,
-                "sandbox_result": result_dict
+                "sandbox_result": result_dict,
+                "step_id": step_id,
             })
         )
 
