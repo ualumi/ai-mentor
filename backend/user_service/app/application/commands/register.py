@@ -22,4 +22,4 @@ async def register_user_command(data, db):
     db.add(db_user)
     await db.commit()
 
-    return db_user.id   # ✅ команда возвращает ТОЛЬКО идентификатор
+    return db_user.id   

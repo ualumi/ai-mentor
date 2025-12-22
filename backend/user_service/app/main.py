@@ -4,17 +4,12 @@ from app.core.database import engine, Base
 
 from fastapi.middleware.cors import CORSMiddleware
 
-
-
-
-
-
 app = FastAPI(title="User Service")
 
-# Разрешаем все источники (для разработки)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Или список конкретных фронтенд URL, например ["http://localhost:5173"]
+    allow_origins=["*"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -27,7 +22,7 @@ async def startup():
         await conn.run_sync(Base.metadata.create_all)
     print("✅ База данных инициализирована")
 
-# Подключаем роутер авторизации
+#роутеры авторизации
 app.include_router(auth.router)
 
 @app.get("/health")

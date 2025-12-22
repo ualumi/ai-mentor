@@ -1,4 +1,6 @@
 import { startSession } from "../api/learning";
+import '../App.css'
+import myImage from '../assets/Layers.svg';  
 
 export default function SessionStarter({ token, onStart }) {
   async function start() {
@@ -6,5 +8,5 @@ export default function SessionStarter({ token, onStart }) {
     onStart(data.session_id);
   }
 
-  return <button onClick={start}>Start Learning</button>;
+  return <button onClick={start} className="module_button"><img src={myImage}/><p>ML basic</p></button>;
 }

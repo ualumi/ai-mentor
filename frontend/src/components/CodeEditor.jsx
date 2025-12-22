@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Editor from "@monaco-editor/react";
 
 export default function CodeEditor({ ws }) {
   const [code, setCode] = useState("");
@@ -16,13 +17,19 @@ export default function CodeEditor({ ws }) {
 
   return (
     <>
-      <textarea
-        rows={10}
-        cols={70}
+      <Editor
+        height="300px"
+        language="python"
+        theme="vs-dark"
         value={code}
-        onChange={(e) => setCode(e.target.value)}
-        placeholder="Введи код..."
+        onChange={(value) => setCode(value ?? "")}
+        options={{
+          minimap: { enabled: false },
+          fontSize: 16,
+          automaticLayout: true,
+        }}
       />
+
       <br />
       <button onClick={submit}>Submit code</button>
     </>
