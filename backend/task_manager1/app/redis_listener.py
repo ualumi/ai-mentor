@@ -49,5 +49,7 @@ async def redis_listener():
             print(f"🧪 Sandbox reply for {session_id}")
 
         # Если оба ответа есть — можно отвечать фронту
-        if task.mentor_reply and task.sandbox_reply:
+        '''if task.mentor_reply and task.sandbox_reply:
+            task.reply_event.set()'''
+        if task.mentor_reply is not None and task.sandbox_reply is not None:
             task.reply_event.set()
