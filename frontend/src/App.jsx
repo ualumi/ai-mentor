@@ -3,6 +3,9 @@ import LearningFlow from "./components/LearningFlow";
 import TopBar from "./components/TopBar";
 import { AuthProvider, useAuth } from "./components/AuthContext";
 import LeftBar from "./components/LeftBar"
+import {Route, BrowserRouter, Routes} from "react-router-dom"
+import Modules from "./components/modules";
+import Analyze from "./components/Analyze";
 
 function AppContent() {
   const { token, login } = useAuth();
@@ -13,10 +16,17 @@ function AppContent() {
 
   return (
     <>
-      <TopBar />
-      <LeftBar />
+      <BrowserRouter>
+        <TopBar />
+        <LeftBar />
+        <Routes>
+          <Route path='/' Component={LearningFlow}/>
+          <Route path="/modules" Component={Modules}/>
+          <Route path="/analitics" Component={Analyze}/>
+        </Routes>
+      </BrowserRouter>
       
-      <LearningFlow />
+      
     </>
   );
 }

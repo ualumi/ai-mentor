@@ -748,6 +748,7 @@ export default function Playground({ ws }) {
       )}
       <div className="task-content">
         <TaskCondition condition={condition} />
+        <button className="next-step-disabled">▶ Следующий шаг</button>
 
         {/* ✅ Кнопка следующего шага */}
         {!isLastStepCompleted && nextCondition && (

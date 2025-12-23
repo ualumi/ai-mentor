@@ -12,6 +12,8 @@
     font-style: normal;
 }
 
+
+
 #root {
   margin: 0 20px 0px 20px;
   text-align: center;
@@ -31,7 +33,7 @@ body {
 .body {
   display: flex;
   flex-direction: column;
-  margin: 0 50px 0px 100px;
+  margin: 0 50px 0px 115px;
   height: 100%;
   
 }
@@ -53,14 +55,28 @@ body {
   
 }
 
+.logout {
+  color: #D9E4FB;
+  background-color: #1E2130;
+  border-radius: 20px;
+  font-family: 'Stolz-light';
+  font-size: 14px;
+}
+
 .leftbar {
+  padding-top: 100px;
   display: flex;
   flex-direction: column;
+  gap: 20px;
   position: absolute;
   left: 0;
   background-color: #121319;
   height: 100%;
-  width: 50px;
+  width: 65px;
+}
+
+.img {
+  width: 30px;
 }
 
 .module_button {
@@ -81,19 +97,31 @@ body {
   display: flex;
   gap: 10px;
   background-color: #12131A;
-  
 }
 
 .analitycs {
-  background-color: #12131A;
+  background-color: #1E2130;
   font-family: 'Stolz';
+  border-radius: 20px;
+  padding: 20px;
+  overflow: hidden;
+  max-height: 300px;
+  clip-path: inset(0 round 16px);
 }
+
 
 .module_section {
   background-color: #12131A;
   border-radius: 20px;
   padding: 20px;
   overflow-x: scroll;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.module_section::-webkit-scrollbar {
+  display: none;
 }
 
 .chartitself {
@@ -107,6 +135,16 @@ body {
   background-color: #12131A;
   border-radius: 20px;
   padding: 20px;
+}
+
+.profile {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  background-color: #12131A;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 15px;
 }
 
 .module_name {
@@ -145,6 +183,17 @@ body {
   padding-bottom: 10px;
 }
 
+.module_text_light {
+  font-family: 'Stolz';
+  font-size: 14px;
+  color: #D9E4FB;
+  text-align: left;
+  margin: 0px;
+
+  padding-top: 10px;
+  opacity: 0.5;
+}
+
 .kaabinet {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -165,6 +214,8 @@ body {
   text-decoration: underline;
   font-family: 'Stolz-light';
   margin: 0;
+  opacity: 0.5;
+  font-size: 14px;
 }
 
 h3 {
@@ -199,6 +250,19 @@ h2 {
 .next-step {
   grid-column: 1;
   grid-row: 2;
+}
+
+.next-step-disabled {
+  grid-column: 1;
+  grid-row: 2;
+  background-color: #1E2130;
+  color: #818795;
+  border: none;
+}
+
+.next-step-disabled:hover {
+  border: none;
+  cursor: not-allowed;
 }
 
 .mentor {

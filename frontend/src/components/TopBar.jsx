@@ -21,18 +21,17 @@ export default function TopBar() {
             width: 32,
             height: 32,
             borderRadius: "50%",
-            background: "#4f46e5",
+            background: "#3B68FF",
             color: "#fff",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontWeight: "bold",
           }}
         >
           {letter}
         </div>
 
-        <button onClick={logout}>Logout</button>
+        <button className="logout" onClick={logout}>Logout</button>
       </div>
     </div>
   );

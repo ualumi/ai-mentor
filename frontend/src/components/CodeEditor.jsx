@@ -85,16 +85,18 @@ export default function CodeEditor({ ws }) {
 
   // ⭐ Создаем кастомную тему с фоном #1C1D25
   useEffect(() => {
-    if (monaco) {
-      monaco.editor.defineTheme("custom-dark", {
-        base: "vs-dark",
-        inherit: true,
-        rules: [],
-        colors: {
-          "editor.background": "#1C1D25",
-        },
-      });
-    }
+    if (!monaco) return;
+
+    monaco.editor.defineTheme("custom-dark", {
+      base: "vs-dark",
+      inherit: true,
+      rules: [],
+      colors: {
+        "editor.background": "#1C1D25",
+      },
+    });
+
+    monaco.editor.setTheme("custom-dark"); // ⭐ ОБЯЗАТЕЛЬНО
   }, [monaco]);
 
   const submit = () => {

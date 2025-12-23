@@ -6,6 +6,7 @@ import { connectTaskWS } from "../api/ws";
 import { useAuth } from "./AuthContext";
 import '../App.css'
 import Analitycs from "./Analitycs";
+import { NavLink } from "react-router-dom";
 
 export default function LearningFlow() {
   const { token } = useAuth(); // ✅ токен берём из контекста
@@ -29,19 +30,26 @@ export default function LearningFlow() {
   if (!sessionId) {
     return <div className="learning-content">
       <div>
-        <h1>Hello username</h1>
+        <h1>Личный кабинет</h1>
         <p className="module_info">Веб-платформа предназначена для обучения навыкам разработки через практику и интерактивное взаимодействие с ИИ-ментором. </p>
       </div>
-      
-      <div className="kaabinet">
+      <div>
+        <div className="profile">
+          <div className="nameandlink">
+              <p className="module_name">Профиль</p>
+              <p className="link">перейти в настройки</p>
+            </div>
+            <p className="module_infor">Modules section description</p>
+        </div>
+        <div className="kaabinet">
           <div className="chart">
             <div className="nameandlink">
               <p className="module_name">Прогресс</p>
-              <p className="link">перейти к аналитике</p>
+              <NavLink to="/analitics"><p className="link">перейти к аналитике</p></NavLink>
             </div>
             <p className="module_infor">Modules section description</p>
             <div className="chartitself">
-              <Analitycs  labels={["День 1", "День 2", "День 3", "День 4"]} values={[20, 40, 55, 80]}/>
+              <Analitycs  labels={["Навык 1", "Навык 2", "Навык 3", "Навык 4"]} values={[20, 40, 30, 80]}/>
             </div>
             
           </div>
@@ -49,7 +57,7 @@ export default function LearningFlow() {
           <div className="module_section">
             <div className="nameandlink">
               <p className="module_name">Модули</p>
-              <p className="link">К списку модулей</p>
+              <NavLink to="/modules"><p className="link">К списку модулей</p></NavLink>
             </div>
             
             <p className="module_infor">Modules section description</p>
@@ -58,9 +66,10 @@ export default function LearningFlow() {
               <SessionStarter className="disabled"></SessionStarter>
               <SessionStarter className="disabled"></SessionStarter>  
             </div>
-          </div>
-            
+          </div>     
+        </div>
       </div>
+      
     </div>
   }
 

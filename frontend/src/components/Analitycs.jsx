@@ -20,6 +20,18 @@ ChartJS.register(
 );
 
 export default function Analitycs({ labels, values }) {
+  const options = {
+    plugins: {
+      chartAreaBackground: {
+        color: "#1C1D25",
+        borderRadius: 16
+      },
+      legend: {
+        display: false, // ⭐
+      },
+    },
+  };
+
   const data = {
     labels,
     datasets: [
@@ -34,7 +46,7 @@ export default function Analitycs({ labels, values }) {
   };
   return (
     <div className="analitycs">
-      <Line data={data} />
+      <Line data={data} options={options} width={600} height={260} />
     </div>
   );
 }
