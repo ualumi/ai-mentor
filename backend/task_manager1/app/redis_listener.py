@@ -35,6 +35,7 @@ async def redis_listener():
         # 1️⃣ Условие задачи
         if channel == CHANNEL_TASK_CONDITION:
             task.condition = payload["condition"]
+            task.step_id = payload.get("step_id")
             task.condition_event.set()
             print(f"📘 Condition received for {session_id}")
 

@@ -8,6 +8,7 @@ class TaskState:
         self.code = None
         self.mentor_reply = None
         self.sandbox_reply = None
+        self.step_id = None
 
         self.condition_event = asyncio.Event()
         self.code_event = asyncio.Event()
