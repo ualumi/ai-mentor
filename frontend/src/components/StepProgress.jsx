@@ -8,9 +8,9 @@ export default function StepProgress({ stepId, totalSteps }) {
   );
 
   return (
-    <div style={{ marginBottom: 16 }}>
-      <div style={{ marginBottom: 4 }}>
-        Шаг {current} / {totalSteps}
+    <div style={{ marginBottom: 16,   marginTop: 16}}>
+      <div className="step">
+        <h3>Scaffolding {current} / {totalSteps}</h3>
       </div>
 
       <div

@@ -1,8 +1,8 @@
 import Login from "./components/Login";
 import LearningFlow from "./components/LearningFlow";
 import TopBar from "./components/TopBar";
-import Analitycs from "./components/Analitycs";
 import { AuthProvider, useAuth } from "./components/AuthContext";
+import LeftBar from "./components/LeftBar"
 
 function AppContent() {
   const { token, login } = useAuth();
@@ -14,6 +14,7 @@ function AppContent() {
   return (
     <>
       <TopBar />
+      <LeftBar />
       
       <LearningFlow />
     </>

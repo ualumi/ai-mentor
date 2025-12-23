@@ -661,6 +661,7 @@ import CodeEditor from "./CodeEditor";
 import MessagePanel from "./MessagePanel";
 import TaskCondition from "./TaskCondition";
 import StepProgress from "./StepProgress"; // ⭐ NEW
+import '../App.css'
 
 export default function Playground({ ws }) {
   const [condition, setCondition] = useState(null);
@@ -728,7 +729,7 @@ export default function Playground({ ws }) {
   const isLastStepCompleted = lastStepCompleted;
 
   return (
-    <div>
+    <div className="task">
       {/* ⭐ NEW: Прогресс-бар или сообщение о завершении */}
       {!isLastStepCompleted ? (
         <StepProgress stepId={stepId} totalSteps={TOTAL_STEPS} />
@@ -745,32 +746,39 @@ export default function Playground({ ws }) {
           </button>
         </div>
       )}
+      <div className="task-content">
+        <TaskCondition condition={condition} />
 
-      <TaskCondition condition={condition} />
+        {/* ✅ Кнопка следующего шага */}
+        {!isLastStepCompleted && nextCondition && (
+          <button className="next-step"
+            onClick={() => {
+              setCondition(nextCondition);
+              setNextCondition(null);
+              setMentorMessages([]);
+              setSandboxMessages([]);
+              if (stepId === TOTAL_STEPS) {
+                setLastStepCompleted(true); // последний шаг завершен
+              } else {
+                setStepId((prev) => prev + 1);
+              }
+            }}
+          >
+            ▶ Следующий шаг
+          </button>
+        )}
 
-      {/* ✅ Кнопка следующего шага */}
-      {!isLastStepCompleted && nextCondition && (
-        <button
-          onClick={() => {
-            setCondition(nextCondition);
-            setNextCondition(null);
-            setMentorMessages([]);
-            setSandboxMessages([]);
-            if (stepId === TOTAL_STEPS) {
-              setLastStepCompleted(true); // последний шаг завершен
-            } else {
-              setStepId((prev) => prev + 1);
-            }
-          }}
-        >
-          ▶ Следующий шаг
-        </button>
-      )}
-
-      <CodeEditor ws={ws} />
-
-      <MessagePanel title="🧠 ИИ-ментор" messages={mentorMessages} />
-      <MessagePanel title="🧪 Песочница" messages={sandboxMessages} />
+        <CodeEditor ws={ws} />
+        <div className="mentor">
+          <MessagePanel title="ИИ-ментор" messages={mentorMessages} />
+        </div>
+        
+        <div className="sandbox">
+          <MessagePanel  title="Terminal" messages={sandboxMessages} />
+        </div>
+        
+      </div>
+      
     </div>
   );
 }

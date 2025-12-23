@@ -27,19 +27,32 @@ export default function LearningFlow() {
   }, [sessionId, token]);
 
   if (!sessionId) {
-    return <div>
-      <h1>Hello username</h1>
-      <p className="module_info">Modules section description</p>
+    return <div className="learning-content">
+      <div>
+        <h1>Hello username</h1>
+        <p className="module_info">Веб-платформа предназначена для обучения навыкам разработки через практику и интерактивное взаимодействие с ИИ-ментором. </p>
+      </div>
+      
       <div className="kaabinet">
           <div className="chart">
-            <p className="module_name">Прогресс</p>
-            <p className="module_info">Modules section description</p>
-            <Analitycs  labels={["День 1", "День 2", "День 3", "День 4"]} values={[20, 40, 55, 80]}/>
+            <div className="nameandlink">
+              <p className="module_name">Прогресс</p>
+              <p className="link">перейти к аналитике</p>
+            </div>
+            <p className="module_infor">Modules section description</p>
+            <div className="chartitself">
+              <Analitycs  labels={["День 1", "День 2", "День 3", "День 4"]} values={[20, 40, 55, 80]}/>
+            </div>
+            
           </div>
           
           <div className="module_section">
-            <p className="module_name">Модули</p>
-            <p className="module_info">Modules section description</p>
+            <div className="nameandlink">
+              <p className="module_name">Модули</p>
+              <p className="link">К списку модулей</p>
+            </div>
+            
+            <p className="module_infor">Modules section description</p>
             <div className="modules">
               <SessionStarter token={token} onStart={setSessionId} className="module_button" />
               <SessionStarter className="disabled"></SessionStarter>

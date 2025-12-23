@@ -26,7 +26,7 @@ export default function Analitycs({ labels, values }) {
       {
         label: "Прогресс обучения",
         data: values,
-        borderColor: "#4f46e5",
+        borderColor: "#3B68FF",
         backgroundColor: "rgba(79,70,229,0.2)",
         tension: 0.3,
       },

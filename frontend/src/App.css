@@ -5,22 +5,44 @@
     font-style: normal;
 }
 
+@font-face {
+    font-family: 'Stolz-light';
+    src: url('./assets/stolzl_light.otf');
+    font-weight: normal;
+    font-style: normal;
+}
+
 #root {
   margin: 0 20px 0px 20px;
   text-align: center;
   width: 100%;
   font-family: 'Stolz';
+  height: 100%;
 }
 
 body {
   
-  width: 100vw;
+  width: calc(100vw - 0px);
   background-color: #0E0F14;
+  overflow: hidden;
+  height: 90vh;
 }
 
 .body {
-  margin: 0 50px 0px 50px;
+  display: flex;
+  flex-direction: column;
+  margin: 0 50px 0px 100px;
+  height: 100%;
+  
 }
+
+.learning-content {
+  display: flex;
+  flex-direction: column;
+  flex: 0.95;
+  justify-content: space-between;
+}
+
 
 .topbar {
   display: flex;
@@ -31,32 +53,51 @@ body {
   
 }
 
+.leftbar {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  left: 0;
+  background-color: #121319;
+  height: 100%;
+  width: 50px;
+}
+
 .module_button {
   display: flex;
   flex-direction: column;
-  background-color: #1C1D25;
+  background-color: #1E2130;
   color: #D9E4FB; /*3B68FF*/
   width: 200px;
   margin: 0;
   border-radius: 10px;
   /*border: 1px solid;
   border-color: #D9E4FB;*/
+  min-width: 250px;
+  text-align: left;
 }
 
 .modules {
   display: flex;
   gap: 10px;
   background-color: #12131A;
+  
 }
 
 .analitycs {
   background-color: #12131A;
+  font-family: 'Stolz';
 }
 
 .module_section {
   background-color: #12131A;
   border-radius: 20px;
   padding: 20px;
+  overflow-x: scroll;
+}
+
+.chartitself {
+  background-color: #1E2130;
 }
 
 .chart {
@@ -76,17 +117,64 @@ body {
 }
 
 .module_info {
+  font-family: 'Stolz-light';
   font-size: 14px;
   color: #D9E4FB;
   margin-bottom: 10px;
   text-align: left;
+  padding-bottom: 20px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+.module_infor {
+  font-family: 'Stolz-light';
+  font-size: 14px;
+  color: #D9E4FB;
+  margin-top: 2px;
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.module_text {
+  font-family: 'Stolz';
+  font-size: 14px;
+  color: #D9E4FB;
+  text-align: left;
+  margin: 0px;
+  padding-bottom: 10px;
 }
 
 .kaabinet {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 30px;
+  gap: 15px;
   width: 100%;
+  height: min-content;
+}
+
+.nameandlink {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.link {
+  color: #D9E4FB;
+  text-decoration: underline;
+  font-family: 'Stolz-light';
+  margin: 0;
+}
+
+h3 {
+  color: #ffff;
+  margin: 0;
+}
+
+.step {
+  margin-bottom: 10px;
+  text-align: left;
 }
 
 h1 {
@@ -98,4 +186,65 @@ h1 {
 h2 {
   color: #D9E4FB;
   margin: 0;
+}
+
+.task-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 2fr min-content 1fr;
+  gap: 15px;
+  height: 100%;
+}
+
+.next-step {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.mentor {
+  grid-column: 1;
+  grid-row: 3;
+  background-color: #121319;
+  color: #ffff;
+  text-align: left;
+  padding: 20px;
+  border-radius: 15px;
+  height: 100%;
+}
+
+.sandbox {
+  grid-column: 2;
+  grid-row: 3;
+  background-color: #121319;
+  color: #ffff;
+  text-align: left;
+  padding: 20px;
+  border-radius: 15px;
+  height: 100%;
+}
+
+.task {
+  height: 75vh;
+}
+
+.editor {
+  border-radius: 15px;
+  background-color: #121319;
+}
+
+.submit_code {
+  background-color: #3B68FF;
+  color: #ffff;
+  height: min-content;
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.task-condition {
+  background-color: #121319;
+  color: #ffff;
+  text-align: left;
+  padding: 20px;
+  border-radius: 15px;
+  height: 100%;
 }

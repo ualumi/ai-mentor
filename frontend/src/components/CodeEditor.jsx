@@ -37,8 +37,12 @@ export default function CodeEditor({ ws }) {
   );
 }*/}
 
-import { useState } from "react";
+
+
+
+{/*import { useState } from "react";
 import Editor from "@monaco-editor/react";
+import '../App.css'
 
 export default function CodeEditor({ ws }) {
   const [code, setCode] = useState("");
@@ -66,8 +70,61 @@ export default function CodeEditor({ ws }) {
       />
 
       <br />
-      <button onClick={submit}>Submit code</button>
+      <button className="submit_code" onClick={submit}>Submit code</button>
+    </>
+  );
+}*/}
+
+import { useState, useEffect } from "react";
+import Editor, { useMonaco } from "@monaco-editor/react";
+import '../App.css'
+
+export default function CodeEditor({ ws }) {
+  const [code, setCode] = useState("");
+  const monaco = useMonaco();
+
+  // ⭐ Создаем кастомную тему с фоном #1C1D25
+  useEffect(() => {
+    if (monaco) {
+      monaco.editor.defineTheme("custom-dark", {
+        base: "vs-dark",
+        inherit: true,
+        rules: [],
+        colors: {
+          "editor.background": "#1C1D25",
+        },
+      });
+    }
+  }, [monaco]);
+
+  const submit = () => {
+    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+
+    ws.send(code); // Отправляем только сам код как строку
+  };
+
+  return (
+    <>
+      <div className="editor">
+        <Editor
+          height="380px"
+          language="python"
+          theme="custom-dark"   // Используем кастомную тему
+          value={code}
+          onChange={(value) => setCode(value ?? "")}
+          options={{
+            minimap: { enabled: false },
+            fontSize: 16,
+            automaticLayout: true,
+            padding: { top: 8 },   // Небольшой отступ сверху
+            lineHeight: 20,
+          }}
+        />
+      </div>
+      
+
+      <br />
+      <button className="submit_code" onClick={submit}>Submit code</button>
     </>
   );
 }
-
