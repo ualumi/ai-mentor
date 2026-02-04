@@ -1,6 +1,8 @@
 fastapi
 redis>=5.0.0
+numpy<2
 uvicorn
 httpx
 asyncio
 aiohttp
+#transformers>=4.0.0

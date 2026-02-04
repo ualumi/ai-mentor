@@ -1,19 +1,16 @@
 from fastapi import FastAPI
 import asyncio
-from app.mentor_worker import mentor_worker
+from app.analitics_worker import mentor_worker
 from app.core.redis_client import redis
 
 app = FastAPI(title="Analitics AI Service")
 
 @app.on_event("startup")
 async def startup_event():
-    try:
-        pong = await redis.ping()
-        if pong:
-            print("✅ Redis подключен (mentor-service)")
-        asyncio.create_task(mentor_worker())
-    except Exception as e:
-        print(f"❌ Ошибка при запуске Mentor Worker: {e}")
+    print("🔥 STARTUP WORKS")
+    await redis.ping()
+    asyncio.create_task(mentor_worker())
+
 
 @app.on_event("shutdown")
 async def shutdown_event():

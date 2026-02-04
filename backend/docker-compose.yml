@@ -123,6 +123,20 @@ services:
     networks:
       - mentor-net
 
+  progress_service:
+    build:
+      context: ./progress_service
+    container_name: progress_service
+    ports:
+      - "8008:8008"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - redis
+    networks:
+      - mentor-net
+
 
 
 networks:

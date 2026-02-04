@@ -1,4 +1,4 @@
-import re
+'''import re
 import aiohttp
 from app.core.model_client import get_llm_hint
 import random;
@@ -16,5 +16,12 @@ async def generate_hint(code: str) -> str:
     for error_type, hint in HINTS.items():
         if re.search(error_type, code, re.IGNORECASE):
             return hint
-    return random.choice(lst); #get_llm_hint(code_snippet=code)
+    return random.choice(lst); #get_llm_hint(code_snippet=code)'''
+
+
+from app.core.model_client import analyze_code
+
+async def generate_analysis(code: str) -> dict:
+    return await analyze_code(code)
+
 
