@@ -18,7 +18,8 @@ async def evaluate_step(
                 "event": "step_completed",
                 "session_id": session_id,
                 "step": step_id,
-                "competency": competency
+                "competency": competency,
+                "mode": "module"
             }
         )
         return {"status": "ok"}
@@ -29,7 +30,8 @@ async def evaluate_step(
             "event": "step_failed",
             "session_id": session_id,
             "step": step_id,
-            "competency": competency
+            "competency": competency,
+            "mode": "module"
         }
     )
 

@@ -46,6 +46,7 @@ async def redis_listener():
 
         elif channel == CHANNEL_CODE_RESULTS:
             task.sandbox_reply = payload.get("sandbox_result")
+            task.reply_event.set()  # ← важно
             print(f"🧪 Sandbox reply for {session_id}")
 
         elif channel == CHANNEL_ANALYSIS_RESULT:

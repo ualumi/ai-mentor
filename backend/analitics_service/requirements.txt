@@ -5,4 +5,6 @@ uvicorn
 httpx
 asyncio
 aiohttp
+requests
+huggingface-hub
 #transformers>=4.0.0

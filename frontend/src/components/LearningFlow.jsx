@@ -36,8 +36,8 @@ export default function LearningFlow() {
       <div>
         <div className="profile">
           <div className="nameandlink">
-              <p className="module_name">Профиль</p>
-              <p className="link">перейти в настройки</p>
+              <p className="module_name">Free mode chat</p>
+              <NavLink to="/free-mode"><p className="link">перейти к free mode</p></NavLink>
             </div>
             <p className="module_infor">Modules section description</p>
         </div>

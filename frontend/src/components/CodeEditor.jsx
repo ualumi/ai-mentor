@@ -75,7 +75,7 @@ export default function CodeEditor({ ws }) {
   );
 }*/}
 
-import { useState, useEffect } from "react";
+{/*import { useState, useEffect } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
 import '../App.css'
 
@@ -129,4 +129,73 @@ export default function CodeEditor({ ws }) {
       <button className="submit_code" onClick={submit}>Submit code</button>
     </>
   );
+}*/}
+
+// app/CodeEditor.jsx
+import { useEffect } from "react";
+import Editor, { useMonaco } from "@monaco-editor/react";
+import '../App.css'
+
+export default function CodeEditor({ ws, code, setCode }) {
+  const monaco = useMonaco();
+
+  // ⭐ Создаем кастомную тему с фоном #1C1D25
+  useEffect(() => {
+    if (!monaco) return;
+
+    monaco.editor.defineTheme("custom-dark", {
+      base: "vs-dark",
+      inherit: true,
+      rules: [],
+      colors: {
+        "editor.background": "#1C1D25",
+      },
+    });
+
+    monaco.editor.setTheme("custom-dark");
+  }, [monaco]);
+
+  const submit = () => {
+    if (!ws || ws.readyState !== WebSocket.OPEN) {
+      console.warn("WebSocket not ready");
+      return;
+    }
+
+    if (!code.trim()) {
+      console.warn("Empty code");
+      return;
+    }
+
+    // Отправляем код в формате JSON с событием run_code
+    const payload = { event: "run_code", code };
+    console.log("➡️ Sending code to backend:", payload);
+    ws.send(JSON.stringify(payload));
+  };
+
+  return (
+    <>
+      <div className="editor">
+        <Editor
+          height="380px"
+          language="python"
+          theme="custom-dark"
+          value={code}
+          onChange={(value) => setCode(value ?? "")}
+          options={{
+            minimap: { enabled: false },
+            fontSize: 16,
+            automaticLayout: true,
+            padding: { top: 8 },
+            lineHeight: 20,
+          }}
+        />
+      </div>
+
+      <br />
+      <button className="submit_code" onClick={submit}>
+        ▶ Submit
+      </button>
+    </>
+  );
 }
+

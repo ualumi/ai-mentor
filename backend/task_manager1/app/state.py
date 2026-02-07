@@ -7,7 +7,7 @@ class TaskState:
         # core
         self.condition = None
         self.code = None
-        self.step_id = None
+        self.step_id = 0
 
         # replies
         self.mentor_reply = None

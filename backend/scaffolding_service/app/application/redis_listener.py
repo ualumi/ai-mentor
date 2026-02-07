@@ -3,6 +3,7 @@ import asyncio
 import aiohttp
 from app.infrastructure.redis import redis_client
 from app.domain.scaffold import ScaffoldingTask
+import random
 
 # Каналы Redis
 CHANNEL_SESSION_CREATED = "learning.events"
@@ -61,12 +62,14 @@ async def redis_listener():
                     "session_id": session_id,
                     "step_id": 0,
                     "condition": {"description": first_step["description"]},
-                    "answer": "read_csv1"
+                    "answer": "read_csv1",
+                    "mode": "module"
                 })
             )
             print(f"🚀 Scaffolding стартовал для {session_id}")
 
         # 🔹 Следующие шаги
+        
         elif channel == CHANNEL_CODE_RESULTS:
             session_id = payload["session_id"]
             step_id = payload["step_id"]
@@ -83,7 +86,8 @@ async def redis_listener():
                     json.dumps({
                         "session_id": session_id,
                         "step_id": next_step,
-                        "condition": {"description": step["description"]}
+                        "condition": {"description": step["description"]},
+                        "mode": "module"
                     })
                 )
                 print(f"➡️ Следующий шаг {next_step} для {session_id}")

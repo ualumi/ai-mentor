@@ -24,9 +24,30 @@ LABELS = [
     "overfitting",
     "cross_validation",
 ]'''
+import requests
+#API_URL = "https://router.huggingface.co/models/Vilyam888/Code_analyze.1.0"
+#API_URL ="https://router.huggingface.co/models/Vilyam888/Code_analyze.1.0"
+#headers = {"Authorization": f"Bearer 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"}
+'''from huggingface_hub import InferenceClient
+api_key = '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'
+
+client = InferenceClient(
+    model="Vilyam888/Code_analyze.1.0",
+    token=api_key
+)'''
 
 async def analyze_code(code: str) -> dict:
-    return ("hola")
+    #response = inference(inputs=code) 
+    #response = requests.post(API_URL, headers=headers, json={"inputs": code})
+    '''result = client.post(
+            json={"inputs": code}
+        )
+    return result'''
+    return "hola"
+    '''print(response.status_code)
+    print(response.text)
+    print(response.json())
+    return response.json()'''
     '''inputs = tokenizer(
         code,
         return_tensors="pt",

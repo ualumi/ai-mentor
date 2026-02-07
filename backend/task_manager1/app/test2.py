@@ -121,7 +121,7 @@ ws.send("model.fit(X, y)")
 while True:
     print(ws.recv())'''
 
-import asyncio
+'''import asyncio
 import websockets
 import json
 
@@ -137,4 +137,81 @@ async def connect_to_websocket():
             print(response)
 
 # Запуск асинхронной функции
+asyncio.run(connect_to_websocket())'''
+
+
+
+import asyncio
+import websockets
+import json
+
+
+async def connect_to_websocket():
+    async with websockets.connect(
+        "ws://localhost:8004/ws/tasks/test1"
+    ) as websocket:
+
+        # 1️⃣ отправляем код (как run_code)
+        await websocket.send(json.dumps({
+            "event": "run_code",
+            "code": "print(9/3)"
+        }))
+
+        # 2️⃣ запускаем выполнение
+        await websocket.send(json.dumps({
+            "event": "submit_code",
+            "code": "print('Hello from test')"
+        }))
+
+        # 3️⃣ слушаем ответы
+        while True:
+            response = await websocket.recv()
+            print("⬅️", response)
+
+
 asyncio.run(connect_to_websocket())
+
+
+
+'''import asyncio
+import json
+import redis.asyncio as redis
+
+REDIS_URL = "redis://redis:6379/0"
+
+CHANNEL_SUBMIT = "submit_code"
+CHANNEL_CODE_RESULTS = "code_results"
+
+
+async def test_submit_and_receive():
+    r = redis.from_url(REDIS_URL, decode_responses=True)
+
+    pubsub = r.pubsub()
+    await pubsub.subscribe(CHANNEL_CODE_RESULTS)
+
+    payload = {
+        "session_id": "test_redis_1",
+        "code": "print(2 + 2)",
+        "step_id": 0
+    }
+
+    print("📤 Publishing to submit_code:", payload)
+    await r.publish(CHANNEL_SUBMIT, json.dumps(payload))
+
+    print("⏳ Waiting for message from code_results...")
+
+    async for msg in pubsub.listen():
+        if msg["type"] != "message":
+            continue
+
+        print("⬅️ Received from code_results:")
+        print(msg["data"])
+        break  # ❗ получаем одно сообщение и выходим
+
+    await pubsub.unsubscribe(CHANNEL_CODE_RESULTS)
+    await r.close()
+
+
+if __name__ == "__main__":
+    asyncio.run(test_submit_and_receive())'''
+

@@ -6,6 +6,7 @@ import LeftBar from "./components/LeftBar"
 import {Route, BrowserRouter, Routes} from "react-router-dom"
 import Modules from "./components/modules";
 import Analyze from "./components/Analyze";
+import FreeModeChat from "./components/FreeModeChat";
 
 function AppContent() {
   const { token, login } = useAuth();
@@ -23,6 +24,7 @@ function AppContent() {
           <Route path='/' Component={LearningFlow}/>
           <Route path="/modules" Component={Modules}/>
           <Route path="/analitics" Component={Analyze}/>
+          <Route path="/free-mode" Component={FreeModeChat}/>
         </Routes>
       </BrowserRouter>
       

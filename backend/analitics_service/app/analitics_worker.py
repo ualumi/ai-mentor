@@ -40,11 +40,18 @@ async def mentor_worker():
     print("📊 Analytics service listening analyze...")
 
     async for message in pubsub.listen():
+        print (message)
         if message["type"] != "message":
             continue
+        
+        raw_data = message["data"]
+        print(type(raw_data), repr(raw_data))
+    # Декодируем, если bytes
+        if isinstance(raw_data, bytes):
+            raw_data = raw_data.decode()
 
         try:
-            payload = json.loads(message["data"])
+            payload = json.loads(raw_data)
             session_id = payload.get("session_id")
             code = payload.get("code")
 
