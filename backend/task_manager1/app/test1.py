@@ -54,13 +54,26 @@ async def test():
         condition = await ws.recv()
         print("📘", condition)
 
-        # 2️⃣ send code
-        await ws.send("print(4/2)")
+        # -----------------------------
+        # 2️⃣ run_code → песочница
+        # -----------------------------
+        await ws.send(json.dumps({
+            "event": "run_code",
+            "code": "print(2 + 2)"
+        }))
 
-        mentor = await ws.recv()
-        sandbox = await ws.recv()
+        sandbox_reply = await ws.recv()
+        print("🧪 Sandbox:", sandbox_reply)
 
-        print("🧠", mentor)
-        print("🧪", sandbox)
+        # -----------------------------
+        # 3️⃣ submit_code → ментор + аналитик
+        # -----------------------------
+        await ws.send(json.dumps({
+            "event": "submit_code",
+            "code": "print(9 / 3)"
+        }))
+
+        mentor_reply = await ws.recv()
+        print("🧠 Mentor:", mentor_reply)
 
 asyncio.run(test())

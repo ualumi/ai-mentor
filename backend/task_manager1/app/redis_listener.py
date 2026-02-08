@@ -10,6 +10,7 @@ CHANNEL_CODE_RESULTS = "code_results"
 CHANNEL_ANALYSIS_RESULT = "analysis_result"
 
 async def redis_listener():
+    print("redis corotine started")
     pubsub = redis.pubsub()
     await pubsub.subscribe(
         CHANNEL_TASK_CONDITION,
@@ -21,6 +22,7 @@ async def redis_listener():
     print("🔄 Redis listener started")
 
     async for msg in pubsub.listen():
+        print(msg)
         if msg["type"] != "message":
             continue
 

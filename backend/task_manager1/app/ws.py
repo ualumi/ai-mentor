@@ -594,8 +594,8 @@ async def task_ws(websocket: WebSocket, session_id: str):
     except WebSocketDisconnect:
         print(f"❌ WS disconnected: {session_id}")'''
 
-# app/ws.py
-import json
+# app/ws.py - все работает но не получает условия заданий
+'''import json
 import asyncio
 from fastapi import WebSocket, WebSocketDisconnect
 from app.redis_client import redis
@@ -746,6 +746,126 @@ async def task_ws(websocket: WebSocket, session_id: str):
                 # Сбрасываем ответы и событие
                 task.mentor_reply = None
                 task.sandbox_reply = None
+                task.reply_event.clear()
+
+    except WebSocketDisconnect:
+        print(f"❌ WS disconnected: {session_id}")'''
+
+import json
+import asyncio
+from fastapi import WebSocket, WebSocketDisconnect
+from app.redis_client import redis
+from app.state import TASKS, TaskState
+
+CHANNEL_SUBMIT = "submit_code"
+CHANNEL_MENTOR_IN = "mentor_in"
+CHANNEL_ANALYZE = "analyze"
+
+
+async def task_ws(websocket: WebSocket, session_id: str):
+    await websocket.accept()
+    print(f"🔌 WS connected: {session_id}")
+
+    task = TASKS.setdefault(session_id, TaskState())
+
+    try:
+        # 🔹 если condition пришло ДО WS — отправляем сразу
+        if task.condition is not None:
+            await websocket.send_text(json.dumps({
+                "event": "task_condition",
+                "condition": task.condition
+            }))
+
+        while True:
+            recv_task = asyncio.create_task(websocket.receive_text())
+            condition_task = asyncio.create_task(task.condition_event.wait())
+
+            done, pending = await asyncio.wait(
+                {recv_task, condition_task},
+                return_when=asyncio.FIRST_COMPLETED
+            )
+
+            # 🟡 1. пришло condition из Redis
+            if condition_task in done:
+                await websocket.send_text(json.dumps({
+                    "event": "task_condition",
+                    "condition": task.condition
+                }))
+                task.condition_event.clear()
+
+                recv_task.cancel()
+                continue
+
+            # 🟢 2. пришло сообщение от клиента
+            raw = recv_task.result()
+            condition_task.cancel()
+
+            event = None
+            code = None
+
+            try:
+                data = json.loads(raw)
+                event = data.get("event")
+                code = data.get("code")
+            except json.JSONDecodeError:
+                code = raw
+
+            if code:
+                task.code = code.strip()
+
+            if not event:
+                continue
+
+            # ▶️ RUN_CODE — sandbox
+            if event == "run_code":
+                payload = {
+                    "session_id": session_id,
+                    "code": task.code,
+                    "step_id": task.step_id
+                }
+                await redis.publish(CHANNEL_SUBMIT, json.dumps(payload))
+
+                try:
+                    await asyncio.wait_for(task.reply_event.wait(), timeout=5)
+                except asyncio.TimeoutError:
+                    await websocket.send_text(json.dumps({
+                        "event": "error",
+                        "message": "Execution timeout"
+                    }))
+                    continue
+
+                await websocket.send_text(json.dumps({
+                    "event": "sandbox_reply",
+                    "result": task.sandbox_reply
+                }))
+
+                task.sandbox_reply = None
+                task.reply_event.clear()
+
+            # 📤 SUBMIT_CODE — mentor + analyze
+            elif event == "submit_code":
+                payload = {
+                    "session_id": session_id,
+                    "code": task.code,
+                    "step_id": task.step_id
+                }
+
+                await redis.publish(CHANNEL_MENTOR_IN, json.dumps(payload))
+                await redis.publish(CHANNEL_ANALYZE, json.dumps(payload))
+
+                try:
+                    await asyncio.wait_for(task.reply_event.wait(), timeout=5)
+                except asyncio.TimeoutError:
+                    pass
+
+                if task.mentor_reply:
+                    await websocket.send_text(json.dumps({
+                        "event": "mentor_reply",
+                        "text": task.mentor_reply
+                    }))
+
+                task.step_id += 1
+                task.mentor_reply = None
                 task.reply_event.clear()
 
     except WebSocketDisconnect:
