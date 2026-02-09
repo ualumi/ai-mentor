@@ -77,3 +77,10 @@ async def test():
         print("🧠 Mentor:", mentor_reply)
 
 asyncio.run(test())
+
+resp = requests.get(f"http://progress_service:8008/progress/{session_id}")
+print(resp.json())
+
+
+resp = requests.get(f"http://attempts_service:8009/attempts/{session_id}")
+print(resp.json())

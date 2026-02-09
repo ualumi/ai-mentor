@@ -19,6 +19,8 @@ services:
       POSTGRES_DB: users_db
     ports:
       - "5432:5432"
+    volumes:
+    - ./postgres-init:/docker-entrypoint-initdb.d
     networks:
       - mentor-net
 
@@ -137,6 +139,24 @@ services:
     networks:
       - mentor-net
 
+  attempts_service:
+    build:
+      context: ./attempts_service
+    container_name: attempts_service
+    ports:
+      - "8009:8009"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/attempts
+      SECRET_KEY: supersecret
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - db
+      - redis
+    networks:
+      - mentor-net
+    volumes:
+      - pgdata:/var/lib/postgresql/data
 
 
 

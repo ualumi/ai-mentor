@@ -17,13 +17,14 @@ async def mentor_worker():
             payload = json.loads(message["data"])
             session_id = payload.get("session_id")
             code = payload.get("code")
+            attempt_id = payload.get("attempt_id")
 
             if not session_id or not code:
                 continue
 
             hint = await generate_hint(code)
 
-            response = {"session_id": session_id, "hint": hint}
+            response = {"session_id": session_id, "hint": hint, "attempt_id": attempt_id}
             await redis.publish(CHANNEL_OUT, json.dumps(response))
             print(f"💡 Отправлена подсказка пользователю {session_id}, {response}")
 

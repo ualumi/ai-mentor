@@ -11,6 +11,7 @@ class Episode(Base):
 
     episode_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     session_id = Column(String, index=True)
+    attempt_id = Column(UUID(as_uuid=True), primary_key=True)
     start_time = Column(DateTime, default=func.now())
     end_time = Column(DateTime, nullable=True)
     dominant_competency = Column(String, nullable=True)
@@ -18,7 +19,7 @@ class Episode(Base):
 
 class Attempt(Base):
     __tablename__ = "attempts"
-
+    __table_args__ = {"schema": "attempts", "extend_existing": True}
     attempt_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     session_id = Column(String, index=True)
     timestamp = Column(DateTime, default=func.now())

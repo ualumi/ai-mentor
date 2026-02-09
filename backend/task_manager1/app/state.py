@@ -19,6 +19,9 @@ class TaskState:
         self.methodology = None            # TBL | DBL
         self.analysis_context = {}         # накопление аналитики
 
+        # 🆕 attempt
+        self.current_attempt_id = None
+
         # sync
         self.condition_event = asyncio.Event()
         self.reply_event = asyncio.Event()

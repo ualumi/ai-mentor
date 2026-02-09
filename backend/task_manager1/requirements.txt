@@ -4,3 +4,4 @@ uvicorn[standard]
 redis>=5.0
 aiohttp
 requests
+uuid

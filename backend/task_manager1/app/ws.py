@@ -756,6 +756,7 @@ import asyncio
 from fastapi import WebSocket, WebSocketDisconnect
 from app.redis_client import redis
 from app.state import TASKS, TaskState
+import uuid
 
 CHANNEL_SUBMIT = "submit_code"
 CHANNEL_MENTOR_IN = "mentor_in"
@@ -844,10 +845,14 @@ async def task_ws(websocket: WebSocket, session_id: str):
 
             # 📤 SUBMIT_CODE — mentor + analyze
             elif event == "submit_code":
+                attempt_id = str(uuid.uuid4())
+                task.current_attempt_id = attempt_id
                 payload = {
                     "session_id": session_id,
+                    "attempt_id": attempt_id,
                     "code": task.code,
-                    "step_id": task.step_id
+                    "step_id": task.step_id,
+                    "condition": task.condition,
                 }
 
                 await redis.publish(CHANNEL_MENTOR_IN, json.dumps(payload))

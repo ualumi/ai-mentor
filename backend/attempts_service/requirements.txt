@@ -1,0 +1,9 @@
+fastapi
+redis>=5.0.0
+uvicorn
+httpx
+asyncio
+aiohttp
+requests
+SQLAlchemy==2.0.21
+asyncpg==0.30.0

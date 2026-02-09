@@ -6,7 +6,7 @@ from sqlalchemy.sql import func
 # Максимальный разрыв между попытками в эпизоде
 MAX_GAP_MINUTES = 10
 
-async def get_open_episode(db, session_id: str, last_attempt_time: datetime):
+'''async def get_open_episode(db, session_id: str, last_attempt_time: datetime):
     """
     Возвращает открытый эпизод для session_id.
     Эпизод считается открытым, если последняя попытка в нем была не более MAX_GAP_MINUTES назад.
@@ -24,6 +24,25 @@ async def get_open_episode(db, session_id: str, last_attempt_time: datetime):
     # если последняя попытка слишком старая, закрываем эпизод
     if episode.start_time + timedelta(minutes=MAX_GAP_MINUTES) < last_attempt_time:
         episode.end_time = last_attempt_time
+        await db.commit()
+        return None
+
+    return episode'''
+
+async def get_open_episode(db, session_id, now):
+    q = (
+        select(Episode)
+        .where(Episode.session_id == session_id, Episode.end_time.is_(None))
+        .order_by(Episode.start_time.desc())
+    )
+    res = await db.execute(q)
+    episode = res.scalars().first()
+    if not episode:
+        return None
+
+    # TODO: можно улучшить, но допустимо для MVP
+    if episode.start_time + timedelta(minutes=MAX_GAP_MINUTES) < now:
+        episode.end_time = now
         await db.commit()
         return None
 

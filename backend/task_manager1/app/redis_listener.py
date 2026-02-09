@@ -39,10 +39,14 @@ async def redis_listener():
             task.methodology = payload.get("methodology")
             task.condition = payload["condition"]
             task.step_id = payload.get("step_id")
+            
             task.condition_event.set()
             print(f"📘 Condition received for {session_id}")
 
         elif channel == CHANNEL_MENTOR_OUT:
+            attempt_id = payload.get("attempt_id")
+            if attempt_id != task.current_attempt_id:
+                continue
             task.mentor_reply = payload.get("hint")
             print(f"🧠 Mentor reply for {session_id}")
 
