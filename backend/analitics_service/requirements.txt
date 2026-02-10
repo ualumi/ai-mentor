@@ -6,10 +6,11 @@ httpx
 asyncio
 aiohttp
 requests
-#huggingface-hub
 #transformers>=4.0.0
-
+transformers>=4.39.0
+tokenizers>=0.15.2
+huggingface_hub>=0.21.0
 #transformers==4.44.2
-#accelerate
-#sentencepiece
-#safetensors
+accelerate
+sentencepiece
+safetensors

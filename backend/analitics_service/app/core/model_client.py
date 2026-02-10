@@ -1,5 +1,5 @@
 
-import requests
+'''import requests
 #API_URL = "https://router.huggingface.co/models/Vilyam888/Code_analyze.1.0"
 #API_URL ="https://router.huggingface.co/models/Vilyam888/Code_analyze.1.0"
 #headers = {"Authorization": f"Bearer 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"}
@@ -7,10 +7,10 @@ import requests
 async def analyze_code(code: str) -> dict:
     #response = inference(inputs=code) 
     #response = requests.post(API_URL, headers=headers, json={"inputs": code})
-    return "hola"
+    return "hola"'''
 
 # app/model.py
-'''import json
+import json
 import torch
 import asyncio
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -39,8 +39,10 @@ def load_model():
 
     tokenizer = AutoTokenizer.from_pretrained(
         MODEL_NAME,
+        use_fast=False,
         trust_remote_code=True
     )
+    print("Tokenizer loaded")
 
     model = AutoModelForCausalLM.from_pretrained(
         MODEL_NAME,
@@ -121,4 +123,4 @@ async def analyze_code(task: str | None, code: str) -> dict:
     except json.JSONDecodeError:
         return {
             "raw_response": decoded
-        }'''
+        }
