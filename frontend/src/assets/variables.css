@@ -1,0 +1,7 @@
+#root {
+    font-family: "Stolz light";
+    --backround-color: #161616;
+    --text-color: #fff;
+    --block-color: #1B1B1D;
+    --line-color:rgba(255, 255, 255, 0.1);
+}

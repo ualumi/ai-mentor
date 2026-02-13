@@ -1,0 +1,25 @@
+@import '../../assets/variables.css';
+
+@font-face {
+    font-family: "Stolz regular";
+    src: url(./assets/stolzl_regular.otf);
+}
+
+.section-sandbox {
+    background-color: var(--block-color);
+    padding-inline: 30px;
+}
+
+.section-caption {
+    font-family: "Stolz regular", monospace;
+    font-size: 48px;
+    color: var(--text-color);
+}
+
+.section-panel {
+    display: grid;
+    grid-template-columns: min-content auto auto;
+    grid-auto-flow: column;
+    gap: 20px;
+    margin-bottom: 20px;
+}

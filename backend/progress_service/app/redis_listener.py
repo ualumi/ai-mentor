@@ -63,6 +63,7 @@ async def redis_listener():
 
     async for msg in pubsub.listen():
         if msg["type"] != "message":
+            print(msg)
             continue
 
         payload = json.loads(msg["data"])
@@ -82,7 +83,7 @@ async def redis_listener():
         # 3️⃣ обновляем прогресс
         user_progress = USER_PROGRESS.setdefault(session_id, {})
         for ev in evidence_list:
-            apply_evidence(user_progress, session_id, ev)
+            apply_evidence(user_progress, ev)
 
         # 4️⃣ пересчитываем рекомендации
         USER_RECOMMENDATIONS[session_id] = build_recommendations(user_progress)

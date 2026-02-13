@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import SessionStarter from "./SessionStarter";
 import TaskView from "./TaskView";
 import Playground from "./Playground";
-import { connectTaskWS } from "../api/ws";
+import { connectTaskWS } from "../../api/ws";
 import { useAuth } from "./AuthContext";
 import '../App.css'
 import Analitycs from "./Analitycs";

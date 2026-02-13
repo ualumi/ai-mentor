@@ -1,4 +1,4 @@
-import { startSession } from "../api/learning";
+import { startSession } from "../../api/learning";
 import '../App.css'
 import myImage from '../assets/Box5.svg';  
 

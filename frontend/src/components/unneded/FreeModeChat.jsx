@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import CodeEditor from "./CodeEditor";
+import CodeEditor from "../CodeEditor";
 import MessagePanel from "./MessagePanel";
 import TaskCondition from "./TaskCondition";
 import StepProgress from "./StepProgress"; // ⭐ NEW

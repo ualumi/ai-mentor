@@ -15,5 +15,6 @@ EVIDENCE_STORE: Dict[str, List[dict]] = {}
 # session_id -> competency -> state
 USER_PROGRESS: Dict[str, Dict[str, dict]] = {}
 
+
 # 4. Рекомендации (derived state)
 USER_RECOMMENDATIONS: Dict[str, List[dict]] = {}

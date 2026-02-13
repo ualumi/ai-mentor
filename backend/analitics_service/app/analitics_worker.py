@@ -33,7 +33,7 @@ from app.utils.hint_logic import generate_analysis
 CHANNEL_IN = "analyze"
 CHANNEL_OUT = "analysis_result"
 
-async def mentor_worker():
+async def analitics_worker():
     pubsub = redis.pubsub()
     await pubsub.subscribe(CHANNEL_IN)
 
@@ -59,16 +59,14 @@ async def mentor_worker():
                 continue
 
             analysis = await generate_analysis(code)
+            # если внутри есть лишний уровень
+            if "analysis" in analysis:
+                analysis = analysis["analysis"]
 
             out = {
                 "session_id": session_id,
-                "analysys": analysis,
-                "analysis": {
-                    "competencies": {
-                    "python_loops": 0.4
-                    },
-                    "confidence": 0.7
-                }
+                "analysis": analysis,
+
             }
 
             await redis.publish(CHANNEL_OUT, json.dumps(out))

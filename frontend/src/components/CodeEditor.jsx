@@ -134,7 +134,7 @@ export default function CodeEditor({ ws }) {
 // app/CodeEditor.jsx
 import { useEffect } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
-import '../App.css'
+import "../App.css"
 
 export default function CodeEditor({ ws, code, setCode }) {
   const monaco = useMonaco();
@@ -148,7 +148,7 @@ export default function CodeEditor({ ws, code, setCode }) {
       inherit: true,
       rules: [],
       colors: {
-        "editor.background": "#1C1D25",
+        "editor.background": "#00000000",
       },
     });
 
@@ -174,9 +174,9 @@ export default function CodeEditor({ ws, code, setCode }) {
 
   return (
     <>
-      <div className="editor">
+      <div>
         <Editor
-          height="380px"
+          height="40vh"
           language="python"
           theme="custom-dark"
           value={code}
@@ -185,16 +185,16 @@ export default function CodeEditor({ ws, code, setCode }) {
             minimap: { enabled: false },
             fontSize: 16,
             automaticLayout: true,
-            padding: { top: 8 },
+            padding: { top: 15 },
             lineHeight: 20,
           }}
         />
       </div>
 
       <br />
-      <button className="submit_code" onClick={submit}>
+      {/*<button className="submit_code" onClick={submit}>
         ▶ Submit
-      </button>
+      </button>*/}
     </>
   );
 }
