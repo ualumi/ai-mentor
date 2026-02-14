@@ -1,19 +1,22 @@
 import { Search } from 'lucide-react'; // или любая другая библиотека иконок
 import "../../App.css"
+import { NavLink } from 'react-router-dom';
 
-const Item = ({ type, icon, text="", placeholder = 'Search', clas="menu-item", showIcon=true }) => {
+const Item = ({ type, icon, text="", placeholder = 'Search', clas="menu-item", showIcon=true, link="" }) => {
   switch (type) {
     case 'button_item':
       return (
-        <div className="item menu-item">
+        <NavLink to={`/${link}`} className={`item ${clas}`}>
           {/*{Icon && <Icon className="menu-item-icon" />}*/}
-          <span className="menu-item-text">{text}</span>
+          
           {showIcon && icon && (
             <span className="item-icon">
               {icon} {/* Просто рендерим React-элемент */}
             </span>
           )}
-        </div>
+          <span className="menu-item-text">{text}</span>
+          {/*<NavLink to={`/${link}`} className="menu-item-text">{text}</NavLink>*/}
+        </NavLink>
       );
 
     case 'text_item':
@@ -24,23 +27,22 @@ const Item = ({ type, icon, text="", placeholder = 'Search', clas="menu-item", s
               {icon} {/* Просто рендерим React-элемент */}
             </span>
           )}
-          <span>{text}</span>
+          <span className="menu-item-text">{text}</span>
         </div>
       );
 
     case 'input_item':
       return (
-        <div className="item menu-item-input">
+        <div className="item menu-item menu-item-input">
           {showIcon && icon && (
             <span className="item-icon">
               {icon} {/* Просто рендерим React-элемент */}
             </span>
           )}
-          <Search className="menu-item-icon" />
           <input 
             type="text"
             placeholder={placeholder}
-            className="menu-item-field"
+            className="menu-item-field menu-item-text"
           />
         </div>
       );

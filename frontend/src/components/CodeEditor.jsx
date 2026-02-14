@@ -131,13 +131,17 @@ export default function CodeEditor({ ws }) {
   );
 }*/}
 
+import { useExecuteCode } from '../hooks/useCodeExecution';
+import { useCode } from './CodeContext';
+
 // app/CodeEditor.jsx
 import { useEffect } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
 import "../App.css"
 
-export default function CodeEditor({ ws, code, setCode }) {
+export default function CodeEditor() {
   const monaco = useMonaco();
+  const { code, setCode } = useCode(); // Берем код из контекста
 
   // ⭐ Создаем кастомную тему с фоном #1C1D25
   useEffect(() => {
@@ -155,7 +159,7 @@ export default function CodeEditor({ ws, code, setCode }) {
     monaco.editor.setTheme("custom-dark");
   }, [monaco]);
 
-  const submit = () => {
+  {/*const submit = () => {
     if (!ws || ws.readyState !== WebSocket.OPEN) {
       console.warn("WebSocket not ready");
       return;
@@ -170,13 +174,13 @@ export default function CodeEditor({ ws, code, setCode }) {
     const payload = { event: "run_code", code };
     console.log("➡️ Sending code to backend:", payload);
     ws.send(JSON.stringify(payload));
-  };
+  };*/}
 
   return (
     <>
       <div>
         <Editor
-          height="40vh"
+          height="49vh"
           language="python"
           theme="custom-dark"
           value={code}

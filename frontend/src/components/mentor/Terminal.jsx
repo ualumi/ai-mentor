@@ -1,21 +1,16 @@
 import ToggleButton from "./ToggleButton";
 import { useState } from "react";
 import "../../App.css"
+import Item from "./Item";
 
-export default function Terminal () {
-  const [isOpen, setIsOpen] = useState(false);
+export default function Terminal ({ isOpen, onToggle }) {
   
   return (
     <div>
-      <ToggleButton
-        isOpen={isOpen}
-        onToggle={() => setIsOpen(!isOpen)}
-        openLabel="Open Terminal"
-        closeLabel="Close Terminal"
-        className="sidebar-toggle"
-      />
       
-      {isOpen && <div className="sidebar menu-item terminal">Content</div>}
+      {isOpen && <div className="sidebar menu-item terminal">
+        <Item type="text_item"text="Terminal 1" clas="item-light terminal-item" />
+        </div>}
     </div>
   );
 };

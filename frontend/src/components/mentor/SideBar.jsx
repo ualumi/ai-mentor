@@ -28,15 +28,15 @@ export default function SideBar ({ isOpen, toggleSidebar }) {
             </div>
         
             <div className="menu-list">
-                <Item type="text_item" text="Search" icon={<Search strokeWidth={1} />} />
-                <Item type="text_item" text="Home" clas="l" icon={<House strokeWidth={1} />}/>
-                <Item type="text_item" text="Progress" clas="l" icon={<Activity strokeWidth={1} />}/>
-                <Item type="text_item" text="Бикиниботтом" clas="l" icon={<Toilet strokeWidth={1} />}/>
+                <Item type="input_item" text="Search" clas="menu-item" icon={<Search strokeWidth={1} />} />
+                <Item type="button_item" text="Home" clas="l" icon={<House strokeWidth={1} />}/>
+                <Item type="button_item" text="Progress" clas="l" icon={<Activity strokeWidth={1} />} link="progress"/>
+                <Item type="button_item" text="Бикиниботтом" clas="l" icon={<Toilet strokeWidth={1} />} link="any"/>
             </div>
             <History></History>
         </div>
         
-        <ProfileItem name="test" email="test@gmail.com"/>
+        <ProfileItem name="User" email="test@gmail.com"/>
     </div>
   );
 };
