@@ -97,6 +97,49 @@
     border-radius: var(--border-radius);
 }
 
+.menu-item-active {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0px -10px 40px -20px rgba(255, 255, 255, 0.08);
+    border-radius: var(--border-radius);
+    background: #272729;
+     overflow: hidden;
+    background: 
+    linear-gradient(90deg, transparent, rgba(59, 104, 255, 0.8) 50%, transparent),
+    #272729;
+    background-blend-mode: normal;
+    background-position: -40% 50%, 0 0; /* позиция для каждого слоя */
+    background-size: 200% 100%, auto;
+    background-repeat: no-repeat;
+    color: var(--text-color);
+}
+
+.menu-item-active::after {
+    content: "";
+    display: flex;
+    width: 3px;
+    height: 4px;
+    background: #3B68FF;
+    filter: blur(2px);
+    justify-self: end;
+}
+
+/*.menu-item-active::after {
+    content: "";
+    position: relative;
+    width: 52px;
+    height: 221px;
+    left: 214px;
+    top: -2px;
+    overflow: hidden;
+
+    background: #3B68FF;
+    opacity: 0.8;
+    filter: blur(50px);
+    transform: rotate(-90deg);
+}*/
+
+
+
 .menu-item-input {
     margin-bottom: 15px;
 }

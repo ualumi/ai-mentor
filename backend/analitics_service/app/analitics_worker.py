@@ -66,7 +66,7 @@ async def analitics_worker():
             out = {
                 "session_id": session_id,
                 "analysis": analysis,
-
+                "code":code
             }
 
             await redis.publish(CHANNEL_OUT, json.dumps(out))

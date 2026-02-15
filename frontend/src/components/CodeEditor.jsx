@@ -74,6 +74,124 @@ export default function CodeEditor({ ws }) {
     </>
   );
 }*/}
+import { useRef } from "react";
+import Editor from "@monaco-editor/react";
+import "./ai.css";
+
+const defaultCode = `import numpy as np
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import silhouette_score
+import matplotlib.pyplot as plt
+
+def cluster_data(data, n_clusters):
+    scaler = StandardScaler()
+    scaled = scaler.fit_transform(data)
+
+    best_score = -1
+    best_model = None
+
+    for k in range(2, n_clusters + 1):
+        model = KMeans(n_clusters=k)
+        labels = model.fit_predict(scaled)
+
+        score = silhouette_score(scaled, labels)
+
+        if score > best_score:
+            best_score = score
+            best_model = model
+
+    plt.scatter(scaled[:, 0], scaled[:, 1], c=best_model.labels_)
+    plt.show()
+
+    return best_model, scaler
+`;
+
+const analysis = [
+  {
+    line: 4,
+    type: "strength",
+    message:
+      "Использование silhouette_score — объективная метрика качества кластеризации",
+    confidence: 0.542,
+  },
+  {
+    line: 26,
+    type: "strength",
+    message:
+      "Возврат обученного scaler позволяет корректно трансформировать новые данные",
+    confidence: 0.455,
+  },
+  {
+    line: 23,
+    type: "weakness",
+    message: "Визуализация использует только первые 2 признака",
+    confidence: 0.516,
+  },
+  {
+    line: 18,
+    type: "weakness",
+    message: "Нет обработки случая одинаковых silhouette scores",
+    confidence: 0.51,
+  },
+  {
+    line: 17,
+    type: "recommendation",
+    message: "Добавить вывод размеров кластеров: np.bincount(...)",
+    confidence: 0.516,
+  },
+];
+
+export default function CodeEditor() {
+  const editorRef = useRef(null);
+
+  const handleMount = (editor, monaco) => {
+    editorRef.current = editor;
+
+    analysis.forEach((item, index) => {
+      const domNode = document.createElement("div");
+      domNode.className = `ai-inline-card ${item.type} fade-in`;
+      domNode.innerHTML = `
+        <div class="ai-inline-header">
+          ${item.type.toUpperCase()} • confidence ${item.confidence}
+        </div>
+        <div>${item.message}</div>
+      `;
+
+      const widget = {
+        getId: () => `ai.widget.${index}`,
+        getDomNode: () => domNode,
+        getPosition: () => ({
+          position: {
+            lineNumber: item.line,
+            column: 1,
+          },
+          preference: [
+            monaco.editor.ContentWidgetPositionPreference.BELOW,
+          ],
+        }),
+      };
+
+      editor.addContentWidget(widget);
+    });
+  };
+
+  return (
+    <Editor
+      height="80vh"
+      defaultLanguage="python"
+      defaultValue={defaultCode}
+      theme="vs-dark"
+      onMount={handleMount}
+      options={{
+        minimap: { enabled: false },
+        fontSize: 15,
+        lineHeight: 22,
+        automaticLayout: true,
+      }}
+    />
+  );
+}
 
 {/*import { useState, useEffect } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
@@ -131,7 +249,7 @@ export default function CodeEditor({ ws }) {
   );
 }*/}
 
-import { useExecuteCode } from '../hooks/useCodeExecution';
+{/*import { useExecuteCode } from '../hooks/useCodeExecution';
 import { useCode } from './CodeContext';
 
 // app/CodeEditor.jsx
@@ -159,22 +277,6 @@ export default function CodeEditor() {
     monaco.editor.setTheme("custom-dark");
   }, [monaco]);
 
-  {/*const submit = () => {
-    if (!ws || ws.readyState !== WebSocket.OPEN) {
-      console.warn("WebSocket not ready");
-      return;
-    }
-
-    if (!code.trim()) {
-      console.warn("Empty code");
-      return;
-    }
-
-    // Отправляем код в формате JSON с событием run_code
-    const payload = { event: "run_code", code };
-    console.log("➡️ Sending code to backend:", payload);
-    ws.send(JSON.stringify(payload));
-  };*/}
 
   return (
     <>
@@ -196,10 +298,7 @@ export default function CodeEditor() {
       </div>
 
       <br />
-      {/*<button className="submit_code" onClick={submit}>
-        ▶ Submit
-      </button>*/}
     </>
   );
 }
-
+*/}

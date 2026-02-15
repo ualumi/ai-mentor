@@ -1,0 +1,42 @@
+.ai-inline-card {
+  margin-top: 6px;
+  margin-bottom: 6px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  max-width: 600px;
+  backdrop-filter: blur(6px);
+  animation: fadeIn 0.5s ease forwards;
+  opacity: 0;
+}
+
+.ai-inline-header {
+  font-size: 11px;
+  opacity: 0.7;
+  margin-bottom: 6px;
+}
+
+/* Цвета */
+
+.strength {
+  background: rgba(0, 255, 150, 0.12);
+  border-left: 3px solid #00ffa0;
+}
+
+.weakness {
+  background: rgba(255, 0, 80, 0.12);
+  border-left: 3px solid #ff0050;
+}
+
+.recommendation {
+  background: rgba(255, 200, 0, 0.12);
+  border-left: 3px solid #ffc800;
+}
+
+/* Fade in */
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
