@@ -26,6 +26,12 @@ class TaskState:
         self.condition_event = asyncio.Event()
         self.reply_event = asyncio.Event()
 
+        self.recommendation = None
+        self.recommendation_event = asyncio.Event()
+
+        self.analysis_event = asyncio.Event()
+        self.progress_event = asyncio.Event()
+
 TASKS: Dict[str, TaskState] = {}
 
 '''from typing import Dict

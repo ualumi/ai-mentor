@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { CodeProvider } from '../CodeContext';
 import Item from "./Item";
 import s from "./FreeMode.module.css"
+import Recommendation from "./Recommendation";
 
 // Создаем queryClient на самом верхнем уровне
 const queryClient = new QueryClient({
@@ -36,6 +37,7 @@ export default function FreeMode() {
                 <div >{/*className={s["insight-panel"]}*/}
                     <ExecutionResult></ExecutionResult>
                 </div>
+                <Recommendation />
             </div>
         </CodeProvider>
     </QueryClientProvider>

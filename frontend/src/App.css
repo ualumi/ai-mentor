@@ -162,6 +162,14 @@
     padding-top: 3px;
 }
 
+.recomendation-item {
+    position: fixed;
+    bottom: 0;
+    right: 20px;
+    width: 280px;
+    height: 300px;
+}
+
 
 .free-mode {
     background-color: var(--backround-color);

@@ -74,7 +74,9 @@ export default function CodeEditor({ ws }) {
     </>
   );
 }*/}
-import { useRef } from "react";
+
+{/* пример привязки кода
+  import { useRef } from "react";
 import Editor from "@monaco-editor/react";
 import "./ai.css";
 
@@ -191,7 +193,7 @@ export default function CodeEditor() {
       }}
     />
   );
-}
+}*/}
 
 {/*import { useState, useEffect } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
@@ -249,7 +251,8 @@ export default function CodeEditor({ ws }) {
   );
 }*/}
 
-{/*import { useExecuteCode } from '../hooks/useCodeExecution';
+
+import { useExecuteCode } from '../hooks/useCodeExecution';
 import { useCode } from './CodeContext';
 
 // app/CodeEditor.jsx
@@ -301,4 +304,3 @@ export default function CodeEditor() {
     </>
   );
 }
-*/}

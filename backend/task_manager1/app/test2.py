@@ -144,11 +144,12 @@ asyncio.run(connect_to_websocket())'''
 import asyncio
 import websockets
 import json
-
+import random
+f=random.randint(1, 10)
 
 async def connect_to_websocket():
     async with websockets.connect(
-        "ws://localhost:8004/ws/tasks/test1"
+        f"ws://localhost:8004/ws/tasks/{f}"
     ) as websocket:
 
         # 1️⃣ отправляем код (как run_code)

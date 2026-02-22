@@ -63,9 +63,13 @@ export default function ExecutionResult() {
       }
       
       // Если это вывод программы
-      if (data.output !== undefined) {
-        setLiveOutput(prev => [...prev, data.output]);
+      if (data.event === 'sandbox_reply') {
+        setLiveOutput(prev => [...prev, data.result.stdout]);
       }
+
+      /*if (data.output !== undefined) {
+        setLiveOutput(prev => [...prev, data.output]);
+      }*/
     };
     
     wsService.on('*', handler);

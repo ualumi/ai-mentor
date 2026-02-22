@@ -14,3 +14,10 @@ redis = Redis(
     port=6379,
     decode_responses=True
 )
+
+# отдельный клиент для pub/sub
+redis_sub = Redis(
+    host="redis",
+    port=6379,
+    decode_responses=True
+)
