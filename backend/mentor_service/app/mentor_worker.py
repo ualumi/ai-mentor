@@ -15,18 +15,19 @@ async def mentor_worker():
             continue
         try:
             payload = json.loads(message["data"])
-            session_id = payload.get("session_id")
+            user_id = payload.get("user_id")
             code = payload.get("code")
             attempt_id = payload.get("attempt_id")
+            learning_session_id= payload.get("learning_session_id")
 
-            if not session_id or not code:
+            if not user_id or not code:
                 continue
 
             hint = await generate_hint(code)
 
-            response = {"session_id": session_id, "hint": hint, "attempt_id": attempt_id}
+            response = {"session_id": user_id, "hint": hint, "attempt_id": attempt_id, "learning_session_id": learning_session_id}
             await redis.publish(CHANNEL_OUT, json.dumps(response))
-            print(f"💡 Отправлена подсказка пользователю {session_id}, {response}")
+            print(f"💡 Отправлена подсказка пользователю {user_id}, {response}")
 
         except Exception as e:
             print(f"Mentor worker error: {e}")

@@ -153,12 +153,12 @@ CHANNEL_MENTOR_IN = "mentor_in"
 CHANNEL_ANALYZE = "analyze"
 
 
-async def task_ws(websocket: WebSocket, session_id: str):
+async def task_ws(websocket: WebSocket, user_id: str):
     await websocket.accept()
-    print(f"🔌 WS connected: {session_id}")
+    print(f"🔌 WS connected: {user_id}")
 
     # создаём TaskState если нет
-    task = TASKS.setdefault(session_id, TaskState())
+    task = TASKS.setdefault(user_id, TaskState())
 
     try:
         # -----------------------------
@@ -320,7 +320,8 @@ async def task_ws(websocket: WebSocket, session_id: str):
                 # ▶ RUN_CODE
                 if event == "run_code":
                     payload = {
-                        "session_id": session_id,
+                        "user_id": user_id,
+                        "learning_session_id": task.learning_session_id,
                         "code": task.code,
                         "step_id": task.step_id
                     }
@@ -331,7 +332,8 @@ async def task_ws(websocket: WebSocket, session_id: str):
                     attempt_id = str(uuid.uuid4())
                     task.current_attempt_id = attempt_id
                     payload = {
-                        "session_id": session_id,
+                        "user_id": user_id,
+                        "learning_session_id": task.learning_session_id,
                         "attempt_id": attempt_id,
                         "code": task.code,
                         "step_id": task.step_id,
@@ -342,4 +344,4 @@ async def task_ws(websocket: WebSocket, session_id: str):
                     task.step_id += 1
 
     except WebSocketDisconnect:
-        print(f"❌ WS disconnected: {session_id}")
+        print(f"❌ WS disconnected: {user_id}")

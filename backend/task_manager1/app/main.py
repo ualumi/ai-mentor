@@ -13,6 +13,6 @@ async def startup():
     print("✅ Task Manager started")
 
 
-@app.websocket("/ws/tasks/{session_id}")
-async def ws_endpoint(websocket: WebSocket, session_id: str):
-    await task_ws(websocket, session_id)
+@app.websocket("/ws/tasks/{user_id}")
+async def ws_endpoint(websocket: WebSocket, user_id: str):
+    await task_ws(websocket, user_id)

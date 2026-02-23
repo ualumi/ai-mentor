@@ -47,10 +47,37 @@ async def redis_listener():
             # 🧠 Ответ ментора
             if msg["channel"] == CHANNEL_MENTOR:
                 attempt.mentor_reply = payload.get("hint")
-
+                attempt.user_id = payload.get("user_id")
             # 📊 Результат аналитики
             elif msg["channel"] == CHANNEL_ANALYSIS:
-                attempt.analysis_result = payload.get("analysis")
+                analysis = payload.get("analysis", {})
+                attempt.user_id = payload.get("user_id")
+                # 1️⃣ сохраняем raw
+                attempt.analysis = analysis
+
+                # 2️⃣ извлекаем skill_scores
+                skill_scores = {}
+
+                tag_alignment = (
+                    analysis
+                    .get("task_compliance", {})
+                    .get("tag_alignment", {})
+                )
+
+                for skill, data in tag_alignment.items():
+                    skill_scores[skill] = data.get("score")
+
+                attempt.skill_scores = skill_scores
+
+                # 3️⃣ total_score
+                attempt.total_score = analysis.get("code_quality_score")
+
+                # 4️⃣ is_correct
+                attempt.is_correct = (
+                    analysis
+                    .get("correctness", {})
+                    .get("is_correct")
+                )
                 # при желании можно сохранить агрегированную компетенцию
                 # attempt.dominant_competency = payload.get("dominant_competency")
 

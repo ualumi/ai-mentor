@@ -67,33 +67,33 @@ async def redis_listener():
             continue
 
         payload = json.loads(msg["data"])
-        session_id = payload.get("session_id")
+        user_id = payload.get("user_id")
         raw_analysis = payload.get("analysis")
 
-        if not session_id or not raw_analysis:
+        if not user_id or not raw_analysis:
             continue
 
         # 1️⃣ сохраняем raw
-        RAW_ANALYSIS.setdefault(session_id, []).append(raw_analysis)
+        RAW_ANALYSIS.setdefault(user_id, []).append(raw_analysis)
 
         # 2️⃣ извлекаем evidence
         evidence_list = extract_evidence(raw_analysis)
-        EVIDENCE_STORE.setdefault(session_id, []).extend(evidence_list)
+        EVIDENCE_STORE.setdefault(user_id, []).extend(evidence_list)
 
         # 3️⃣ обновляем прогресс
-        user_progress = USER_PROGRESS.setdefault(session_id, {})
+        user_progress = USER_PROGRESS.setdefault(user_id, {})
         for ev in evidence_list:
             apply_evidence(user_progress, ev)
 
         # 4️⃣ пересчитываем рекомендации
-        USER_RECOMMENDATIONS[session_id] = build_recommendations(user_progress)
+        USER_RECOMMENDATIONS[user_id] = build_recommendations(user_progress)
 
         # 5️⃣ публикуем наружу
         await redis.publish(
-            f"user_progress:{session_id}",
+            f"user_progress:{user_id}",
             json.dumps({
                 "progress": user_progress,
-                "recommendations": USER_RECOMMENDATIONS[session_id]
+                "recommendations": USER_RECOMMENDATIONS[user_id]
             })
         )
 

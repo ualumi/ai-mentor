@@ -52,10 +52,11 @@ async def analitics_worker():
 
         try:
             payload = json.loads(raw_data)
-            session_id = payload.get("session_id")
+            user_id = payload.get("user_id")
             code = payload.get("code")
+            learning_session_id= payload.get("learning_session_id")
 
-            if not session_id or not code:
+            if not user_id or not code:
                 continue
 
             analysis = await generate_analysis(code)
@@ -64,13 +65,14 @@ async def analitics_worker():
                 analysis = analysis["analysis"]
 
             out = {
-                "session_id": session_id,
+                "user_id": user_id,
                 "analysis": analysis,
-                "code":code
+                "code":code,
+                "learning_session_id": learning_session_id
             }
 
             await redis.publish(CHANNEL_OUT, json.dumps(out))
-            print(f"📤 analysis_result sent for {session_id}")
+            print(f"📤 analysis_result sent for {user_id}")
 
         except Exception as e:
             print(f"Analytics worker error: {e}")

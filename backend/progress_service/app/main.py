@@ -32,20 +32,20 @@ async def get_progress(session_id: str):
         "recommendations": recommendations
     }'''
 
-@app.get("/progress/{session_id}")
-async def get_progress(session_id: str):
+@app.get("/progress/{user_id}")
+async def get_progress(user_id: str):
     print("USER_PROGRESS:", USER_PROGRESS)
-    progress = USER_PROGRESS.get(session_id)
+    progress = USER_PROGRESS.get(user_id)
 
-    if session_id not in USER_PROGRESS:
+    if user_id not in USER_PROGRESS:
         raise HTTPException(
             status_code=404,
-            detail=f"No progress found for session {session_id}"
+            detail=f"No progress found for {user_id}"
         )
 
     return {
         "progress": progress,
-        "recommendations": USER_RECOMMENDATIONS.get(session_id, [])
+        "recommendations": USER_RECOMMENDATIONS.get(user_id, [])
     }
 
 '''import asyncio

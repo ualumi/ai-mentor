@@ -17,9 +17,9 @@ async def sandbox_worker():
 
         data = json.loads(message["data"])
         code = data["code"]
-        session_id = data["session_id"]
+        user_id = data["user_id"]
         step_id = data["step_id"]
-
+        learning_session_id = data["learning_session_id"]
         # 🔹 Выполнение кода через уже существующий run_code
         result_dict = await run_code(code)
 
@@ -35,10 +35,11 @@ async def sandbox_worker():
         await redis.publish(
             "code_results",
             json.dumps({
-                "session_id": session_id,
+                "user_id": user_id,
                 "code": code,
                 "sandbox_result": result_dict,
                 "step_id": step_id,
+                "learning_session_id": learning_session_id
             })
         )
 

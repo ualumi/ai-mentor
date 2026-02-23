@@ -1,8 +1,8 @@
 from pydantic import BaseModel
 
 class StartSessionRequest(BaseModel):
-    competency: str
-    methodology: str
+  #intervention_id: str
+  competency: str
 
 
 class SessionResponse(BaseModel):

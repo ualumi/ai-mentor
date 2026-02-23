@@ -2,7 +2,8 @@ from app.domain.scaffold import ScaffoldingTask
 from app.infrastructure.event_bus import EventBus
 
 async def evaluate_step(
-    session_id: str,
+    user_id: str,
+    learning_session_id: str,
     step_id: int,
     code: str,
     competency: str
@@ -16,8 +17,9 @@ async def evaluate_step(
             "scaffolding.events",
             {
                 "event": "step_completed",
-                "session_id": session_id,
-                "step": step_id,
+                "user_id": user_id,
+                "learning_session_id": learning_session_id,
+                "step_id": step_id,
                 "competency": competency,
                 "mode": "module"
             }
@@ -28,8 +30,9 @@ async def evaluate_step(
         "scaffolding.events",
         {
             "event": "step_failed",
-            "session_id": session_id,
-            "step": step_id,
+            "user_id": user_id,
+            "learning_session_id": learning_session_id,
+            "step_id": step_id,
             "competency": competency,
             "mode": "module"
         }

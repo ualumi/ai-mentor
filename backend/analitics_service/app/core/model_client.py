@@ -42,7 +42,7 @@ async def analyze_code(code: str) -> dict:
             },
             "code_quality_score": 9.2,
             "correctness": {
-                "is_correct": True,
+                "is_correct": False,
                 "score": 9,
                 "edge_cases_handled": True
             },

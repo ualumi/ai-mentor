@@ -1,15 +1,16 @@
 import json
-from app.infrastructure.redis import redis
+from app.infrastructure.redis import redis_client
 
 CHANNEL_TASK_CONDITION = "task_condition"
 
-async def publish_task_condition(session_id: str, condition: dict):
+async def publish_task_condition(user_id, learning_session_id: str, condition: dict):
     payload = {
-        "session_id": session_id,
+        "user_id": user_id,
+        "learning_session_id": learning_session_id,
         "condition": condition
     }
     print("publishing task")
-    await redis.publish(CHANNEL_TASK_CONDITION, json.dumps(payload))
+    await redis_client.publish(CHANNEL_TASK_CONDITION, json.dumps(payload))
 
 
 '''async def publish_task_condition(task_run_id: str, condition: dict):

@@ -91,12 +91,12 @@ class AnalysisListener:
             try:
                 payload = json.loads(message["data"])
 
-                session_id = payload.get("session_id")
+                user_id = payload.get("user_id")
                 code = payload.get("code")
                 analysis = payload.get("analysis")
                 print("code", code)
                 print("analysis", analysis)
-                if not session_id or not code or not analysis:
+                if not user_id or not code or not analysis:
                     continue
 
                 if "analysis_result" in analysis:
@@ -108,7 +108,7 @@ class AnalysisListener:
 
                 print(annotations)
                 out = {
-                    "session_id": session_id,
+                    "user_id": user_id,
                     "annotations": [
                         {
                             "line": a.line,
@@ -125,7 +125,7 @@ class AnalysisListener:
                     json.dumps(out)
                 )
 
-                print(f"📤 code_annotations_ready sent for {session_id}")
+                print(f"📤 code_annotations_ready sent for {user_id}")
 
             except Exception as e:
                 print("Annotation listener error:", e)

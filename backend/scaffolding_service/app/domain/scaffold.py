@@ -1,30 +1,23 @@
 class ScaffoldingTask:
     def __init__(self):
         self.steps = [
-            {
-                "id": 0,
-                "description": "Загрузить датасет"
-            },
-            {
-                "id": 1,
-                "description": "Обучить модель"
-            },
-            {
-                "id": 2,
-                "description": "Оценить качество модели"
-            }
+            {"id": 0, "description": "Загрузить датасет"},
+            {"id": 1, "description": "Обучить модель"},
+            {"id": 2, "description": "Оценить качество модели"},
         ]
 
     def get_step(self, step_id: int):
-        return self.steps[step_id]
+        step = self.steps[step_id]
+        return {
+            "step_id": step["id"],
+            "title": f"Шаг {step_id}",
+            "description": step["description"]
+        }
 
     def total_steps(self):
         return len(self.steps)
 
     def validate(self, step_id: int, code: str) -> bool:
-        """
-        Упрощённая логика валидации (заглушка)
-        """
         rules = {
             0: ["read_csv", "load"],
             1: ["fit"],
@@ -33,11 +26,3 @@ class ScaffoldingTask:
 
         required = rules.get(step_id, [])
         return all(r in code for r in required)
-    
-    def get_step(self, step_id: int):
-        step = self.steps[step_id]
-        return {
-            "step_id": step["id"],
-            "title": f"Шаг {step_id}",
-            "description": step["description"]
-        }

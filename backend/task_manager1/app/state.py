@@ -31,6 +31,7 @@ class TaskState:
 
         self.analysis_event = asyncio.Event()
         self.progress_event = asyncio.Event()
+        self.learning_session_id = None
 
 TASKS: Dict[str, TaskState] = {}
 
