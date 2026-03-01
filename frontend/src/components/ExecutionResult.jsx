@@ -120,7 +120,10 @@ export default function ExecutionResult() {
           {mentorReplies.map((reply, i) => (
             <div key={i} className="mentor-message">
               <div className={s["insight-panel"]}>
-                <Item type="text_item" text={reply.text} clas='menu-item'></Item>
+                <div className='menu-item mentor-item item-light'>
+                  <p className='menu-caption mentor-caption'>Mentor</p>
+                  <p>{reply.text}</p>
+                </div>
               </div>
               
               {/*{process.env.NODE_ENV === 'development' && (

@@ -31,7 +31,8 @@ export default function SideBar ({ isOpen, toggleSidebar }) {
                 <Item type="input_item" text="Search" clas="menu-item" icon={<Search strokeWidth={1} />} />
                 <Item type="button_item" text="Home" clas="" icon={<House strokeWidth={1} />}/>
                 <Item type="button_item" text="Progress" clas="l" icon={<Activity strokeWidth={1} />} link="progress"/>
-                <Item type="button_item" text="Tasks" clas="menu-item-active" icon={<Toilet strokeWidth={1} />} link="any"/>
+                <Item type="button_item" text="Tasks" clas="menu-item-active"  link="any"/>
+                <Item type="button_item" text="Modules" clas=""  link="module"/>
             </div>
             <History></History>
         </div>

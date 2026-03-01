@@ -2,15 +2,18 @@ import { useEffect, useState } from 'react';
 import { wsService } from '../../services/websocket';
 import Item from './Item';
 import "../../App.css"
+import { Link, useNavigate } from "react-router-dom";
+{/*<button onClick={() => navigate(`/module/${recommendation.data}`)}>*/}
 
-export default function Recommendation() {
+export default function Recommendation({mode}) {
+  const navigate = useNavigate();
   const [recommendation, setRecommendation] = useState(null);
 
   useEffect(() => {
     const handler = (data) => {
       console.log('📚 Recommendation received:', data);
 
-      if (data.event === 'module_recommendation') {
+      if (data.event === 'module_recommendaton') {
         setRecommendation({
           time: new Date().toLocaleTimeString(),
           data: data.data
@@ -28,25 +31,22 @@ export default function Recommendation() {
   if (!recommendation) return null;
 
   return (
-    <div className="item menu-item menu-item-input  recomendation-item">
+    <div className="item menu-item menu-item-input item-light recomendation-item">
+          <div className="recomendation-content">
           <div className="">
-          <div className="">
-            📚 Рекомендован модуль
+            Рекомендован модуль
           </div>
 
-          <div className="">
+          <div className="menu-caption mentor-caption">
             {typeof recommendation.data === 'string'
               ? recommendation.data
               : JSON.stringify(recommendation.data, null, 2)}
           </div>
-
-          <button onClick={() => navigate(`/modules/${recommendation.data}`)}>
-                🚀 Начать модуль
+          
+          <button onClick={() => navigate(`/module/1`)} className='module-button'>
+                Начать модуль
             </button>
 
-          <div className="">
-            {recommendation.time}
-          </div>
         </div>
     </div>
 

@@ -4,7 +4,7 @@ import "../../App.css"
 import Item from "./Item";
 
 export default function Terminal ({ isOpen, onToggle }) {
-  
+  isOpen=true;
   return (
     <div>
       

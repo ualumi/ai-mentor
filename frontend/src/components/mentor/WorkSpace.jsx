@@ -7,6 +7,7 @@ import { CodeProvider } from '../CodeContext';
 import Item from "./Item";
 import s from "./FreeMode.module.css"
 import Recommendation from "./Recommendation";
+import { useParams } from "react-router-dom";
 
 // Создаем queryClient на самом верхнем уровне
 const queryClient = new QueryClient({
@@ -19,7 +20,8 @@ const queryClient = new QueryClient({
   },
 });
 
-export default function FreeMode() {
+export default function WorkSpace({ mode }) {
+
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
     const toggleSidebar = () => {
@@ -33,11 +35,11 @@ export default function FreeMode() {
                     <SideBar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} ></SideBar>
                 </div>
                 
-                <SandBox></SandBox>
+                <SandBox mode={mode}></SandBox>
                 <div >{/*className={s["insight-panel"]}*/}
                     <ExecutionResult></ExecutionResult>
                 </div>
-                <Recommendation />
+                <Recommendation mode={mode}/>
             </div>
         </CodeProvider>
     </QueryClientProvider>

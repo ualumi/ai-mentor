@@ -107,7 +107,7 @@ import asyncio
 CHANNEL_TASK_CONDITION = "task_condition"
 CHANNEL_MENTOR_OUT = "mentor_out"
 CHANNEL_CODE_RESULTS = "code_results"
-CHANNEL_ANALYSIS_RESULT = "analysis_result"
+CHANNEL_ANALYSIS_RESULT = "code_annotations_ready"
 
 
 async def redis_listener():
@@ -126,7 +126,6 @@ async def redis_listener():
     print("🔄 Redis listener started")
 
     async for msg in pubsub.listen():
-        await asyncio.sleep(0)
         print(msg)
         # print(msg)  # можно оставить для отладки
 
@@ -170,13 +169,14 @@ async def redis_listener():
 
         if channel == CHANNEL_TASK_CONDITION:
             
-            task.learning_session_id = payload.get("learning_session_id")
+            """task.learning_session_id = payload.get("learning_session_id")
             task.mode = payload["mode"]
             task.methodology = payload.get("methodology")
             task.condition = payload["condition"]
             task.step_id = payload.get("step_id")
-            task.condition_event.set()
-            print(f"📘 Condition received for {user_id}")
+            task.condition_event.set()"""
+            await task.condition_queue.put(payload)
+            print(f"📘 Condition queued for {user_id}")
 
         elif channel == CHANNEL_MENTOR_OUT:
             attempt_id = payload.get("attempt_id")

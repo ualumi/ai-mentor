@@ -1,13 +1,32 @@
+@font-face {
+    font-family: "Stolz regular";
+    src: url(../assets/stolzl_regular.otf);
+}
+
 .ai-inline-card {
   margin-top: 6px;
   margin-bottom: 6px;
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: 8px 0px 8px 8px;
   font-size: 13px;
   max-width: 600px;
   backdrop-filter: blur(6px);
   animation: fadeIn 0.5s ease forwards;
   opacity: 0;
+  color: #ffff;
+}
+
+
+.editor-wrapper {
+  position: relative;
+}
+
+.ai-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none; /* чтобы не мешать курсору */
 }
 
 .ai-inline-header {
@@ -16,27 +35,230 @@
   margin-bottom: 6px;
 }
 
-/* Цвета */
+
 
 .strength {
-  background: rgba(0, 255, 150, 0.12);
-  border-left: 3px solid #00ffa0;
+  background: rgba(0, 255, 150, 0.15);
+  border-right: 3px solid #00ffa0;
 }
 
 .weakness {
-  background: rgba(255, 0, 80, 0.12);
-  border-left: 3px solid #ff0050;
+  background: rgba(255, 0, 80, 0.15);
+  border-right: 3px solid #ff0050;
 }
 
 .recommendation {
-  background: rgba(255, 200, 0, 0.12);
-  border-left: 3px solid #ffc800;
+  background: rgba(255, 200, 0, 0.15);
+  border-right: 3px solid #ffc800;
 }
 
-/* Fade in */
+
 
 @keyframes fadeIn {
   to {
     opacity: 1;
   }
+}
+
+/*.editor-wrapper {
+  position: relative;
+  display: flex;
+}
+
+.ai-overlay {
+  position: absolute;
+  right: -420px; 
+  top: 0;
+  width: 400px;
+  pointer-events: none;
+}
+
+.ai-external-card {
+  position: absolute;
+  width: 380px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  animation: fadeIn 0.4s ease forwards;
+}*/
+
+
+
+
+.editor-wrapper {
+  position: relative;
+}
+
+.ai-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+}
+
+/* ================== */
+/* Карточка */
+/* ================== */
+
+.ai-inline-card {
+  background: #1e1e1e;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 12px;
+  color: white;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.5);
+  pointer-events: auto;
+  animation: fadeIn 0.15s ease-in-out;
+}
+
+.ai-inline-header {
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 11px;
+  opacity: 0.8;
+}
+
+/* ================== */
+/* Цвета карточек */
+/* ================== */
+
+.ai-inline-card.strength {
+  border-left: 4px solid #00ff88;
+}
+
+.ai-inline-card.weakness {
+  border-left: 4px solid #ff4d4f;
+}
+
+.ai-inline-card.recommendation {
+  border-left: 4px solid #ffc107;
+}
+
+/* ================== */
+/* Подсветка строки */
+/* ================== */
+
+.line-highlight-strength {
+  background: rgba(0, 255, 136, 0.08);
+}
+
+.line-highlight-weakness {
+  background: rgba(255, 77, 79, 0.08);
+}
+
+.line-highlight-recommendation {
+  background: rgba(255, 193, 7, 0.08);
+}
+
+/* ================== */
+/* Цветные точки */
+/* ================== */
+
+.glyph-strength {
+  background: #00ff88;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-left: 6px;
+}
+
+.glyph-weakness {
+  background: #ff4d4f;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-left: 6px;
+}
+
+.glyph-recommendation {
+  background: #ffc107;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-left: 6px;
+}
+
+/* ================== */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-50%) scale(0.95); }
+  to { opacity: 1; transform: translateY(-50%) scale(1); }
+}
+
+.line-end-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.line-end-dot.strength {
+  background: #00ff88;
+}
+
+.line-end-dot.weakness {
+  background: #ff4d4f;
+}
+
+.line-end-dot.recommendation {
+  background: #ffc107;
+}
+
+.ai-active-line {
+  background-color: rgba(255,255,0,0.15);
+}
+
+.ai-gutter-line {
+  border-left: 3px solid #FFD700;
+}
+
+
+
+.ai-line-green {
+  background: rgba(76, 175, 80, 0.15);
+}
+
+.ai-line-yellow {
+  background: rgba(255, 193, 7, 0.15);
+}
+
+.ai-line-red {
+  background: rgba(244, 67, 54, 0.15);
+}
+
+.ai-gutter-green {
+  border-left: 4px solid #4CAF50 !important;
+}
+
+.ai-gutter-yellow {
+  border-left: 4px solid #FFC107 !important;
+}
+
+.ai-gutter-red {
+  border-left: 4px solid #F44336 !important;
+}
+
+.ai-zone {
+    padding: 8px 12px;
+  font-size: 13px;
+  line-height: 1.4;
+  box-sizing: border-box;
+  margin: 0;
+  transition: all 0.2s ease;
+  font-family:"Stolz regular"
+  /*padding: 8px 12px;
+  margin: 4px 0;
+  font-size: 14px;
+  border-radius: 6px;
+  background: #1e1e2e;
+  border-left: 4px solid #4fc1ff;
+  color: #e0e0e0;
+  transition: all 0.2s ease;
+  font-family:"Stolz light" ;*/
+}
+
+.ai-zone:hover {
+  background: #252538;
 }

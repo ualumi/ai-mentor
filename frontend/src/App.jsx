@@ -1,4 +1,4 @@
-import FreeMode from "./components/mentor/FreeMode";
+import WorkSpace from "./components/mentor/WorkSpace";
 import {Route, BrowserRouter, Routes} from "react-router-dom"
 import "./App.css"
 export default function App() {
@@ -6,9 +6,9 @@ export default function App() {
     <div className="body">
       <BrowserRouter>
           <Routes>
-            <Route path='/mentor' Component={FreeMode}/>
-            {/*<Route path="/modules" Component={Modules}/>
-            <Route path="/progress" Component={Analyze}/>*/}
+            <Route path="/mentor" element={<WorkSpace mode="free" />} />
+            <Route path="/module/:id" element={<WorkSpace mode="module" />} />
+            {/*<Route path="/progress" Component={Analyze}/>*/}
           </Routes>
         </BrowserRouter>
     </div>

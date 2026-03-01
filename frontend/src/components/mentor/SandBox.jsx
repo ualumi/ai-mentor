@@ -56,30 +56,55 @@ import SubmitCodeButton from '../SubmitCodeButton';
 import ExecutionResult from '../ExecutionResult';
 import { wsService } from '../../services/websocket';
 import { useEffect } from 'react';
+import Actionpanel from './Actionpanel'
 
-export default function SandBox(props) {
+
+export default function SandBox({mode}) {
     const [isTerminalOpen, setIsTerminalOpen] = useState(false);
     const handleToggle = () => {
         setIsTerminalOpen(!isTerminalOpen);
     };
+    const [analysis, setAnalysis] = useState([]);
 
     useEffect(() => {
-        wsService.connect();
-        return () => wsService.disconnect();
-    }, []);
+    const handler = (data) => {
+      console.log("WS MESSAGE:", data);
+
+      if (
+        data.event === "analysis_result" &&
+        data.data?.annotations
+      ) {
+        console.log("Annotation received");
+        setAnalysis(data.data.annotations);
+      }
+    };
+
+    wsService.connect();
+    wsService.on("*", handler);
+
+    return () => {
+      wsService.off("*", handler);
+      wsService.disconnect();
+    };
+  }, []);
   return (
     <section className={s["section-sandbox"]}>
-        <h1 className={s["section-caption"]}>Free mode</h1>
+        {mode === "free" && <h1 className={s["section-caption"]}></h1>}
+        {mode === "module" && <h1 className={s["section-caption-module"]}>Clustering</h1>}
+        
         <div className={s["section-panel"]}>
             <ToggleButton isOpen={isTerminalOpen} onToggle={handleToggle} className="item icon-only item-light"/>
             <Item type="button_item"  clas="item-light icon-only" icon={<Therminal strokeWidth={1} />}/>
-            <Item type="text_item"text="Загрузить условие" clas="item-light" icon={<Paperclip strokeWidth={1} />}/>
+            {mode === "free" && <Item type="text_item"text="Загрузить условие" clas="item-light" icon={<Paperclip strokeWidth={1} />}/>}
+            
             {/*<Item type="text_item" text="Подсказка ментора" clas="item-light" icon={<Lightbulb strokeWidth={1} />}/>*/}
             <SubmitCodeButton></SubmitCodeButton>
         </div>
         <div className="editor">
-            <CodeEditor></CodeEditor>
-            <Terminal isOpen={isTerminalOpen} onToggle={handleToggle}></Terminal>
+            <CodeEditor analysis={analysis}></CodeEditor>
+            {mode === "free" && <Terminal isOpen={isTerminalOpen} onToggle={handleToggle}></Terminal>}
+            {mode === "module" && <Actionpanel isOpen={isTerminalOpen} onToggle={handleToggle}></Actionpanel>}
+            
         </div>
         
     </section>

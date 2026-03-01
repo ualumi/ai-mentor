@@ -164,6 +164,7 @@ async def task_ws(websocket: WebSocket, user_id: str):
         # -----------------------------
         # Отправляем накопленные события (если пришли ДО WS)
         # -----------------------------
+        #condition = await task.condition_queue.get()
         if task.condition is not None:
             await websocket.send_text(json.dumps({
                 "event": "task_condition",

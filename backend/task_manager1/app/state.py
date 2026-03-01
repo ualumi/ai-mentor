@@ -24,6 +24,7 @@ class TaskState:
 
         # sync
         self.condition_event = asyncio.Event()
+        self.condition_queue = asyncio.Queue()
         self.reply_event = asyncio.Event()
 
         self.recommendation = None

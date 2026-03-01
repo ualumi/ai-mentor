@@ -57,8 +57,86 @@ export const useWebSocketSubscription = (eventType, handler) => {
   }, [eventType, handler]);
 };*/
 
-// hooks/useCodeExecution.js
 import { useQueryClient, useMutation } from '@tanstack/react-query';
+import { wsService } from '../services/websocket';
+import { useState } from 'react';
+
+const QUERY_KEYS = {
+  executionResult: (taskId) => ['executionResult', taskId],
+};
+
+export const useExecuteCode = () => {
+  const queryClient = useQueryClient();
+  const [isWaiting, setIsWaiting] = useState(false);
+
+  return useMutation({
+    mutationFn: async ({ code, event = 'run_code' }) => {
+      setIsWaiting(true);
+
+      return new Promise(async (resolve, reject) => {
+        // ✅ Подписываемся на события до отправки
+        const wildcardHandler = (data) => {
+          console.log('📨 Received message in wildcard handler:', data);
+
+          if (data.event === 'mentor_reply' || data.type === 'mentor_reply') {
+            console.log('✅ Found mentor_reply, resolving with data:', data);
+            cleanup();
+            resolve(data);
+          } 
+          else if (data.result !== undefined || data.output !== undefined) {
+            console.log('✅ Found execution result, resolving with data:', data);
+            cleanup();
+            resolve(data);
+          } 
+          else if (data.event === 'execution_result' || data.type === 'execution_result') {
+            console.log('✅ Found execution_result, resolving with data:', data);
+            cleanup();
+            resolve(data);
+          }
+        };
+
+        const cleanup = () => {
+          clearTimeout(timeout);
+          wsService.off('*', wildcardHandler);
+          setIsWaiting(false);
+        };
+
+        wsService.on('*', wildcardHandler);
+
+        // Таймаут на случай если сервер не отвечает
+        const timeout = setTimeout(() => {
+          cleanup();
+          reject(new Error('Timeout: сервер не отвечает'));
+        }, 10000);
+
+        try {
+          // ✅ Отправляем код после подписки
+          await wsService.send(event, { code });
+
+          // Для submit_code — фейковый mentor_reply отправится автоматически в WS
+        } catch (error) {
+          cleanup();
+          reject(error);
+        }
+      });
+    },
+
+    onSuccess: (data) => {
+      console.log('💾 Saving result to cache:', data);
+      queryClient.setQueryData(
+        QUERY_KEYS.executionResult('current'), 
+        data
+      );
+    },
+
+    onError: (error) => {
+      console.error('❌ Execution failed:', error);
+    },
+  });
+};
+
+// hooks/useCodeExecution.js
+/*import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { wsService } from '../services/websocket';
 import { useState } from 'react';
 
@@ -140,4 +218,4 @@ export const useExecuteCode = () => {
       console.error('❌ Execution failed:', error);
     },
   });
-};
+};*/
