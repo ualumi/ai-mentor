@@ -31,6 +31,44 @@ token = r.json()["access_token"]
 
 print(f"✅ User registered & logged in: {email}")
 
+r = requests.post(
+    f"{LEARNING_SERVICE}/learning/start",
+    headers={"Authorization": f"Bearer {token}"},
+    json={"competency": "Clustering"},
+)
+assert r.status_code == 200, f"Failed to start session: {r.status_code}, {r.text}"
+print("Response from Learning Service:", r.status_code, r.text)
+
+session_id = r.json()["session_id"]
+print(f"🧩 session_id = {session_id}")
+
+# -------------------------------
+# 2️⃣ Проверка /learning/my
+# -------------------------------
+r_my = requests.get(
+    f"{LEARNING_SERVICE}/learning/my?status=active",
+    headers={"Authorization": f"Bearer {token}"},
+)
+
+assert r_my.status_code == 200, f"/my failed: {r_my.status_code}, {r_my.text}"
+
+sessions = r_my.json()
+
+print("📚 Active sessions:", sessions)
+
+# 1. Должна быть хотя бы одна активная сессия
+assert len(sessions) >= 1, "❌ No active sessions returned!"
+
+# 2. Наша session_id должна быть в списке
+assert any(s.get("session_id") == session_id for s in sessions), \
+    "❌ Created session not found in /my response!"
+
+# 3. Убедимся, что статус действительно active
+assert all(s.get("status") == "active" for s in sessions), \
+    "❌ Non-active session returned when filtering by status=active!"
+
+print("✅ /learning/my returned correct active sessions!")
+
 import asyncio
 import websockets
 import json

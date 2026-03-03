@@ -70,30 +70,35 @@ export const useExecuteCode = () => {
   const [isWaiting, setIsWaiting] = useState(false);
 
   return useMutation({
-    mutationFn: async ({ code, event = 'run_code' }) => {
+    mutationFn: async ({ type = "code_event", event = 'run_code', code }) => {
       setIsWaiting(true);
 
       return new Promise(async (resolve, reject) => {
         // ✅ Подписываемся на события до отправки
         const wildcardHandler = (data) => {
-          console.log('📨 Received message in wildcard handler:', data);
+          console.log('📨 Received message:', data);
 
-          if (data.event === 'mentor_reply' || data.type === 'mentor_reply') {
-            console.log('✅ Found mentor_reply, resolving with data:', data);
-            cleanup();
-            resolve(data);
-          } 
-          else if (data.result !== undefined || data.output !== undefined) {
-            console.log('✅ Found execution result, resolving with data:', data);
-            cleanup();
-            resolve(data);
-          } 
-          else if (data.event === 'execution_result' || data.type === 'execution_result') {
-            console.log('✅ Found execution_result, resolving with data:', data);
+          if (data.source?.startsWith("sandbox_response")) {
             cleanup();
             resolve(data);
           }
+
+          else if (data.event === 'mentor_reply' || data.type === 'mentor_reply') {
+            cleanup();
+            resolve(data);
+          }
+
+          else if (data.event === 'execution_result' || data.type === 'execution_result') {
+            cleanup();
+            resolve(data);
+          }
+          console.log(
+            "Total wildcard handlers:",
+            wsService.messageHandlers.get('*')?.length
+          );
         };
+
+        
 
         const cleanup = () => {
           clearTimeout(timeout);
@@ -111,7 +116,11 @@ export const useExecuteCode = () => {
 
         try {
           // ✅ Отправляем код после подписки
-          await wsService.send(event, { code });
+          await wsService.send({
+            type,
+            event,
+            code
+          });
 
           // Для submit_code — фейковый mentor_reply отправится автоматически в WS
         } catch (error) {

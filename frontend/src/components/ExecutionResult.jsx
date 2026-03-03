@@ -51,25 +51,30 @@ export default function ExecutionResult() {
   useEffect(() => {
     const handler = (data) => {
       console.log('📨 ExecutionResult received:', data);
-      
-      // Если это ответ ментора
-      if (data.event === 'mentor_reply' || data.type === 'mentor_reply') {
-        console.log('👨‍🏫 Mentor reply received:', data.text || data.message || data);
-        setMentorReplies(prev => [...prev, {
-          time: new Date().toLocaleTimeString(),
-          text: data.text || data.message || JSON.stringify(data),
-          data: data
-        }]);
-      }
-      
-      // Если это вывод программы
-      if (data.event === 'sandbox_reply') {
-        setLiveOutput(prev => [...prev, data.result.stdout]);
+
+      // ✅ Ответ ментора
+      if (data.source?.startsWith("mentor_response")) {
+        const hint = data.data?.hint;
+
+        if (!hint) return;
+
+        setMentorReplies(prev => [
+          ...prev,
+          {
+            time: new Date().toLocaleTimeString(),
+            text: hint,
+            data: data
+          }
+        ]);
       }
 
-      /*if (data.output !== undefined) {
-        setLiveOutput(prev => [...prev, data.output]);
-      }*/
+      // ✅ Ответ песочницы
+      if (data.source?.startsWith("sandbox_response")) {
+        const stdout = data.data?.sandbox_result?.stdout;
+        if (stdout) {
+          setLiveOutput(prev => [...prev, stdout]);
+        }
+      }
     };
     
     wsService.on('*', handler);
@@ -106,7 +111,7 @@ export default function ExecutionResult() {
   );
 
   return (
-    <div className="execution-result">
+    <div className={s["execution-result"]}>
       <div className="result-header">
         <h3>Результат выполнения</h3>
         <div className={`connection-status ${connectionState.toLowerCase()}`}>

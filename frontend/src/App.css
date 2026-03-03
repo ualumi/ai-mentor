@@ -19,6 +19,7 @@
     --side-color: rgba(255, 255, 255, 0.5);
     --font-size-p: 14px;
     --border-radius: 13px;
+    height: 100vh;
 }
 
 .sidebar {
@@ -237,7 +238,7 @@
 }
 
 .terminal {
-    min-height: 25vh;
+    height: 20vh;
     overflow-y: auto;
     padding-inline: 0px;
     margin-bottom: 0px;

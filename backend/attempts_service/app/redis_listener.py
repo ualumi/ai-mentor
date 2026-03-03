@@ -1,4 +1,4 @@
-import json
+"""import json
 from sqlalchemy import select
 from app.database import AsyncSessionLocal
 from app.models import Attempt
@@ -82,57 +82,105 @@ async def redis_listener():
                 # attempt.dominant_competency = payload.get("dominant_competency")
 
             await db.commit()
-            print(f"✏️ Attempt {attempt_id} updated from {msg['channel']}")
+            print(f"✏️ Attempt {attempt_id} updated from {msg['channel']}")"""
 
-'''import json
-from datetime import datetime
+import json
 from sqlalchemy import select
+from sqlalchemy.orm import aliased
 from app.database import AsyncSessionLocal
-from app.models import Attempt, Episode
-from app.episode_logic import get_open_episode
+from app.models import Attempt
 from app.redis_client import redis
 
-CHANNEL_ANALYSIS = "analysis_result"
-CHANNEL_MENTOR = "mentor_out"
+CHANNEL_ANALYSIS_PATTERN = "analytics_response:*"
+CHANNEL_MENTOR_PATTERN = "mentor_response:*"
+
 
 async def redis_listener():
     pubsub = redis.pubsub()
-    await pubsub.subscribe(CHANNEL_ANALYSIS)
-    print("🔄 Attempts Service listening to analysis_result")
+
+    # 👇 подписка по паттерну
+    await pubsub.psubscribe(
+        CHANNEL_ANALYSIS_PATTERN,
+        CHANNEL_MENTOR_PATTERN
+    )
+
+    print("🔄 Attempts Service listening to analytics_response:* & mentor_response:*")
 
     async for msg in pubsub.listen():
-        if msg["type"] != "message":
+
+        # ⚠️ ВАЖНО: при psubscribe тип будет "pmessage"
+        if msg["type"] != "pmessage":
             continue
 
-        payload = json.loads(msg["data"])
-        session_id = payload.get("session_id")
-        analysis = payload.get("analysis")
-        if not session_id or not analysis:
+        try:
+            payload = json.loads(msg["data"])
+        except Exception:
             continue
 
-        attempt_time = datetime.utcnow()
+        attempt_id = payload.get("attempt_id")
+        user_id = payload.get("user_id")
+
+        if not attempt_id or not user_id:
+            continue
 
         async with AsyncSessionLocal() as db:
-            # ищем текущий открытый эпизод
-            episode = await get_open_episode(db, session_id, attempt_time)
+            AttemptAlias = aliased(Attempt, name="a")
 
-            # если нет открытого эпизода, создаём новый
-            if not episode:
-                episode = Episode(session_id=session_id, start_time=attempt_time)
-                db.add(episode)
-                await db.flush()
-
-            # сохраняем попытку в эпизод
-            attempt = Attempt(
-                session_id=session_id,
-                timestamp=attempt_time,
-                mode=payload.get("mode", "free"),
-                code_hash=payload.get("code_hash"),
-                analysis=analysis,
-                mentor_action=payload.get("mentor_action", {}),
-                episode_id=episode.episode_id
+            res = await db.execute(
+                select(AttemptAlias).where(
+                    AttemptAlias.attempt_id == attempt_id
+                )
             )
+            attempt = res.scalars().first()
 
-            db.add(attempt)
+            if not attempt:
+                continue  # race condition
+
+            channel = msg["channel"].decode() if isinstance(msg["channel"], bytes) else msg["channel"]
+
+            # ----------------------------
+            # 🧠 Ответ ментора
+            # ----------------------------
+            if channel.startswith("mentor_out:"):
+
+                attempt.mentor_reply = payload.get("hint")
+                attempt.user_id = user_id
+
+            # ----------------------------
+            # 📊 Результат аналитики
+            # ----------------------------
+            elif channel.startswith("analysis_result:"):
+
+                analysis = payload.get("analysis", {})
+                attempt.user_id = user_id
+
+                # 1️⃣ сохраняем raw JSON
+                attempt.analysis = analysis
+
+                # 2️⃣ skill_scores
+                skill_scores = {}
+
+                tag_alignment = (
+                    analysis
+                    .get("task_compliance", {})
+                    .get("tag_alignment", {})
+                )
+
+                for skill, data in tag_alignment.items():
+                    skill_scores[skill] = data.get("score")
+
+                attempt.skill_scores = skill_scores
+
+                # 3️⃣ total_score
+                attempt.total_score = analysis.get("code_quality_score")
+
+                # 4️⃣ is_correct
+                attempt.is_correct = (
+                    analysis
+                    .get("correctness", {})
+                    .get("is_correct")
+                )
+
             await db.commit()
-            print(f"📝 Attempt saved ({attempt.attempt_id}) in episode {episode.episode_id}")'''
+
+            print(f"✏️ Attempt {attempt_id} updated from {channel}")

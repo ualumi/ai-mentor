@@ -68,10 +68,10 @@ services:
     networks:
         - mentor-net
 
-  task_manager1:
+  task_manager:
     build: 
-      context: ./task_manager1
-    container_name: task_manager1
+      context: ./task_manager
+    container_name: task_manager
     ports:
       - "8004:8004"
     environment:

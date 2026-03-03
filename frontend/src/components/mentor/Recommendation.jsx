@@ -9,11 +9,15 @@ export default function Recommendation({mode}) {
   const navigate = useNavigate();
   const [recommendation, setRecommendation] = useState(null);
 
-  useEffect(() => {
+  useEffect(() => { 
     const handler = (data) => {
       console.log('📚 Recommendation received:', data);
 
-      if (data.event === 'module_recommendaton') {
+      // ✅ Сообщение о прогрессе пользователя
+      if (
+        data.source?.startsWith("user_progress") &&
+        data.data?.recommendations
+      ) {
         setRecommendation({
           time: new Date().toLocaleTimeString(),
           data: data.data

@@ -4,6 +4,7 @@ from app.application.commands.start_session import start_session
 from app.application.queries.get_session import get_session
 from app.schemas.session import StartSessionRequest
 from app.infrastructure.redis import redis_client
+from app.application.queries.get_user_sessions import get_user_sessions
 
 router = APIRouter(prefix="/learning", tags=["learning"])
 
@@ -55,3 +56,20 @@ async def get_active_session(authorization: str = Header(...)):
         return None
 
     return await get_session(session_id)
+
+@router.get("/my")
+async def get_my_sessions(
+    status: str | None = None,
+    authorization: str = Header(...)
+):
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401)
+
+    token = authorization.replace("Bearer ", "")
+    payload = await verify_token(token)
+
+    user_id = int(payload["user_id"])
+
+    sessions = await get_user_sessions(user_id, status)
+
+    return sessions

@@ -434,7 +434,7 @@ import "./ai.css";
 
 export default function CodeEditor({ analysis = [] }) {
   console.log({ analysis });
-
+  const { code, setCode } = useCode();
   const editorRef = useRef(null);
   const zonesRef = useRef(new Map());
   const decorationsRef = useRef([]);
@@ -450,7 +450,7 @@ export default function CodeEditor({ analysis = [] }) {
     const editor = editorRef.current;
 
     const filteredAnalysis = analysis.filter(
-      (item) => item.confidence > 0.5
+      (item) => item.confidence > 0.3
     );
 
     // ---------------- VIEW ZONES ----------------
@@ -536,7 +536,7 @@ export default function CodeEditor({ analysis = [] }) {
       base: "vs-dark",
       inherit: true,
       rules: [],
-      colors: { "editor.background": "#00000000" },
+      colors: { "editor.background": "#202022" },
     });
 
     monaco.editor.setTheme("custom-dark");
@@ -547,7 +547,7 @@ export default function CodeEditor({ analysis = [] }) {
       height="57.5vh"
       language="python"
       theme="custom-dark"
-      defaultValue={defaultCode}
+      value={code}
       options={{
             minimap: { enabled: false },
             fontSize: 15,
@@ -555,7 +555,17 @@ export default function CodeEditor({ analysis = [] }) {
             padding: { top: 15 },
             lineHeight: 20,
           }}
-      onMount={handleMount}
+      onMount={(editor) => {
+        handleMount(editor);
+
+        // если код ещё пустой — инициализируем дефолтным
+        if (!code) {
+          setCode(defaultCode);
+        }
+      }}
+      onChange={(value) => {
+        setCode(value || "");
+      }}
     />
   );
 }

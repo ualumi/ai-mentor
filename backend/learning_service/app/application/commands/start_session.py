@@ -16,6 +16,8 @@ async def find_active_session(user_id: int, competency: str):
     session_key = f"learning:session:{session_id}"
     return await redis_client.hgetall(session_key)
 
+    
+
 async def start_session(
     user_id: int,
     competency: str,
@@ -53,5 +55,13 @@ async def start_session(
             "user_id": user_id,
         }
     )
+
+    # сохранить саму сессию
+    key = f"learning:session:{session.id}"
+    await redis_client.hset(key, mapping=session.to_dict())
+
+    # 🔥 ДОБАВИТЬ ИНДЕКС ПОЛЬЗОВАТЕЛЯ
+    user_sessions_key = f"learning:user_sessions:{user_id}"
+    await redis_client.sadd(user_sessions_key, session.id)
 
     return session

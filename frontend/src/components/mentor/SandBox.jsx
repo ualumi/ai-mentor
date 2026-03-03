@@ -57,6 +57,7 @@ import ExecutionResult from '../ExecutionResult';
 import { wsService } from '../../services/websocket';
 import { useEffect } from 'react';
 import Actionpanel from './Actionpanel'
+import { RunCodeButton } from "../RunCodeSutton";
 
 
 export default function SandBox({mode}) {
@@ -66,12 +67,13 @@ export default function SandBox({mode}) {
     };
     const [analysis, setAnalysis] = useState([]);
 
-    useEffect(() => {
+    useEffect(() => { 
     const handler = (data) => {
       console.log("WS MESSAGE:", data);
 
+      // ✅ Аннотации кода
       if (
-        data.event === "analysis_result" &&
+        data.source?.startsWith("code_annotations") &&
         data.data?.annotations
       ) {
         console.log("Annotation received");
@@ -79,21 +81,20 @@ export default function SandBox({mode}) {
       }
     };
 
-    wsService.connect();
     wsService.on("*", handler);
 
     return () => {
       wsService.off("*", handler);
-      wsService.disconnect();
     };
   }, []);
   return (
     <section className={s["section-sandbox"]}>
-        {mode === "free" && <h1 className={s["section-caption"]}></h1>}
+        {mode === "free" && <h1 className={s["section-caption"]}>Free mode</h1>}
         {mode === "module" && <h1 className={s["section-caption-module"]}>Clustering</h1>}
         
         <div className={s["section-panel"]}>
             <ToggleButton isOpen={isTerminalOpen} onToggle={handleToggle} className="item icon-only item-light"/>
+            <RunCodeButton></RunCodeButton>
             <Item type="button_item"  clas="item-light icon-only" icon={<Therminal strokeWidth={1} />}/>
             {mode === "free" && <Item type="text_item"text="Загрузить условие" clas="item-light" icon={<Paperclip strokeWidth={1} />}/>}
             

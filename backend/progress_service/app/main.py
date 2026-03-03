@@ -2,14 +2,28 @@ import asyncio
 from fastapi import FastAPI, HTTPException
 from app.redis_listener import redis_listener
 from app.state import USER_PROGRESS, USER_RECOMMENDATIONS
+from app.redis_client import redis
+CHANNEL_ANALYSIS_PATTERN = "analytics_response:*"
+from contextlib import asynccontextmanager
+from fastapi import FastAPI
+import asyncio
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+
+    pubsub = redis.pubsub()
+    await pubsub.psubscribe(CHANNEL_ANALYSIS_PATTERN)
+
+    asyncio.create_task(redis_listener(pubsub))
+
+    print("✅ Progress Service started and subscribed")
+
+    yield
+
+    await pubsub.close()
 
 
-app = FastAPI(title="Progress Service")
-
-@app.on_event("startup")
-async def startup():
-    asyncio.create_task(redis_listener())
-    print("✅ Progress Service started")
+app = FastAPI(lifespan=lifespan)
 
 @app.get("/health")
 async def health():
@@ -47,6 +61,10 @@ async def get_progress(user_id: str):
         "progress": progress,
         "recommendations": USER_RECOMMENDATIONS.get(user_id, [])
     }
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8008, reload=True)
 
 '''import asyncio
 from fastapi import FastAPI
