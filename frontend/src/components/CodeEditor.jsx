@@ -450,7 +450,7 @@ export default function CodeEditor({ analysis = [] }) {
     const editor = editorRef.current;
 
     const filteredAnalysis = analysis.filter(
-      (item) => item.confidence > 0.3
+      (item) => item.confidence > 0.4
     );
 
     // ---------------- VIEW ZONES ----------------

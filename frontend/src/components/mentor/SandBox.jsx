@@ -68,25 +68,36 @@ export default function SandBox({mode}) {
     const [analysis, setAnalysis] = useState([]);
 
     useEffect(() => { 
-    const handler = (data) => {
-      console.log("WS MESSAGE:", data);
+      const handler = (data) => {
+        console.log("WS MESSAGE:", data);
 
-      // ✅ Аннотации кода
-      if (
-        data.source?.startsWith("code_annotations") &&
-        data.data?.annotations
-      ) {
-        console.log("Annotation received");
-        setAnalysis(data.data.annotations);
-      }
-    };
+        // ✅ Аннотации кода
+        if (
+          data.source?.startsWith("code_annotations") &&
+          data.data?.annotations
+        ) {
+          const newAnnotations = data.data.annotations;
 
-    wsService.on("*", handler);
+          setAnalysis(prev => {
+            // фильтруем, чтобы не добавлять дубли
+            const filtered = newAnnotations.filter(
+              ann => !prev.some(p => p.id === ann.id) // предполагаем, что у каждой аннотации есть уникальный id
+            );
 
-    return () => {
-      wsService.off("*", handler);
-    };
-  }, []);
+            // если новых аннотаций нет — возвращаем старое состояние
+            if (filtered.length === 0) return prev;
+
+            return [...prev, ...filtered];
+          });
+        }
+      };
+
+      wsService.on("code_annotations", handler);
+
+      return () => {
+        wsService.off("code_annotations", handler);
+      };
+    }, []);
   return (
     <section className={s["section-sandbox"]}>
         {mode === "free" && <h1 className={s["section-caption"]}>Free mode</h1>}

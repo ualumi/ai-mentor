@@ -32,7 +32,7 @@ export default function SideBar ({ isOpen, toggleSidebar }) {
                 <Item type="button_item" text="Home" clas="" icon={<House strokeWidth={1} />}/>
                 <Item type="button_item" text="Progress" clas="l" icon={<Activity strokeWidth={1} />} link="progress"/>
                 <Item type="button_item" text="Tasks" clas="menu-item-active"  link="any"/>
-                <Item type="button_item" text="Modules" clas=""  link="module"/>
+                <Item type="button_item" text="Modules" clas=""  link="modules"/>
             </div>
             <History></History>
         </div>

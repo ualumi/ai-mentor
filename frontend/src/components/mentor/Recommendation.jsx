@@ -11,7 +11,6 @@ export default function Recommendation({mode}) {
 
   useEffect(() => { 
     const handler = (data) => {
-      console.log('📚 Recommendation received:', data);
 
       // ✅ Сообщение о прогрессе пользователя
       if (
@@ -25,10 +24,10 @@ export default function Recommendation({mode}) {
       }
     };
 
-    wsService.on('*', handler);
+    wsService.on('user_progress', handler);
 
     return () => {
-      wsService.off('*', handler);
+      wsService.off('user_progress', handler);
     };
   }, []);
 

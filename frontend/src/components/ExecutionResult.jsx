@@ -1,34 +1,7 @@
-// components/ExecutionResult.jsx
-{/*import { useQuery } from '@tanstack/react-query';
 
-const QUERY_KEYS = {
-  executionResult: (taskId) => ['executionResult', taskId],
-};
-
-export default function ExecutionResult() {
-  const { data: result, isLoading, error } = useQuery({
-    queryKey: QUERY_KEYS.executionResult('current'),
-    enabled: false, // не выполняем автоматически
-  });
-
-  if (isLoading) return <div className="result-loading">⏳ Выполнение...</div>;
-  
-  if (error) return <div className="result-error">❌ {error.message}</div>;
-  
-  if (!result) return <div className="result-empty">Нажмите кнопку для выполнения кода</div>;
-
-  return (
-    <div className="execution-result">
-      <h3>Результат:</h3>
-      <pre className="result-output">
-        {JSON.stringify(result, null, 2)}
-      </pre>
-    </div>
-  );
-}*/}
 
 // components/ExecutionResult.jsx
-import { useQuery } from '@tanstack/react-query';
+/*import { useQuery } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { wsService } from '../services/websocket';
 import Item from './mentor/Item';
@@ -68,19 +41,12 @@ export default function ExecutionResult() {
         ]);
       }
 
-      // ✅ Ответ песочницы
-      if (data.source?.startsWith("sandbox_response")) {
-        const stdout = data.data?.sandbox_result?.stdout;
-        if (stdout) {
-          setLiveOutput(prev => [...prev, stdout]);
-        }
-      }
     };
-    
-    wsService.on('*', handler);
+    wsService.on("mentor_response", handler);
+    //wsService.on('*', handler);
     
     return () => {
-      wsService.off('*', handler);
+      wsService.off('mentor_response', handler);
     };
   }, []);
 
@@ -119,7 +85,6 @@ export default function ExecutionResult() {
         </div>
       </div>
       
-      {/* Ответы ментора */}
       {mentorReplies.length > 0 && (
         <div className="mentor-replies">
           {mentorReplies.map((reply, i) => (
@@ -131,38 +96,101 @@ export default function ExecutionResult() {
                 </div>
               </div>
               
-              {/*{process.env.NODE_ENV === 'development' && (
-                <pre className="debug-data">{JSON.stringify(reply.data, null, 2)}</pre>
-              )}*/}
             </div>
           ))}
         </div>
       )}
-      
-      {/* Потоковый вывод */}
-      {liveOutput.length > 0 && (
-        <div className="live-output">
-          <h4>Вывод программы:</h4>
-          {liveOutput.map((line, i) => (
-            <pre key={i} className="output-line">{line}</pre>
+         
+      {!mentorReplies.length && !liveOutput.length && !result && (
+        <div className="result-empty">
+          <p>Нажмите кнопку для выполнения кода</p>
+          <p className="connection-hint">Статус: {connectionState}</p>
+        </div>
+      )}
+    </div>
+  );
+}*/
+
+import { useState, useEffect } from 'react';
+import { wsService } from '../services/websocket';
+import s from "./mentor/FreeMode.module.css";
+
+export default function ExecutionResult() {
+  const [liveOutput, setLiveOutput] = useState([]);
+  const [mentorReplies, setMentorReplies] = useState([]);
+  const [connectionState, setConnectionState] = useState(
+    wsService.getConnectionState()
+  );
+
+  // ✅ Подписка на mentor_response
+  useEffect(() => {
+    console.log("🟢 ExecutionResult mounted");
+    const handler = (data) => {
+      console.log('📨 ExecutionResult received:', data);
+
+      if (data.source?.startsWith("mentor_response")) {
+        const hint = data.data?.hint;
+        if (!hint) return;
+
+        setMentorReplies(prev => {
+          const newMessage = {
+            time: new Date().toLocaleTimeString(),
+            text: hint,
+            data: data
+          };
+
+          // Проверяем, есть ли уже такое сообщение по тексту
+          const exists = prev.some(msg => msg.text === newMessage.text);
+
+          if (exists) return prev; // если есть, не добавляем
+
+          return [...prev, newMessage];
+        });
+      }
+    };
+
+    wsService.on("mentor_response", handler);
+
+    return () => {
+      wsService.off("mentor_response", handler);
+      console.log("🔴 ExecutionResult unmounted");
+    };
+  }, []);
+
+  // ✅ Отслеживание состояния WebSocket
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setConnectionState(wsService.getConnectionState());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div className={s["execution-result"]}>
+      <div className="result-header">
+        <h3>Результат выполнения</h3>
+        <div className={`connection-status ${connectionState.toLowerCase()}`}>
+          WebSocket: {connectionState}
+        </div>
+      </div>
+
+      {mentorReplies.length > 0 && (
+        <div className="mentor-replies">
+          {mentorReplies.map((reply, i) => (
+            <div key={i} className="mentor-message">
+              <div className={s["insight-panel"]}>
+                <div className="menu-item mentor-item item-light">
+                  <p className="menu-caption mentor-caption">Mentor</p>
+                  <p>{reply.text}</p>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       )}
-      
-      {/* Финальный результат из кэша 
-      {result && (
-        <div className="final-result">
-          <h4>Результат (из кэша):</h4>
-          <pre className="result-json">
-            {JSON.stringify(result, null, 2)}
-          </pre>
-        </div>
-      )}
-      */}
-      
-      
-      {/* Если нет данных */}
-      {!mentorReplies.length && !liveOutput.length && !result && (
+
+      {!mentorReplies.length && !liveOutput.length && (
         <div className="result-empty">
           <p>Нажмите кнопку для выполнения кода</p>
           <p className="connection-hint">Статус: {connectionState}</p>

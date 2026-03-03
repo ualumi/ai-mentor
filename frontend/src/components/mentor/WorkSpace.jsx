@@ -9,17 +9,6 @@ import s from "./FreeMode.module.css"
 import Recommendation from "./Recommendation";
 import { useParams } from "react-router-dom";
 
-// Создаем queryClient на самом верхнем уровне
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000, // 5 минут
-      retry: 3,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
-
 export default function WorkSpace({ mode }) {
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -28,7 +17,6 @@ export default function WorkSpace({ mode }) {
         setIsSidebarOpen(!isSidebarOpen);
     };
   return (
-    <QueryClientProvider client={queryClient}>
         <CodeProvider>
             <div className={`free-mode ${isSidebarOpen ? 'sidebar-visible' : 'sidebar-hidden'}`}>
                 <div className="sidebar-container">
@@ -42,6 +30,5 @@ export default function WorkSpace({ mode }) {
                 <Recommendation mode={mode}/>
             </div>
         </CodeProvider>
-    </QueryClientProvider>
   );
 }

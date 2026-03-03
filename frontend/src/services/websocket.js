@@ -1,6 +1,6 @@
 
 // services/websocket.js
-class WebSocketService {
+{/*class WebSocketService {
   constructor() {
     this.ws = null;
     this.messageHandlers = new Map();
@@ -17,21 +17,40 @@ class WebSocketService {
     console.log("CONNECT CALLED");
     this.url = url;
     
-    if (this.ws) {
-      console.log("⚠️ WebSocket already exists. State:", this.ws.readyState);
-      return this.connectionPromise || Promise.resolve();
-    }
+    //if (this.ws) {
+    //  console.log("⚠️ WebSocket already exists. State:", this.ws.readyState);
+    //  return this.connectionPromise || Promise.resolve();
+    //}
     // Если уже подключены, возвращаем успех
-    if (this.isConnected && this.ws && this.ws.readyState === WebSocket.OPEN) {
-      console.log('✅ Already connected');
-      return Promise.resolve();
-    }
+    //if (this.isConnected && this.ws && this.ws.readyState === WebSocket.OPEN) {
+    //  console.log('✅ Already connected');
+    //  return Promise.resolve();
+    //}
 
     // Если соединение в процессе установки, возвращаем существующий промис
-    if (this.connectionPromise) {
-      console.log('⏳ Connection already in progress');
-      return this.connectionPromise;
-    }
+    //if (this.connectionPromise) {
+    //  console.log('⏳ Connection already in progress');
+    //  return this.connectionPromise;
+    //}
+
+      // если сокет уже открыт — выходим
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        console.log("✅ WS already open");
+        return Promise.resolve();
+      }
+
+      // если в процессе подключения — возвращаем промис
+      if (this.ws && this.ws.readyState === WebSocket.CONNECTING) {
+        console.log("⏳ WS already connecting");
+        return this.connectionPromise;
+      }
+
+      // если сокет есть, но CLOSED — очищаем
+      if (this.ws) {
+        console.log("♻️ Cleaning old websocket");
+        this.ws.close();
+        this.ws = null;
+      }
 
     console.log(`🔄 Connecting to WebSocket... (attempt ${this.reconnectAttempts + 1}/${this.maxReconnectAttempts + 1})`);
     
@@ -215,249 +234,225 @@ class WebSocketService {
   }
 }
 
+export const wsService = new WebSocketService();*/}
 
+// services/websocket.js
 
-
-
-export const wsService = new WebSocketService();
-
-/*class WebSocketService {
+class WebSocketService {
   constructor() {
     this.ws = null;
+    this.url = null;
+
     this.messageHandlers = new Map();
+
     this.connectionPromise = null;
+    this.reconnectTimeout = null;
     this.isConnected = false;
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 5;
-    this.url = null;
 
-    this.pendingMentorReplyForEvent = null;
+    this.pendingMessages = [];
+
+    console.log("✅ WS SERVICE INITIALIZED");
   }
 
-  connect(url = "ws://localhost:8004/ws/tasks/2") {
+  // --------------------------------------------------
+  // CONNECT
+  // --------------------------------------------------
+  connect(url = "ws://localhost:8004/ws/2") {
     this.url = url;
 
-    if (this.isConnected && this.ws?.readyState === WebSocket.OPEN) {
+    // 🔒 Если уже открыт — ничего не делаем
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       return Promise.resolve();
     }
 
-    if (this.connectionPromise) {
+    // 🔒 Если уже подключается — возвращаем существующий promise
+    if (this.ws && this.ws.readyState === WebSocket.CONNECTING) {
       return this.connectionPromise;
     }
 
+    // 🔒 Если сокет есть, но закрыт — полностью очищаем
+    if (this.ws) {
+      this.ws.onopen = null;
+      this.ws.onmessage = null;
+      this.ws.onclose = null;
+      this.ws.onerror = null;
+      this.ws.close();
+      this.ws = null;
+    }
+
+    console.log("🔄 Creating NEW WebSocket connection");
+
     this.connectionPromise = new Promise((resolve, reject) => {
-      try {
-        this.ws = new WebSocket(url);
+      const ws = new WebSocket(url);
+      this.ws = ws;
 
-        const timeout = setTimeout(() => {
-          if (!this.isConnected) {
-            this.ws.close();
-            reject(new Error("Connection timeout"));
+      const timeout = setTimeout(() => {
+        if (ws.readyState !== WebSocket.OPEN) {
+          ws.close();
+          reject(new Error("WebSocket connection timeout"));
+        }
+      }, 5000);
+
+      ws.onopen = () => {
+        clearTimeout(timeout);
+        console.log("SOCKET OPENED", this.ws);
+        console.log("🟢 WS CONNECTED");
+
+        this.reconnectAttempts = 0;
+
+        // отправляем накопленные сообщения
+        //while (this.pendingMessages.length > 0) {
+        //  ws.send(this.pendingMessages.shift());
+        //}
+
+        resolve();
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+
+          const messageType =
+            data.source?.split(":")[0] ||
+            data.type ||
+            data.event ||
+            "message";
+
+          const specific = this.messageHandlers.get(messageType);
+          console.log("HANDLERS MAP:", this.messageHandlers);
+
+          if (specific && specific.length > 0) {
+            specific.forEach((handler) => handler(data));
+          } else {
+            const wildcard = this.messageHandlers.get("*") || [];
+            wildcard.forEach((handler) => handler(data));
           }
-        }, 5000);
 
-        this.ws.onopen = () => {
-          clearTimeout(timeout);
-          this.isConnected = true;
-          this.reconnectAttempts = 0;
-          resolve();
-        };
+        } catch (err) {
+          console.error("❌ WS parse error:", err);
+        }
+      };
 
-        this.ws.onmessage = (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            const messageType = data.type || data.event || "message";
+      ws.onerror = (err) => {
+        console.error("❌ WS error:", err);
+      };
 
-            // 🔹 1. Отдаём настоящий ответ
-            //this.emit(messageType, data);
-            //this.emit("*", data);
+      ws.onclose = (event) => {
+        console.log("🔌 WS CLOSED");
 
-            // 🔹 2. Если был submit_code — отправляем фейки ОДИН РАЗ
-            if (this.pendingMentorReplyForEvent === "submit_code") {
+        this.ws = null;
+        this.connectionPromise = null;
 
-              // --- FAKE MENTOR REPLY ---
-              const fakeMentorReply = {
-                event: "mentor_reply",
-                message: "Ответ ментора",
-                timestamp: Date.now(),
-              };
+        // авто-reconnect только если не manual disconnect
+        if (
+          event.code !== 1000 &&
+          this.reconnectAttempts < this.maxReconnectAttempts
+        ) {
+          this.reconnectAttempts++;
 
-              this.emit("mentor_reply", fakeMentorReply);
-              this.emit("*", fakeMentorReply);
+          const delay = Math.min(
+            1000 * Math.pow(2, this.reconnectAttempts),
+            10000
+          );
 
-              // --- FAKE MODULE RECOMMENDATION ---
-              const fakeRecommendation = {
-                event: "module_recommendaton",
-                data: "Clustering",
-              };
+          console.log(`🔄 Reconnecting in ${delay}ms`);
 
-              this.emit("module_recommendaton", fakeRecommendation);
-              this.emit("*", fakeRecommendation);
-
-              // --- FAKE ANALYSIS RESULT ---
-              const analysis = [
-                {
-                  line: 4,
-                  type: "strength",
-                  message:
-                    "Использование silhouette_score — объективная метрика качества кластеризации",
-                  confidence: 0.542,
-                },
-                {
-                  line: 26,
-                  type: "strength",
-                  message:
-                    "Возврат обученного scaler позволяет корректно трансформировать новые данные",
-                  confidence: 0.455,
-                },
-                {
-                  line: 23,
-                  type: "weakness",
-                  message:
-                    "Визуализация использует только первые 2 признака",
-                  confidence: 0.516,
-                },
-                {
-                  line: 18,
-                  type: "weakness",
-                  message:
-                    "Нет обработки случая одинаковых silhouette scores",
-                  confidence: 0.51,
-                },
-                {
-                  line: 17,
-                  type: "recommendation",
-                  message:
-                    "Добавить вывод размеров кластеров: np.bincount(...)",
-                  confidence: 0.516,
-                },
-              ];
-
- 
-
-              const fakeAnalysis = {
-                event: "analysis_result",
-                data: {
-                  user_id: "2",
-                  annotations: analysis,
-                },
-              };
-
-              this.emit("analysis_result", fakeAnalysis);
-              this.emit("*", fakeAnalysis);
-
-              // 🔹 сбрасываем флаг (чтобы больше не повторялось)
-              this.pendingMentorReplyForEvent = null;
-            }
-
-          } catch (error) {
-            console.error("Error parsing message:", error);
-          }
-        };
-
-        this.ws.onclose = (event) => {
-          this.isConnected = false;
-          this.ws = null;
-          this.connectionPromise = null;
-
-          if (
-            !event.wasClean &&
-            this.reconnectAttempts < this.maxReconnectAttempts
-          ) {
-            this.reconnectAttempts++;
-            const delay = Math.min(
-              1000 * 2 ** this.reconnectAttempts,
-              10000
-            );
-            setTimeout(() => this.connect(this.url), delay);
-          }
-        };
-
-        this.ws.onerror = (err) =>
-          console.error("WebSocket error:", err);
-
-      } catch (err) {
-        reject(err);
-      }
+          this.reconnectTimeout = setTimeout(() => {
+            this.connect(this.url);
+          }, delay);
+        }
+      };
     });
 
     return this.connectionPromise;
   }
 
-  async send(event, data = {}) {
-    if (!this.isConnected || this.ws?.readyState !== WebSocket.OPEN) {
-      await this.connect(this.url);
+  // --------------------------------------------------
+  // SEND
+  // --------------------------------------------------
+  async send(data) {
+    if (!this.url) {
+      throw new Error("WebSocket URL not set");
     }
 
-    let message;
+    await this.connect(this.url);
 
-    if (event === "run_code") {
-      message = JSON.stringify({
-        event: "run_code",
-        code: data.code || "",
-      });
-    } 
-    else if (event === "submit_code") {
-      message = JSON.stringify({
-        event: "submit_code",
-        code: data.code || "",
-      });
-
-      // включаем отправку фейков
-      this.pendingMentorReplyForEvent = "submit_code";
-    } 
-    else {
-      message = JSON.stringify({
-        event,
-        ...data,
-      });
+    if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      throw new Error("WebSocket not connected");
     }
 
+    const message = JSON.stringify(data);
     this.ws.send(message);
-    return true;
   }
 
-  emit(eventType, payload) {
-    const handlers = this.messageHandlers.get(eventType) || [];
-    handlers.forEach((handler) => {
-      try {
-        handler(payload);
-      } catch (e) {
-        console.error("Handler error:", e);
-      }
-    });
-  }
-
+  // --------------------------------------------------
+  // EVENTS
+  // --------------------------------------------------
   on(eventType, handler) {
     if (!this.messageHandlers.has(eventType)) {
       this.messageHandlers.set(eventType, []);
     }
-    this.messageHandlers.get(eventType).push(handler);
+
+    const handlers = this.messageHandlers.get(eventType);
+
+    if (!handlers.includes(handler)) {
+      handlers.push(handler);
+    }
   }
 
   off(eventType, handler) {
     const handlers = this.messageHandlers.get(eventType);
     if (!handlers) return;
-    const index = handlers.indexOf(handler);
-    if (index !== -1) handlers.splice(index, 1);
+
+    this.messageHandlers.set(
+      eventType,
+      handlers.filter((h) => h !== handler)
+    );
   }
 
+  // --------------------------------------------------
+  // DISCONNECT
+  // --------------------------------------------------
   disconnect() {
-    if (this.ws) {
-      this.ws.close(1000, "Normal closure");
-      this.ws = null;
-      this.isConnected = false;
-      this.connectionPromise = null;
-      this.pendingMentorReplyForEvent = null;
+    if (this.reconnectTimeout) {
+      clearTimeout(this.reconnectTimeout);
     }
+
+    if (this.ws) {
+      this.ws.close(1000);
+      this.ws = null;
+    }
+
+    this.connectionPromise = null;
+    this.reconnectAttempts = 0;
+    this.pendingMessages = [];
+
+    console.log("🛑 WS MANUALLY DISCONNECTED");
   }
 
   getConnectionState() {
     if (!this.ws) return "DISCONNECTED";
-    return ["CONNECTING", "OPEN", "CLOSING", "CLOSED"][this.ws.readyState];
+
+    switch (this.ws.readyState) {
+      case WebSocket.CONNECTING:
+        return "CONNECTING";
+      case WebSocket.OPEN:
+        return "OPEN";
+      case WebSocket.CLOSING:
+        return "CLOSING";
+      case WebSocket.CLOSED:
+        return "CLOSED";
+      default:
+        return "UNKNOWN";
+    }
   }
 }
 
-export const wsService = new WebSocketService();
+//export const wsService = new WebSocketService();
+const globalKey = "__WS_SERVICE__";
 
-*/
+export const wsService =
+  globalThis[globalKey] ||
+  (globalThis[globalKey] = new WebSocketService());

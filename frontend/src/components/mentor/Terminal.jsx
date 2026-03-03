@@ -36,15 +36,21 @@ export default function Terminal({ isOpen, onToggle }) {
             (result.stdout || "") +
             (result.stderr ? "\n" + result.stderr : "");
 
-          setOutput((prev) => prev + text);
+          setOutput((prev) => {
+            // если этот текст уже есть в output, не добавляем
+            if (prev.includes(text)) return prev;
+
+            return text;
+          });
         }
       }
     };
 
-    wsService.on("*", handler);
-
+    //wsService.on("*", handler);
+    wsService.on("sandbox_response", handler);
     return () => {
-      wsService.off("*", handler);
+      //wsService.off("*", handler);
+      wsService.off("sandbox_response", handler);
     };
   }, []);
 
