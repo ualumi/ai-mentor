@@ -1,9 +1,6 @@
 
-#API_URL = "https://router.huggingface.co/models/Vilyam888/Code_analyze.1.0"
-#API_URL ="https://router.huggingface.co/models/Vilyam888/Code_analyze.1.0"
-#headers = {"Authorization": f"Bearer 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"}
 
-async def analyze_code(code: str) -> dict:
+"""async def analyze_code(code: str) -> dict:
     #response = inference(inputs=code) 
     #response = requests.post(API_URL, headers=headers, json={"inputs": code})
     return{"analysis": {
@@ -144,12 +141,12 @@ async def analyze_code(code: str) -> dict:
     ],
     "detailed_analysis": "Рекурсия — правильное решение задачи, но без проверки входа и обработки ошибок функция может работать некорректно при отрицательном значении. По тегам: Math и Recursion реализованы правильно, но Programming требует обработки ошибок."
   }
-}
-    #test1
+}"""
+
     
 
 # app/model.py
-'''import json
+import json
 import torch
 import asyncio
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -264,4 +261,4 @@ async def analyze_code(code: str, task=DEFAULT_TASK) -> dict:
     except json.JSONDecodeError:
         return {
             "raw_response": decoded
-        }'''
+        }

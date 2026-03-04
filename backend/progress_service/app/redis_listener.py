@@ -55,6 +55,9 @@ async def redis_listener():
                 "recommendations": USER_RECOMMENDATIONS[user_id]
             })
         )'''
+import logging
+
+logger = logging.getLogger(__name__)
 
 import json
 from app.redis_client import redis
@@ -135,6 +138,12 @@ async def redis_listener(pubsub):
                 "recommendations": USER_RECOMMENDATIONS[user_id]
             })
         )
+        out={
+                "user_id": user_id,
+                "progress": user_progress,
+                "recommendations": USER_RECOMMENDATIONS[user_id]
+            }
+        logger.info(f"📤 Progress updated for {user_id}, value: {out}")
 
         print(f"📈 Progress updated for user {user_id}")
 

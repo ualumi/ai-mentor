@@ -48,19 +48,3 @@ async def get_attempts(user_id: str, db=Depends(get_session)):
         }
         for r in rows
     ]
-
-'''@app.get("/episodes/{session_id}")
-async def get_episodes(session_id: str, db=Depends(get_session)):
-    res = await db.execute(
-        select(Episode).where(Episode.session_id == session_id)
-    )
-    return res.scalars().all()
-    
-
-@app.get("/attempt/{attempt_id}")
-async def get_attempt(attempt_id: str, db=Depends(get_session)):
-    res = await db.execute(
-        select(Attempt).where(Attempt.attempt_id == attempt_id)
-    )
-    return res.scalars().first()
-'''

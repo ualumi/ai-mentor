@@ -1,3 +1,21 @@
+import logging
+from logging.handlers import RotatingFileHandler
+import os
+
+os.makedirs("logs", exist_ok=True)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    handlers=[
+        RotatingFileHandler(
+            "logs/app.log",
+            maxBytes=5_000_000,
+            backupCount=3
+        ),
+        logging.StreamHandler()
+    ],
+)
 from fastapi import FastAPI
 import asyncio
 from app.listener import AnalysisListener

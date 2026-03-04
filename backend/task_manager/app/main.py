@@ -1,3 +1,21 @@
+import logging
+from logging.handlers import RotatingFileHandler
+import os
+
+os.makedirs("logs", exist_ok=True)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    handlers=[
+        RotatingFileHandler(
+            "logs/app.log",
+            maxBytes=5_000_000,
+            backupCount=3
+        ),
+        logging.StreamHandler()
+    ],
+)
 import json
 import uuid
 import asyncio
@@ -7,6 +25,10 @@ from .redis_client import redis_client
 from .models import FrontendMessage
 from jose import jwt, JWTError
 import os
+
+import logging
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI()
 SECRET_KEY = os.getenv("SECRET_KEY", "default_secret")
@@ -45,6 +67,7 @@ async def listen_user_channels(user_id: str):
             "source": channel,
             "data": data
         })
+        logger.info(f"source: {channel}, value: {data}")
 
 
 async def listen_task_condition(user_id: str):

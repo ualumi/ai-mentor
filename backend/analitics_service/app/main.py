@@ -1,8 +1,27 @@
+import logging
+from logging.handlers import RotatingFileHandler
+import os
+
+os.makedirs("logs", exist_ok=True)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    handlers=[
+        RotatingFileHandler(
+            "logs/app.log",
+            maxBytes=5_000_000,
+            backupCount=3
+        ),
+        logging.StreamHandler()
+    ],
+)
+
 from fastapi import FastAPI
 import asyncio
 from app.analitics_worker import analitics_worker
 from app.core.redis_client import redis
-#from app.core.model_client import load_model
+from app.core.model_client import load_model
 
 app = FastAPI(title="Analitics AI Service")
 
@@ -12,7 +31,7 @@ async def startup_event():
     print("🔥 STARTUP WORKS")
     await redis.ping()
     asyncio.create_task(analitics_worker())
-    #load_model()
+    load_model()
 
 
 @app.on_event("shutdown")

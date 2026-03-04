@@ -72,6 +72,10 @@ import json
 from app.redis_client import redis
 from app.resolver import PythonResolver
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 REQUEST_PATTERN = "analytics_response:*"
 
 class AnalysisListener:
@@ -132,7 +136,7 @@ class AnalysisListener:
                     f"code_annotations:{user_id}",
                     json.dumps(out)
                 )
-
+                logger.info(f"📤 code_annotations sent for {user_id}, value: {out}")
                 print(f"📤 code_annotations sent for {user_id}")
 
             except Exception as e:

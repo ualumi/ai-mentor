@@ -54,6 +54,8 @@ services:
       - user_service
     networks:
         - mentor-net
+    volumes:
+      - ./logs/learning_service:/app/logs
   
   scaffolding_service:
     build: ./scaffolding_service
@@ -84,6 +86,8 @@ services:
       - user_service
     networks:
       - mentor-net
+    volumes:
+      - ./logs/task_manager:/app/logs
 
   sandbox_service:
     build:
@@ -126,6 +130,8 @@ services:
       - redis
     networks:
       - mentor-net
+    volumes:
+      - ./logs/analitics_service:/app/logs
 
   progress_service:
     build:
@@ -140,6 +146,8 @@ services:
       - redis
     networks:
       - mentor-net
+    volumes:
+      - ./logs/progress_service:/app/logs
 
   attempts_service:
     build:
@@ -173,6 +181,8 @@ services:
       - redis
     networks:
       - mentor-net
+    volumes:
+      - ./logs/annotation_service:/app/logs
 
 
 
