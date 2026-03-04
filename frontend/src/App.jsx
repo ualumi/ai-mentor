@@ -5,13 +5,23 @@ import { useRef, useEffect } from "react";
 import "./App.css"
 import Modules from "./components/modules/Modules";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useAuth } from "./context/AuthContext";
+import AuthForm from "./components/auth/AuthForm";
+
 
 const queryClient = new QueryClient();
 
 export default function App() {
+  const { token } = useAuth();
   useEffect(() => {
-    wsService.connect("ws://localhost:8004/ws/2");
-  }, []);
+    if (!token) return;
+
+    wsService.connect(token);
+
+    return () => {
+      wsService.disconnect();
+    };
+  }, [token]);
   return (
     <QueryClientProvider client={queryClient}>
       <div className="body">
@@ -20,6 +30,7 @@ export default function App() {
               <Route path="/mentor" element={<WorkSpace mode="free" />} />
               <Route path="/modules" element={<Modules />} />
               <Route path="/module/:id" element={<WorkSpace mode="module" />} />
+              <Route path="/" element={<AuthForm />} />
               {/*<Route path="/progress" Component={Analyze}/>*/}
             </Routes>
           </BrowserRouter>

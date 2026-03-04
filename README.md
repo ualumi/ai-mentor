@@ -1,17 +1,5 @@
 # ai-mentor
-  annotation_service:
-    build:
-      context: ./annotation_service
-    container_name: annotation_service
-    ports:
-      - "8011:8011"
-    environment:
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-    depends_on:
-      - redis
-    networks:
-      - mentor-net
+
 ## Запуск:
 ### backend
    ```bash

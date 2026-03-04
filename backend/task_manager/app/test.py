@@ -3,6 +3,7 @@ import json
 import uuid
 import requests
 
+
 # -------------------------------
 # Настройки сервисов
 # -------------------------------
@@ -73,9 +74,14 @@ import asyncio
 import websockets
 import json
 
-async def test_free_mode():
+'''async def test_free_mode():
     async with websockets.connect(
         f"ws://localhost:8004/ws/{user_id}"
+    ) as websocket:'''
+
+async def test_free_mode():
+    async with websockets.connect(
+        f"ws://localhost:8004/ws?token={token}"
     ) as websocket:
 
         # 1️⃣ Устанавливаем режим

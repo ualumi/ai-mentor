@@ -250,7 +250,7 @@ class WebSocketService {
     this.isConnected = false;
     this.reconnectAttempts = 0;
     this.maxReconnectAttempts = 5;
-
+    this.token = null;
     this.pendingMessages = [];
 
     console.log("✅ WS SERVICE INITIALIZED");
@@ -259,8 +259,26 @@ class WebSocketService {
   // --------------------------------------------------
   // CONNECT
   // --------------------------------------------------
-  connect(url = "ws://localhost:8004/ws/2") {
-    this.url = url;
+  //connect(url = "ws://localhost:8004/ws/2") {
+  
+  /*connect(token) {
+    if (!token) {
+      throw new Error("No auth token provided for WebSocket connection");
+    }
+
+    const url = `ws://localhost:8004/ws?token=${token}`;
+    this.url = url;*/
+    connect(token) {
+      if (token) {
+        this.token = token;
+      }
+
+      if (!this.token) {
+        throw new Error("No auth token provided");
+      }
+
+      const url = `ws://localhost:8004/ws?token=${this.token}`;
+      this.url = url;
 
     // 🔒 Если уже открыт — ничего не делаем
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
@@ -360,7 +378,7 @@ class WebSocketService {
           console.log(`🔄 Reconnecting in ${delay}ms`);
 
           this.reconnectTimeout = setTimeout(() => {
-            this.connect(this.url);
+            this.connect();
           }, delay);
         }
       };
@@ -377,7 +395,7 @@ class WebSocketService {
       throw new Error("WebSocket URL not set");
     }
 
-    await this.connect(this.url);
+    await this.connect();
 
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
       throw new Error("WebSocket not connected");

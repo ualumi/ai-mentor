@@ -5,8 +5,13 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from .websocket_manager import ConnectionManager
 from .redis_client import redis_client
 from .models import FrontendMessage
+from jose import jwt, JWTError
+import os
 
 app = FastAPI()
+SECRET_KEY = os.getenv("SECRET_KEY", "default_secret")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+
 manager = ConnectionManager()
 
 # Храним состояние пользователя
@@ -72,8 +77,30 @@ async def listen_task_condition(user_id: str):
 # WebSocket endpoint
 # -----------------------------
 
-@app.websocket("/ws/{user_id}")
-async def websocket_endpoint(websocket: WebSocket, user_id: str):
+'''@app.websocket("/ws/{user_id}")
+async def websocket_endpoint(websocket: WebSocket, user_id: str):'''
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    #await websocket.accept()
+
+    # 1️⃣ Получаем токен из query параметров
+    token = websocket.query_params.get("token")
+    if not token:
+        await websocket.close(code=1008)
+        return
+
+    # 2️⃣ Декодируем JWT
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        #user_id = str(payload["user_id"])
+        user_id = int(payload["sub"])
+    except JWTError:
+        await websocket.close(code=1008)
+        return
+    
+    
+    # Основная логика
     await manager.connect(user_id, websocket)
 
     USER_STATE[user_id] = {

@@ -35,6 +35,7 @@ async def register(data: RegisterRequest, db: AsyncSession = Depends(get_db)):
 async def login(data: LoginRequest, db: AsyncSession = Depends(get_db)):
     try:
         token = await login_user_command(data, db)
+        print("user_token", token)
         return TokenResponse(access_token=token)
     except ValueError:
         raise HTTPException(status_code=401, detail="Invalid credentials")

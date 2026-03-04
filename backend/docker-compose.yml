@@ -46,6 +46,7 @@ services:
     container_name: learning_service
     environment:
       - REDIS_URL=redis://redis:6379
+      - SECRET_KEY=supersecret
     ports:
       - "8001:8001"
     depends_on:
@@ -77,6 +78,7 @@ services:
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      SECRET_KEY: supersecret
     depends_on:
       - redis
       - user_service
