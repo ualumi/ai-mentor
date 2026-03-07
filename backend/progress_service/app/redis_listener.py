@@ -145,5 +145,5 @@ async def redis_listener(pubsub):
             }
         logger.info(f"📤 Progress updated for {user_id}, value: {out}")
 
-        print(f"📈 Progress updated for user {user_id}")
+        print(f"📈 Progress updated for user {user_id}, value: {out}")
 
