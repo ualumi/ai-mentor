@@ -3,6 +3,7 @@ from app.infrastructure.redis import redis_client
 from app.infrastructure.event_bus import EventBus
 from app.infrastructure.attempt_client import get_attempts
 from app.infrastructure.methodology_client import submit_to_methodology
+from app.application.orchestrators.learning_orchestrator import generate_next_task
 
 SESSION_TTL = 60 * 60 * 24  # 24 часа
 
@@ -21,7 +22,7 @@ async def find_active_session(user_id: int, competency: str):
 async def start_session(
     user_id: int,
     competency: str,
-    methodology = "scaffolding"
+    methodology="scaffolding"
 ):
     session = LearningSession(
         user_id=user_id,
@@ -29,39 +30,41 @@ async def start_session(
         methodology=methodology
     )
 
-    # 🔹 получаем все попытки
+    # сохранить сессию
+    key = f"learning:session:{session.id}"
+    await redis_client.hset(key, mapping=session.to_dict())
+
+    # индекс пользователя
+    user_sessions_key = f"learning:user_sessions:{user_id}"
+    await redis_client.sadd(user_sessions_key, session.id)
+
+    # получить попытки
     attempts = await get_attempts(session.id)
 
-    # 🔹 фильтруем неуспешные
     failed_attempts = [
         a for a in attempts
         if a.get("is_correct") is False
     ]
 
-    '''await submit_to_methodology(
-        methodology,
-        {
-            "learning_session_id": session.id,
-            "user_id": user_id,
-            "competency": competency,
-            "failed_attempts": failed_attempts
-        }
-    )'''
-
+    # отправить событие методологии
     await submit_to_methodology(
-        methodology="scaffolding",
+        methodology=methodology,
         payload={
             "learning_session_id": session.id,
             "user_id": user_id,
+            "attempts": failed_attempts,
+            "competency": competency
         }
     )
+    payload={
+            "learning_session_id": session.id,
+            "user_id": user_id,
+            "attempts": failed_attempts
+        }
+    print(payload)
 
-    # сохранить саму сессию
-    key = f"learning:session:{session.id}"
-    await redis_client.hset(key, mapping=session.to_dict())
 
-    # 🔥 ДОБАВИТЬ ИНДЕКС ПОЛЬЗОВАТЕЛЯ
-    user_sessions_key = f"learning:user_sessions:{user_id}"
-    await redis_client.sadd(user_sessions_key, session.id)
+    # сгенерировать первое задание
+    #await generate_next_task(session.id)
 
     return session

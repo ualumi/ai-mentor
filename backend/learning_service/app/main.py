@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from app.api.sessions import router
 from fastapi.middleware.cors import CORSMiddleware
+#from app.infrastructure.subscriber import listen_scaffolding_events
+from app.infrastructure.progress_subscriber import listen_progress_events
 
 app = FastAPI(title="Learning Service")
 
@@ -21,5 +23,6 @@ async def health():
 @app.on_event("startup")
 async def startup():
     import asyncio
-    from app.infrastructure.subscriber import listen_scaffolding_events
-    asyncio.create_task(listen_scaffolding_events())
+    
+#    asyncio.create_task(listen_scaffolding_events())
+    asyncio.create_task(listen_progress_events())

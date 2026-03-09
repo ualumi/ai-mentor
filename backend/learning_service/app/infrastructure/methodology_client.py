@@ -1,24 +1,6 @@
-'''import httpx
-from app.infrastructure.methodology_registry import METHODOLOGIES
 
-async def submit_to_methodology(
-    methodology: str,
-    payload: dict
-):
-    config = METHODOLOGIES.get(methodology)
-    if not config:
-        raise ValueError("Unknown methodology")
 
-    async with httpx.AsyncClient() as client:
-        r = await client.post(
-            config["submit_url"],
-            json=payload,
-            timeout=10
-        )
-
-    return r.json()'''
-
-from app.infrastructure.redis import redis_client
+'''from app.infrastructure.redis import redis_client
 import json
 
 CHANNEL_SESSION_CREATED = "learning.events"
@@ -46,4 +28,49 @@ async def submit_to_methodology(
         json.dumps(event_payload)
     )
 
+    return {"status": "published"}'''
+
+
+from app.infrastructure.redis import redis_client
+import json
+
+CHANNEL_METHODLOGY_EVENTS = "learning.events"
+
+
+async def submit_to_methodology(methodology: str, payload: dict):
+    event_payload = {
+        "event": "generate_task",
+        "methodology": methodology,
+        "learning_session_id": payload["learning_session_id"],
+        "user_id": payload["user_id"],
+        "competency": payload["competency"],
+        "attempts": payload.get("attempts", [])
+    }
+
+    await redis_client.publish(
+        CHANNEL_METHODLOGY_EVENTS,
+        json.dumps(event_payload)
+    )
+
     return {"status": "published"}
+
+async def request_task_generation(
+    methodology: str,
+    payload: dict
+):
+
+    event_payload = {
+        "event": "generate_task",
+        "methodology": methodology,
+        "learning_session_id": payload["learning_session_id"],
+        "user_id": payload["user_id"],
+        "competency": payload["competency"],
+        "attempts": payload.get("attempts", [])
+    }
+
+    await redis_client.publish(
+        CHANNEL_METHODLOGY_EVENTS,
+        json.dumps(event_payload)
+    )
+
+    return {"status": "task_requested"}

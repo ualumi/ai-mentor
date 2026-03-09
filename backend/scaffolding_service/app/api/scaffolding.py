@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+'''from fastapi import APIRouter
 from app.schemas.scaffold import StepRequest, StepResponse
 from app.application.evaluate_step import evaluate_step
 
@@ -19,17 +19,10 @@ async def submit_step(data: StepRequest):
     if result["status"] == "ok":
         return StepResponse(status="ok")
 
-    '''hint = await generate_hint(
-        code=data.code,
-        context={
-            "competency": data.competency,
-            "methodology": "scaffolding"
-        }
-    )'''
 
     hint = "read_csv"
 
     return StepResponse(
         status="fail",
         hint=hint
-    )
+    )'''

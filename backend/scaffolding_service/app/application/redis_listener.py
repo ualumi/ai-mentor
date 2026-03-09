@@ -1,84 +1,70 @@
 import json
 import asyncio
-import aiohttp
-from app.infrastructure.redis import redis_client
-from app.domain.scaffold import ScaffoldingTask
 import random
-
-# Каналы Redis
-CHANNEL_SESSION_CREATED = "learning.events"
-CHANNEL_CODE_RESULTS = "code_results"
+from app.infrastructure.redis import redis_client
+from app.application.task_generator import generate_condition
+CHANNEL_METHODLOGY_EVENTS = "learning.events"
 CHANNEL_TASK_CONDITION = "task_condition"
 
-# URL для регистрации сессии в Task Manager
-#TASK_MANAGER_URL = "http://task_manager:8004/tasks/register_session"
+
+TASK_POOL = {
+    "loops": [
+        "Напишите цикл, который выводит числа от 1 до 10",
+        "Посчитайте сумму элементов списка используя цикл",
+        "Найдите максимальный элемент массива через цикл"
+    ],
+    "pandas": [
+        "Загрузите CSV файл используя pandas",
+        "Посчитайте среднее значение столбца",
+        "Отфильтруйте строки по условию"
+    ]
+}
+
 
 async def redis_listener():
-    pubsub = redis_client.pubsub()
-    await pubsub.subscribe(
-        CHANNEL_SESSION_CREATED,
-        CHANNEL_CODE_RESULTS
-    )
 
-    scaffold = ScaffoldingTask()
-    print("🔄 Scaffolding Service слушает события")
+    pubsub = redis_client.pubsub()
+
+    await pubsub.subscribe(CHANNEL_METHODLOGY_EVENTS)
+
+    print("🔄 Scaffolding Service слушает learning.events")
 
     async for message in pubsub.listen():
+
         if message["type"] != "message":
             continue
-        print("получено сообщение", message)
+
         payload = json.loads(message["data"])
-        channel = message["channel"]
 
-        # 🔹 Старт методологии
-        if channel == CHANNEL_SESSION_CREATED:
-            if payload.get("methodology") != "scaffolding" or payload.get("event") != "session_created":
-                continue
-              
-            learning_session_id = payload["learning_session_id"]
-            user_id = payload["user_id"]
+        # интересует только generate_task
+        if payload.get("event") != "generate_task":
+            continue
 
-            '''# ✅ 1. Регистрируем сессию в Task Manager
-            await register_session(session_id)'''
+        if payload.get("methodology") != "scaffolding":
+            continue
 
-            # ✅ 2. Публикуем первое условие только после успешной регистрации
-            first_step = scaffold.get_step(0)
-            await asyncio.sleep(0.1)
-            await redis_client.publish(
-                CHANNEL_TASK_CONDITION,
-                json.dumps({
-                    "learning_session_id": learning_session_id,
-                    "step_id": 0,
-                    "condition": {"description": first_step["description"]},
-                    "mode": "module",
-                    "user_id": user_id
-                })
-            )
-            print(f"🚀 Scaffolding стартовал для {user_id}")
+        learning_session_id = payload["learning_session_id"]
+        user_id = payload["user_id"]
+        competency = payload["competency"]
+        attempts = payload.get("attempts", [])
 
-        # 🔹 Следующие шаги
-        
-        elif channel == CHANNEL_CODE_RESULTS:
-            user_id = payload["user_id"]
-            step_id = payload["step_id"]
-            code = payload.get("code", "")
+        print(f"📩 Получен запрос на генерацию задания для сессии {learning_session_id} по компетенции {competency} с попытками {attempts}" )
+        # 🔹 генерация условия
+        condition = generate_condition(
+            competency,
+            attempts
+        )
 
-            if not scaffold.validate(step_id, code):
-                continue
+        # 🔹 публикация задания
+        # 🔹 публикация задания на per-user канал
+        await redis_client.publish(
+            f"task_condition:{user_id}",  # канал конкретного пользователя
+            json.dumps({
+                "learning_session_id": learning_session_id,
+                "user_id": user_id,
+                "condition": condition,
+                "mode": "module"
+            })
+        )
 
-            next_step = int(step_id) + 1
-            if next_step < scaffold.total_steps():
-                step = scaffold.get_step(next_step)
-                await redis_client.publish(
-                    CHANNEL_TASK_CONDITION,
-                    json.dumps({
-                        "session_id": learning_session_id,
-                        "step_id": next_step,
-                        "condition": {"description": step["description"]},
-                        "mode": "module",
-                        "user_id": user_id
-                    })
-                )
-                print(f"➡️ Следующий шаг {next_step} для {learning_session_id}")
-            else:
-                print(f"🏁 Методология завершена для {learning_session_id}")
+    print(f"📘 task generated for session {learning_session_id}, отправлено для {user_id}")

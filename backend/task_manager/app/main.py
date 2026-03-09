@@ -47,7 +47,7 @@ async def listen_user_channels(user_id: str):
         })
 
 
-async def listen_task_condition(user_id: str):
+'''async def listen_task_condition(user_id: str):
     pubsub = redis_client.pubsub()
     await pubsub.subscribe("task_condition")
 
@@ -63,10 +63,43 @@ async def listen_task_condition(user_id: str):
         USER_STATE[user_id].update({
             "learning_session_id": payload["learning_session_id"],
             "condition": payload["condition"],
-            "step_id": payload["step_id"],
             "module_ready": True
         })
 
+        await manager.send_to_user(user_id, {
+            "type": "task_condition",
+            "condition": payload["condition"]
+        })'''
+
+async def listen_task_condition(user_id: str):
+    pubsub = redis_client.pubsub()
+    
+    # Подписка на канал конкретного пользователя
+    await pubsub.psubscribe(f"task_condition:*")
+
+    async for message in pubsub.listen():
+        print(message)
+        if message["type"] != "pmessage":
+            continue
+
+        payload = json.loads(message["data"])
+        user_id = payload.get("user_id")
+        # Обновляем состояние пользователя в USER_STATE
+        if user_id not in USER_STATE:
+            # Если вдруг WS ещё не инициализирован — создаём минимальное состояние
+            USER_STATE[user_id] = {
+            "learning_session_id": payload["learning_session_id"],
+            "condition": payload["condition"],
+            "module_ready": True
+        }
+            
+        USER_STATE[user_id].update({
+            "learning_session_id": payload["learning_session_id"],
+            "condition": payload["condition"],
+            "module_ready": True
+        })
+
+        # Отправляем задачу пользователю
         await manager.send_to_user(user_id, {
             "type": "task_condition",
             "condition": payload["condition"]
@@ -154,7 +187,6 @@ async def websocket_endpoint(websocket: WebSocket):
                     base_payload.update({
                         "learning_session_id": state["learning_session_id"],
                         "condition": state["condition"],
-                        "step_id": state["step_id"],
                     })
 
                 # -----------------
