@@ -39,7 +39,7 @@ CHANNEL_METHODLOGY_EVENTS = "learning.events"
 
 async def submit_to_methodology(methodology: str, payload: dict):
     event_payload = {
-        "event": "generate_task",
+        "event": "session_created",
         "methodology": methodology,
         "learning_session_id": payload["learning_session_id"],
         "user_id": payload["user_id"],

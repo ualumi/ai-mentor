@@ -16,7 +16,7 @@ manager = ConnectionManager()
 
 # Храним состояние пользователя
 USER_STATE = {}
-
+PENDING_TASKS = {}
 # -----------------------------
 # Redis listeners
 # -----------------------------
@@ -72,6 +72,61 @@ async def listen_user_channels(user_id: str):
         })'''
 
 async def listen_task_condition(user_id: str):
+    stream_key = f"task_condition:{user_id}"
+
+    # Сохраняем последнее прочитанное сообщение
+    last_id = "0"  # можно "0" для прочтения всех или ">" для новых
+
+    while True:
+        resp = await redis_client.xread(
+            streams={stream_key: last_id},
+            count=10,
+            block=1000  # блокируем до 1 секунды, ждём новые
+        )
+        print(resp)
+        if not resp:
+            continue
+
+        # resp = [(stream_key, [(message_id, {field: value})])]
+        for _, messages in resp:
+            for message_id, fields in messages:
+                learning_session_id = fields["learning_session_id"]
+                condition = json.loads(fields["condition"])
+
+                # обновляем USER_STATE
+                if user_id not in USER_STATE:
+                    PENDING_TASKS.setdefault(user_id, []).append({
+                        "learning_session_id": learning_session_id,
+                        "condition": condition
+                    })
+                    continue
+                '''if user_id not in USER_STATE:
+                    USER_STATE[user_id] = {"mode": None, "module_ready": False}'''
+                if user_id in PENDING_TASKS:
+                        for task in PENDING_TASKS[user_id]:
+                            USER_STATE[user_id].update(task)
+                            await manager.send_to_user(user_id, {
+                                "type": "task_condition",
+                                "condition": task["condition"]
+                            })
+                        del PENDING_TASKS[user_id]
+
+                USER_STATE[user_id].update({
+                    "learning_session_id": learning_session_id,
+                    "condition": condition,
+                    "module_ready": True
+                })
+
+                # отправляем через websocket
+                await manager.send_to_user(user_id, {
+                    "type": "task_condition",
+                    "condition": condition
+                })
+
+                # отмечаем последнее сообщение
+                last_id = message_id
+#получает одно тупое сообщение и валится
+'''async def listen_task_condition(user_id: str):
     pubsub = redis_client.pubsub()
     
     # Подписка на канал конкретного пользователя
@@ -103,7 +158,7 @@ async def listen_task_condition(user_id: str):
         await manager.send_to_user(user_id, {
             "type": "task_condition",
             "condition": payload["condition"]
-        })
+        })'''
 
 
 # -----------------------------
@@ -148,6 +203,19 @@ async def websocket_endpoint(websocket: WebSocket):
         while True:
             raw = await websocket.receive_text()
             data = FrontendMessage(**json.loads(raw))
+            if data.type == "next_step":
+
+                state = USER_STATE[user_id]
+
+                await redis_client.publish(
+                    "scaffolding.next_step",
+                    json.dumps({
+                        "user_id": user_id,
+                        "learning_session_id": state["learning_session_id"]
+                    })
+                )
+
+                continue
 
             # -----------------
             # Установка режима
@@ -166,6 +234,7 @@ async def websocket_endpoint(websocket: WebSocket):
             # Проверка module режима
             # -----------------
             if state["mode"] == "module" and not state["module_ready"]:
+                
                 await manager.send_to_user(user_id, {
                     "error": "Waiting for task condition"
                 })
@@ -184,6 +253,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 }
 
                 if state["mode"] == "module":
+
                     base_payload.update({
                         "learning_session_id": state["learning_session_id"],
                         "condition": state["condition"],

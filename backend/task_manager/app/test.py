@@ -209,7 +209,7 @@ async def read_responses(ws, timeout=2):
             break
 
 
-async def test_module_mode():
+'''async def test_module_mode():
 
     async with websockets.connect(
         f"ws://localhost:8004/ws?token={token}"
@@ -246,6 +246,58 @@ async def test_module_mode():
 
             # 4️⃣ читаем ответы
             await read_responses(websocket)
+
+        print("🏁 тест завершён")
+
+
+asyncio.run(test_module_mode())'''
+
+async def test_module_mode():
+
+    async with websockets.connect(
+        f"ws://localhost:8004/ws?token={token}"
+    ) as websocket:
+
+        # 1️⃣ режим module
+        await websocket.send(json.dumps({
+            "type": "set_mode",
+            "mode": "module"
+        }))
+
+        r = requests.post(
+            f"{LEARNING_SERVICE}/learning/start",
+            headers={"Authorization": f"Bearer {token}"},
+            json={"competency": "Clustering"},
+        )
+
+        assert r.status_code == 200, f"Failed to start session: {r.status_code}, {r.text}"
+
+        session_id = r.json()["session_id"]
+        print(f"🧩 session_id = {session_id}")
+
+        # 2️⃣ получаем первое условие
+        condition = await wait_for_condition(websocket)
+        print("📘 first condition:", condition["condition"]["description"])
+
+        for step in range(MAX_STEPS):
+
+            print(f"\n===== STEP {step} =====")
+
+            # 3️⃣ отправляем код
+            await send_code(websocket)
+
+            # 4️⃣ читаем ответы mentor / analytics
+            await read_responses(websocket)
+
+            # 5️⃣ просим следующий шаг
+            await websocket.send(json.dumps({
+                "type": "next_step"
+            }))
+
+            # 6️⃣ ждём новое условие
+            condition = await wait_for_condition(websocket)
+
+            print("📘 condition:", condition["condition"]["description"])
 
         print("🏁 тест завершён")
 

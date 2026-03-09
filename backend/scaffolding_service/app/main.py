@@ -26,7 +26,7 @@ if __name__ == "__main__":
 import asyncio
 from fastapi import FastAPI
 #from app.api.scaffolding import router
-from app.application.redis_listener import redis_listener, CHANNEL_TASK_CONDITION
+from app.application.redis_listener import redis_listener
 import json
 from app.infrastructure.redis import redis_client
 
