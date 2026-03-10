@@ -1,12 +1,12 @@
 // components/Modules.jsx
 import { useQuery } from '@tanstack/react-query';
 
-const LEARNING_SERVICE = "http://learning_service:8001";
+const LEARNING_SERVICE = "http://localhost:8001";
 
 export default function Modules() {
 
-  const token = localStorage.getItem("access_token");
-
+  const token = localStorage.getItem("token");
+  console.log("TOKEN:", token);
   const { data: sessions, isLoading, error } = useQuery({
     queryKey: ['activeSessions'],
     queryFn: async () => {

@@ -1,11 +1,11 @@
 import Item from "./Item";
 import ToggleButton from "./ToggleButton";
 import { useState } from "react";
-import History from "./History";
+import History from "../history/History";
 import { House, User, Settings, ChevronLeft, ChevronRight, Search, Activity, Toilet } from 'lucide-react';
 import ProfileItem from "./ProfileItem";
 
-export default function SideBar ({ isOpen, toggleSidebar }) {
+export default function SideBar ({ mode, isOpen, toggleSidebar }) {
 
   return (
     <div className="sidebar">
@@ -34,7 +34,7 @@ export default function SideBar ({ isOpen, toggleSidebar }) {
                 <Item type="button_item" text="Tasks" clas="menu-item-active"  link="any"/>
                 <Item type="button_item" text="Modules" clas=""  link="modules"/>
             </div>
-            <History></History>
+            <History mode={mode}></History>
         </div>
         
         <ProfileItem name="User" email="test@gmail.com"/>

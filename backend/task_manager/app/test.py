@@ -9,6 +9,7 @@ import requests
 # -------------------------------
 USER_SERVICE = "http://user_service:8002"
 LEARNING_SERVICE = "http://learning_service:8001"
+ATTEMPTS_SERVICE = "http://attempts_service:8009" 
 
 
 # -------------------------------
@@ -76,7 +77,7 @@ async def test_free_mode():
 
 asyncio.run(test_free_mode())
 
-'''r = requests.post(
+r = requests.post(
     f"{LEARNING_SERVICE}/learning/start",
     headers={"Authorization": f"Bearer {token}"},
     json={"competency": "Clustering"},
@@ -112,62 +113,9 @@ assert any(s.get("session_id") == session_id for s in sessions), \
 assert all(s.get("status") == "active" for s in sessions), \
     "❌ Non-active session returned when filtering by status=active!"
 
-print("✅ /learning/my returned correct active sessions!")'''
+print("✅ /learning/my returned correct active sessions!")
 
-'''async def test_module_mode():
-    async with websockets.connect(
-        f"ws://localhost:8004/ws?token={token}"
-    ) as websocket:
-
-        # 1️⃣ Устанавливаем режим
-        await websocket.send(json.dumps({
-            "type": "set_mode",
-            "mode": "module"
-        }))
-
-        # 2️⃣ Ждём нужное событие
-        while True:
-            response = await websocket.recv()
-            data = json.loads(response)
-
-            print("⬅️", data)
-
-            if (
-                data.get("type") == "task_condition"
-                and data.get("condition", {}).get("description") == "Загрузить датасет"
-            ):
-                print("✅ Получено нужное условие")
-
-                # 3️⃣ run_code
-                await websocket.send(json.dumps({
-                    "type": "code_event",
-                    "event": "run_code",
-                    "code": "print(9/3)"
-                }))
-
-                # 4️⃣ submit_code
-                await websocket.send(json.dumps({
-                    "type": "code_event",
-                    "event": "submit_code",
-                    "code": "print(4/3)"
-                }))
-
-                break
-
-        # 5️⃣ Читаем ответы после отправки
-        while True:
-            try:
-                response = await asyncio.wait_for(websocket.recv(), timeout=5.0)
-                print("⬅️", response)
-            except asyncio.TimeoutError:
-                break
-
-
-asyncio.run(test_module_mode())'''
-
-
-
-MAX_STEPS = 3
+'''MAX_STEPS = 3
 
 
 async def wait_for_condition(ws):
@@ -206,53 +154,12 @@ async def read_responses(ws, timeout=2):
             response = await asyncio.wait_for(ws.recv(), timeout=timeout)
             print("⬅️", response)
         except asyncio.TimeoutError:
-            break
+            break'''
+
+
 
 
 '''async def test_module_mode():
-
-    async with websockets.connect(
-        f"ws://localhost:8004/ws?token={token}"
-    ) as websocket:
-
-        # 1️⃣ режим module
-        await websocket.send(json.dumps({
-            "type": "set_mode",
-            "mode": "module"
-        }))
-        r = requests.post(
-            f"{LEARNING_SERVICE}/learning/start",
-            headers={"Authorization": f"Bearer {token}"},
-            json={"competency": "Clustering"},
-        )
-        assert r.status_code == 200, f"Failed to start session: {r.status_code}, {r.text}"
-        print("Response from Learning Service:", r.status_code, r.text)
-
-        session_id = r.json()["session_id"]
-        print(f"🧩 session_id = {session_id}")
-                
-
-        for step in range(MAX_STEPS):
-
-            print(f"\n===== STEP {step} =====")
-
-            # 2️⃣ ждём новое условие
-            condition = await wait_for_condition(websocket)
-
-            print("📘 condition:", condition["condition"]["description"])
-
-            # 3️⃣ отправляем код
-            await send_code(websocket)
-
-            # 4️⃣ читаем ответы
-            await read_responses(websocket)
-
-        print("🏁 тест завершён")
-
-
-asyncio.run(test_module_mode())'''
-
-async def test_module_mode():
 
     async with websockets.connect(
         f"ws://localhost:8004/ws?token={token}"
@@ -302,4 +209,40 @@ async def test_module_mode():
         print("🏁 тест завершён")
 
 
-asyncio.run(test_module_mode())
+asyncio.run(test_module_mode())'''
+
+# -------------------------------
+# 2️⃣ Тест эндпоинта истории попыток
+# -------------------------------
+history_resp = requests.get(f"{ATTEMPTS_SERVICE}/attempts/{token}/history")
+assert history_resp.status_code == 200
+history_data = history_resp.json()
+
+print("📖 Attempts history:", history_data)
+
+# проверяем, что структура правильная
+for attempt in history_data:
+    assert "attempt_id" in attempt
+    assert "first_line" in attempt
+    assert "timestamp" in attempt
+
+# -------------------------------
+# 3️⃣ Тест эндпоинта деталей конкретной попытки
+# -------------------------------
+if history_data:
+    attempt_id = history_data[0]["attempt_id"]
+
+    detail_resp = requests.get(f"{ATTEMPTS_SERVICE}/attempt/{attempt_id}")
+    assert detail_resp.status_code == 200
+    attempt_detail = detail_resp.json()
+
+    print("📝 Attempt detail:", json.dumps(attempt_detail, indent=2))
+
+    # базовая проверка полей
+    assert attempt_detail["attempt_id"] == attempt_id
+    assert "code" in attempt_detail
+    assert "mentor_reply" in attempt_detail
+    assert "analysis" in attempt_detail
+    assert "skill_scores" in attempt_detail
+    assert "total_score" in attempt_detail
+    assert "is_correct" in attempt_detail

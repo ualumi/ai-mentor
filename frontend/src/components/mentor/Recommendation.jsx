@@ -11,7 +11,9 @@ export default function Recommendation({mode}) {
 
   useEffect(() => { 
     const handler = (data) => {
+      const uniqueCompetencies = [...new Set(data.data.recommendations.map(item => item.competency))];
 
+      console.log(data)
       // ✅ Сообщение о прогрессе пользователя
       if (
         data.source?.startsWith("user_progress") &&
@@ -19,7 +21,7 @@ export default function Recommendation({mode}) {
       ) {
         setRecommendation({
           time: new Date().toLocaleTimeString(),
-          data: data.data
+          data: uniqueCompetencies[0] // Пока просто первій компонент для заглушки
         });
       }
     };

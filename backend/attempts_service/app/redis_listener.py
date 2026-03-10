@@ -87,6 +87,155 @@ async def redis_listener():
 import json
 from sqlalchemy import select
 from sqlalchemy.orm import aliased
+
+from app.database import AsyncSessionLocal
+from app.models import Attempt
+from app.redis_client import redis
+
+
+CHANNEL_ANALYSIS_PATTERN = "analytics_response:*"
+CHANNEL_MENTOR_PATTERN = "mentor_response:*"
+
+CHANNEL_MENTOR_REQUEST_PATTERN = "mentor_request:*"
+CHANNEL_ANALYTICS_REQUEST_PATTERN = "analytics_request:*"
+
+
+async def redis_listener():
+
+    pubsub = redis.pubsub()
+
+    await pubsub.psubscribe(
+        CHANNEL_ANALYSIS_PATTERN,
+        CHANNEL_MENTOR_PATTERN,
+        CHANNEL_MENTOR_REQUEST_PATTERN,
+        CHANNEL_ANALYTICS_REQUEST_PATTERN
+    )
+
+    print("🔄 Attempts Service listening to mentor/analytics requests & responses")
+
+    async for msg in pubsub.listen():
+
+        if msg["type"] != "pmessage":
+            continue
+
+        try:
+            payload = json.loads(msg["data"])
+        except Exception:
+            continue
+
+        attempt_id = payload.get("attempt_id")
+        user_id = payload.get("user_id")
+
+        if not attempt_id or not user_id:
+            continue
+
+        user_id = str(user_id) 
+        channel = msg["channel"].decode() if isinstance(msg["channel"], bytes) else msg["channel"]
+
+        async with AsyncSessionLocal() as db:
+
+            AttemptAlias = aliased(Attempt, name="a")
+
+            # -------------------------------------------------
+            # 1️⃣ CREATE ATTEMPT (при request)
+            # -------------------------------------------------
+            if channel.startswith("mentor_request:") or channel.startswith("analytics_request:"):
+
+                res = await db.execute(
+                    select(AttemptAlias).where(
+                        AttemptAlias.attempt_id == attempt_id
+                    )
+                )
+
+                existing = res.scalars().first()
+
+                if existing:
+                    continue
+
+                attempt = Attempt(
+                    attempt_id=attempt_id,
+                    user_id=user_id
+                )
+
+                db.add(attempt)
+                await db.commit()
+
+                print(f"✅ Attempt {attempt_id} created")
+
+                continue
+
+
+            # -------------------------------------------------
+            # 2️⃣ UPDATE ATTEMPT (responses)
+            # -------------------------------------------------
+            res = await db.execute(
+                select(AttemptAlias).where(
+                    AttemptAlias.attempt_id == attempt_id
+                )
+            )
+
+            attempt = res.scalars().first()
+
+            if not attempt:
+                print(f"⚠️ Attempt {attempt_id} not found for response")
+                continue
+
+            # ----------------------------
+            # 🧠 mentor_response
+            # ----------------------------
+            if channel.startswith("mentor_response:"):
+
+                print("получено mentor_response")
+
+                attempt.mentor_reply = payload.get("hint")
+                attempt.user_id = user_id
+                
+
+            # ----------------------------
+            # 📊 analytics_response
+            # ----------------------------
+            elif channel.startswith("analytics_response:"):
+
+                analysis = payload.get("analysis", {})
+
+                attempt.user_id = user_id
+
+                # raw JSON
+                attempt.analysis = analysis
+
+                # skill_scores
+                skill_scores = {}
+
+                tag_alignment = (
+                    analysis
+                    .get("task_compliance", {})
+                    .get("tag_alignment", {})
+                )
+
+                for skill, data in tag_alignment.items():
+                    skill_scores[skill] = data.get("score")
+
+                attempt.skill_scores = skill_scores
+
+                # total_score
+                attempt.total_score = analysis.get("code_quality_score")
+
+                # correctness
+                attempt.is_correct = (
+                    analysis
+                    .get("correctness", {})
+                    .get("is_correct")
+                )
+
+                attempt.code_hash = payload.get("code")
+
+            await db.commit()
+
+            print(f"✏️ Attempt {attempt_id} updated from {channel}")
+
+'''import json
+from sqlalchemy import select
+from sqlalchemy.orm import aliased
 from app.database import AsyncSessionLocal
 from app.models import Attempt
 from app.redis_client import redis
@@ -107,7 +256,7 @@ async def redis_listener():
     print("🔄 Attempts Service listening to analytics_response:* & mentor_response:*")
 
     async for msg in pubsub.listen():
-
+        print(msg)
         # ⚠️ ВАЖНО: при psubscribe тип будет "pmessage"
         if msg["type"] != "pmessage":
             continue
@@ -119,7 +268,7 @@ async def redis_listener():
 
         attempt_id = payload.get("attempt_id")
         user_id = payload.get("user_id")
-
+        print(f"attempt_id {attempt_id}, user_id {user_id}")
         if not attempt_id or not user_id:
             continue
 
@@ -134,18 +283,19 @@ async def redis_listener():
             attempt = res.scalars().first()
 
             if not attempt:
+                print("not attempt")
                 continue  # race condition
 
             channel = msg["channel"].decode() if isinstance(msg["channel"], bytes) else msg["channel"]
-
+            print("attempt")
             # ----------------------------
             # 🧠 Ответ ментора
             # ----------------------------
-            if channel.startswith("mentor_out:"):
-
+            if channel.startswith("mentor_response:"):
+                print("получено mentor_response")
                 attempt.mentor_reply = payload.get("hint")
                 attempt.user_id = user_id
-
+                print(attempt.mentor_reply, attempt.user_id)
             # ----------------------------
             # 📊 Результат аналитики
             # ----------------------------
@@ -183,4 +333,4 @@ async def redis_listener():
 
             await db.commit()
 
-            print(f"✏️ Attempt {attempt_id} updated from {channel}")
+            print(f"✏️ Attempt {attempt_id} updated from {channel}")'''

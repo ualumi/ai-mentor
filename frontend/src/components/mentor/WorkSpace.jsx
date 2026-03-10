@@ -20,10 +20,10 @@ export default function WorkSpace({ mode }) {
         <CodeProvider>
             <div className={`free-mode ${isSidebarOpen ? 'sidebar-visible' : 'sidebar-hidden'}`}>
                 <div className="sidebar-container">
-                    <SideBar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} ></SideBar>
+                    <SideBar mode={mode} isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} ></SideBar>
                 </div>
                 
-                <SandBox mode={mode}></SandBox>
+                <SandBox mode={mode} isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}></SandBox>
                 <div >{/*className={s["insight-panel"]}*/}
                     <ExecutionResult></ExecutionResult>
                 </div>

@@ -83,7 +83,6 @@ async def listen_task_condition(user_id: str):
             count=10,
             block=1000  # блокируем до 1 секунды, ждём новые
         )
-        print(resp)
         if not resp:
             continue
 
@@ -102,14 +101,14 @@ async def listen_task_condition(user_id: str):
                     continue
                 '''if user_id not in USER_STATE:
                     USER_STATE[user_id] = {"mode": None, "module_ready": False}'''
-                if user_id in PENDING_TASKS:
+                '''if user_id in PENDING_TASKS:
                         for task in PENDING_TASKS[user_id]:
                             USER_STATE[user_id].update(task)
                             await manager.send_to_user(user_id, {
                                 "type": "task_condition",
                                 "condition": task["condition"]
                             })
-                        del PENDING_TASKS[user_id]
+                        del PENDING_TASKS[user_id]'''
 
                 USER_STATE[user_id].update({
                     "learning_session_id": learning_session_id,

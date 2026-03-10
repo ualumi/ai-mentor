@@ -194,6 +194,7 @@
 /* Контейнер сайдбара */
 .sidebar-container {
   overflow: hidden; /* Важно для анимации схлопывания */
+  
 }
 
 .profile-item {
