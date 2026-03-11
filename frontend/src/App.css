@@ -20,24 +20,16 @@
     --font-size-p: 14px;
     --border-radius: 13px;
     height: 100vh;
+    width: 100vw;
 }
 
-.sidebar {
-    padding-inline: 27px;
-    height: calc(100% - 20px);
+.body {
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    margin-bottom: 20px;
+    overflow: hidden;
 }
 
-.sidebar-label {
-    display: flex;
-    justify-content: space-between;
-    border-block-end: 1px solid var(--line-color);
-    margin-bottom: 30px;
-    align-items: center;
-}
+
+
 
 
 .menu-caption {
@@ -98,17 +90,17 @@
     border-radius: var(--border-radius);
 }
 
-.menu-item-active {
+.item-active {
+    color: #fff;
+}
+
+/*.menu-item-active {
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: inset 0px -10px 40px -20px rgba(255, 255, 255, 0.08);
     border-radius: var(--border-radius);
     background: #272729;
      overflow: hidden;
-    background: 
-    linear-gradient(90deg, transparent, rgba(59, 104, 255, 0.8) 50%, transparent),
-    #272729;
-    background-blend-mode: normal;
-    background-position: -40% 50%, 0 0; /* позиция для каждого слоя */
+
     background-size: 200% 100%, auto;
     background-repeat: no-repeat;
     color: var(--text-color);
@@ -120,9 +112,11 @@
     width: 3px;
     height: 4px;
     background: #3B68FF;
+    background-blend-mode: normal;
+    background-position: -40% 50%, 0 0;
     filter: blur(2px);
     justify-self: end;
-}
+}*/
 
 /*.menu-item-active::after {
     content: "";
@@ -165,37 +159,132 @@
 
 .recomendation-item {
     position: fixed;
-    bottom: 0;
+    bottom: 10px;
     right: 20px;
-    width: 280px;
-    height: 300px;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    border-radius: 50px;
+    background: linear-gradient(253.45deg, rgba(59, 104, 255, 0.1) 12.5%, rgba(59, 104, 255, 0.5) 90.78%), #272729 !important;
+    border: 1.25px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0px -12.5px 50px -25px rgba(255, 255, 255, 0.08);
+    border-radius: 62.5px;
+    filter: drop-shadow(-10px 4px 20px rgba(22, 22, 22, 0.15));
+
+    color: transparent;
+    border: none;
 }
 
 
+.recomendation-item-active {
+    display: flex;
+    width: 350px;
+    height: 370px;
+    position: fixed;
+    bottom: 10px;
+    right: 20px;
+    background-color: #28282A !important;
+    flex-direction: column;
+    justify-content: space-between;
+    filter: drop-shadow(-10px 4px 20px rgba(22, 22, 22, 0.15));
+    padding: 15px !important;
+    transition: 1s ease;
+}
+
+.recommendation-collapse {
+    background-color: transparent;
+    outline: none;
+    border: none;
+    color: #fff;
+    opacity: 0.5;
+}
+
+.recommendation-collapse:focus, .recommendation-collapse:hover {
+    opacity: 1;
+    outline: none;
+}
+
+
+.recommendation-highlight {
+  animation: aiGlow 3s ease;
+}
+
+@keyframes aiGlow {
+
+  0% {
+    box-shadow: 0 0 0 rgba(120,120,255,0);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(59, 104, 255, 0.5);
+  }
+
+  100% {
+    box-shadow: 0 0 0 rgba(120,120,255,0);
+  }
+
+}
+
+.recomentation-tabs {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-block-start: 1px solid var(--line-color);
+    padding-top: 15px;
+}
+
+.mentor-tab {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    opacity: 0.5;
+}
+
+.mentor-tab-active {
+    opacity: 1;
+}
+
 .free-mode {
     background-color: var(--backround-color);
-    display: grid;
-    /*grid-template-columns: 1.2fr 2.5fr 1fr;*/
-    width: 100vw;
+    /*display: grid;
+    /*grid-template-columns: 1.2fr 2.5fr 1fr;
+    width: 100vw;*/
+    display: flex;
+    flex: 1;
     height: 100vh;
     transition: grid-template-columns 0.3s ease;
 }
 
-/* Когда сайдбар открыт */
+.free-mode .free {
+    display: flex;
+    width: 100%;
+}
+
+.free-mode .module {
+    display: grid;
+    grid-template-columns:  1fr 0.4fr ;
+    width: 100%;
+}
+
+/* Когда сайдбар открыт 
 .sidebar-visible {
   grid-template-columns: 1fr 2.5fr 1fr;
 }
 
-/* Когда сайдбар скрыт - первая колонка схлопывается, вторая расширяется */
+/* Когда сайдбар скрыт - первая колонка схлопывается, вторая расширяется 
 .sidebar-hidden {
-  grid-template-columns: 0fr 3.5fr 1fr; /* 1.2 + 2.5 = 3.7 */
-}
+  grid-template-columns: 0fr 3.5fr 1fr; /* 1.2 + 2.5 = 3.7 
+}*/
 
-/* Контейнер сайдбара */
+/* Контейнер сайдбара 
 .sidebar-container {
-  overflow: hidden; /* Важно для анимации схлопывания */
-  
-}
+  overflow: hidden; 
+  max-width: 30vw;
+  background-color:#161616 ;
+  min-width: 100px;
+}*/
 
 .profile-item {
     display: flex;
@@ -243,6 +332,13 @@
     overflow-y: auto;
     padding-inline: 0px;
     margin-bottom: 0px;
+        padding-inline: 27px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: width 0.25s 
+ease;
+    background-color: #161616;
 }
 
 .terminal-item {
@@ -295,12 +391,11 @@ input:focus::placeholder {
 .mentor-caption {
     margin: 0;
      border-block-end: 1px solid var(--line-color);
-     font-size: 16px;
+     font-size: 20px;
+     padding-bottom: 15px;
 }
 
-.recomendation-item {
-    display: flex;
-}
+
 
 .recomendation-content {
     width: 100%;
@@ -315,4 +410,37 @@ input:focus::placeholder {
     color: #fff;
     font-family: "Stolz regular";
     width: 100%;
+}
+
+.progress {
+    display: flex;
+    padding-top: 15px;
+    flex-direction: column;
+    padding-bottom: 30px;
+}
+
+.progress-bar-container {
+  width: 100%;
+  background: transparent;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--line-color);
+}
+
+.progress-bar-fill {
+    background: linear-gradient(90deg, #3B68FF 0%, #6F90FF 100%);;
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.progress-info {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    color: var(--side-color);
+    gap: 5px;
+}
+
+.progress-item-text {
+    font-size: 14px;
 }

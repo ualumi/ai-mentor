@@ -25,15 +25,15 @@ export default function AttemptsHistory({ onSelectAttempt }) {
   });
 
   if (isLoading) {
-    return <div>⏳ Загрузка истории попыток...</div>;
+    return <div className='item'>Загрузка истории...</div>;
   }
 
   if (error) {
-    return <div>❌ Ошибка загрузки: {error.message}</div>;
+    return <div className='item'>Ошибка загрузки: {error.message}</div>;
   }
 
   if (!history || history.length === 0) {
-    return <div>📭 История попыток отсутствует</div>;
+    return <div></div>;
   }
 
   return (
@@ -44,7 +44,7 @@ export default function AttemptsHistory({ onSelectAttempt }) {
           className="item"
           onClick={() => onSelectAttempt(attempt.attempt_id)}
         >
-          <p className='menu-item-text'>{attempt.first_line}...</p>
+          <span className='menu-item-text'>{attempt.first_line}...</span>
           {/*<small>Attempt ID: {attempt.attempt_id}</small>*/}
         </button>
       ))}

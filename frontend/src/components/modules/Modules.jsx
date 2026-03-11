@@ -1,6 +1,6 @@
 // components/Modules.jsx
 import { useQuery } from '@tanstack/react-query';
-
+import "../../App.css"
 const LEARNING_SERVICE = "http://localhost:8001";
 
 export default function Modules() {
@@ -28,26 +28,23 @@ export default function Modules() {
   });
 
   if (isLoading) {
-    return <div>⏳ Загрузка активных модулей...</div>;
+    return <div className='item'> Загрузка активных модулей...</div>;
   }
 
   if (error) {
-    return <div>❌ Ошибка загрузки: {error.message}</div>;
+    return <div className='item'> Ошибка загрузки: {error.message}</div>;
   }
 
   if (!sessions || sessions.length === 0) {
-    return <div>📭 Нет активных модулей</div>;
+    return <div className='item'> Нет активных модулей</div>;
   }
 
   return (
     <div className="modules-container">
-      <h3>📚 Активные модули</h3>
 
       {sessions.map((session) => (
-        <div key={session.session_id} className="module-card">
-          <h4>{session.competency}</h4>
-          <p>Session ID: {session.session_id}</p>
-          <p>Status: {session.status}</p>
+        <div key={session.session_id} className="item item-light">
+          <span className='menu-item-text'>{session.competency}</span>
         </div>
       ))}
     </div>

@@ -1,17 +1,24 @@
-import WorkSpace from "./components/mentor/WorkSpace";
+
 import {Route, BrowserRouter, Routes} from "react-router-dom"
 import { wsService } from './services/websocket';
 import { useRef, useEffect } from "react";
 import "./App.css"
-import Modules from "./components/modules/Modules";
+import Layout from "./Layout";
+
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuth } from "./context/AuthContext";
-import AuthForm from "./components/auth/AuthForm";
 
+import React, { useState } from 'react';
 
 const queryClient = new QueryClient();
 
 export default function App() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  
+      const toggleSidebar = () => {
+          setIsSidebarOpen(!isSidebarOpen);
+      };
+
   const { token } = useAuth();
   useEffect(() => {
     if (!token) return;
@@ -25,14 +32,21 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="body">
-        <BrowserRouter>
+        
+        {/*<BrowserRouter>
+            <SideBar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}></SideBar>
             <Routes>
-              <Route path="/mentor" element={<WorkSpace mode="free" />} />
+              <Route path="/mentor" element={<WorkSpace mode="free" isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}/>} />
               <Route path="/modules" element={<Modules />} />
-              <Route path="/module/:id" element={<WorkSpace mode="module" />} />
+              <Route path="/module/:id" element={<WorkSpace mode="module" isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}/>} />
               <Route path="/" element={<AuthForm />} />
-              {/*<Route path="/progress" Component={Analyze}/>*/}
             </Routes>
+          </BrowserRouter>*/}
+          <BrowserRouter>
+            <Layout
+              isSidebarOpen={isSidebarOpen}
+              toggleSidebar={toggleSidebar}
+            />
           </BrowserRouter>
       </div>
     </QueryClientProvider>

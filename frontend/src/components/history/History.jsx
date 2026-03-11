@@ -19,9 +19,9 @@ export default function History({mode}) {
         {mode === "free" && 
           <div className="menu-list history-list">
             <AttemptsHistory onSelectAttempt={handleSelectAttempt} />
-            <Item type="text_item" text="Gjgsnrf1" clas="l" />
+            {/*<Item type="text_item" text="Gjgsnrf1" clas="l" />
             <Item type="text_item" text="Gjgsnrf1gghj..." clas="l" />
-            <Item type="text_item" text="Gjgsnrf1gghj..." clas="l" />
+            <Item type="text_item" text="Gjgsnrf1gghj..." clas="l" />*/}
           </div>
         }
       

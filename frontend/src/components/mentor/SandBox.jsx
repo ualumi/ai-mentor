@@ -61,7 +61,7 @@ import { RunCodeButton } from "../RunCodeSutton";
 import ProgressBar from "../modules/module/ProgressBar";
 
 
-export default function SandBox({mode, isOpen, toggleSidebar}) {
+export default function SandBox({mode}) {
     const [isTerminalOpen, setIsTerminalOpen] = useState(false);
     const handleToggle = () => {
         setIsTerminalOpen(!isTerminalOpen);
@@ -101,28 +101,21 @@ export default function SandBox({mode, isOpen, toggleSidebar}) {
     }, []);
   return (
     <section className={s["section-sandbox"]}>
-        {isOpen=== false && <ToggleButton
-                    isOpen={isOpen}
-                    onToggle={toggleSidebar}
-                    openLabel=""
-                    closeLabel=""
-                    /*iconOpen={<ChevronLeft size={24} />}
-                    iconClose={<ChevronRight size={24} />}*/
-                    showLabel={false}
-                    position="right"
-                    className="round"
-                    aria-label={isOpen ? 'Закрыть меню' : 'Открыть меню'}
-                />}
         {mode === "free" && <h1 className={s["section-caption"]}>Free mode</h1>}
         {mode === "module" && 
-          <div>
-            <ProgressBar />
+          <div className="progress">
+            
             <h1 className={s["section-caption-module"]}>Clustering</h1>
+            <div className="progress-info">
+              <span className="progress-item-text">Прогресс по модулю: </span>
+              <ProgressBar progress={15} />
+            </div>
+            
           </div>
         }
         
         <div className={s["section-panel"]}>
-            <ToggleButton isOpen={isTerminalOpen} onToggle={handleToggle} className="item icon-only item-light"/>
+            {/*<ToggleButton isOpen={isTerminalOpen} onToggle={handleToggle} className="item icon-only item-light"/>*/}
             <RunCodeButton></RunCodeButton>
             {/*<Item type="button_item"  clas="item-light icon-only" icon={<Therminal strokeWidth={1} />}/>*/}
             {mode === "free" && <Item type="text_item"text="Загрузить условие" clas="item-light" icon={<Paperclip strokeWidth={1} />}/>}

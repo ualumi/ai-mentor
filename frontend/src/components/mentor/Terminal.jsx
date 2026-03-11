@@ -57,7 +57,7 @@ export default function Terminal({ isOpen, onToggle }) {
   return (
     <div>
       {isOpen && (
-        <div className="sidebar menu-item terminal">
+        <div className="menu-item terminal">
           <Item
             type="text_item"
             text="Terminal 1"

@@ -1,7 +1,7 @@
 import React from 'react';
 
 
-const ProgressBar = ({ progress, height = 20, color = '#4CAF50' }) => {
+function ProgressBar ({ progress, height = 10, color = '#3B68FF' }) {
   return (
     <div className="progress-bar-container" style={{ height: `${height}px` }}>
       <div 
