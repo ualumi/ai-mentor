@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import "./auth.css";
 import "../../App.css"
 
-const API_BASE = "http://localhost:8002";
+const API_BASE = "http://155.212.237.86:8002";
 
 
 export default function AuthForm() {
