@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import "../../App.css"
 
-const ATTEMPTS_SERVICE = "http://localhost:8009";
+const ATTEMPTS_SERVICE = "http://155.212.237.86:8009";
 
 export default function AttemptsHistory({ onSelectAttempt }) {
   const token = localStorage.getItem("token");

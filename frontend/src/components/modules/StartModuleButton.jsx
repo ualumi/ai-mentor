@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
-const LEARNING_SERVICE = "http://localhost:8001";
+const LEARNING_SERVICE = "http://155.212.237.86:8001";
 
 export default function StartModuleButton({ competency }) {
 
