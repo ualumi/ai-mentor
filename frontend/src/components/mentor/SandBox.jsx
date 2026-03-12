@@ -61,7 +61,7 @@ import { RunCodeButton } from "../RunCodeSutton";
 import ProgressBar from "../modules/module/ProgressBar";
 
 
-export default function SandBox({mode}) {
+export default function SandBox({mode, name}) {
     const [isTerminalOpen, setIsTerminalOpen] = useState(false);
     const handleToggle = () => {
         setIsTerminalOpen(!isTerminalOpen);
@@ -105,7 +105,7 @@ export default function SandBox({mode}) {
         {mode === "module" && 
           <div className="progress">
             
-            <h1 className={s["section-caption-module"]}>Clustering</h1>
+            <h1 className={s["section-caption-module"]}>{name}</h1>
             <div className="progress-info">
               <span className="progress-item-text">Прогресс по модулю: </span>
               <ProgressBar progress={15} />
@@ -116,17 +116,21 @@ export default function SandBox({mode}) {
         
         <div className={s["section-panel"]}>
             {/*<ToggleButton isOpen={isTerminalOpen} onToggle={handleToggle} className="item icon-only item-light"/>*/}
-            <RunCodeButton></RunCodeButton>
-            {/*<Item type="button_item"  clas="item-light icon-only" icon={<Therminal strokeWidth={1} />}/>*/}
-            {mode === "free" && <Item type="text_item"text="Загрузить условие" clas="item-light" icon={<Paperclip strokeWidth={1} />}/>}
+            <div className={s["section-panel-main"]}>
+              {/*<Item type="button_item"  clas="item-light icon-only" icon={<Therminal strokeWidth={1} />}/>*/}
+              {mode === "free" && <Item type="text_item" clas="item-light icon-only" icon={<Paperclip strokeWidth={1} />}/>}
+              
+              {/*<Item type="text_item" text="Подсказка ментора" clas="item-light" icon={<Lightbulb strokeWidth={1} />}/>*/}
+              <SubmitCodeButton></SubmitCodeButton>
+            </div>
             
-            {/*<Item type="text_item" text="Подсказка ментора" clas="item-light" icon={<Lightbulb strokeWidth={1} />}/>*/}
-            <SubmitCodeButton></SubmitCodeButton>
+            <RunCodeButton className="item-light"></RunCodeButton>
         </div>
         <div className="editor">
             <CodeEditor analysis={analysis}></CodeEditor>
             {mode === "free" && <Terminal isOpen={isTerminalOpen} onToggle={handleToggle}></Terminal>}
-            {mode === "module" && <Actionpanel isOpen={isTerminalOpen} onToggle={handleToggle}></Actionpanel>}
+            {mode === "module" && <Terminal isOpen={isTerminalOpen} onToggle={handleToggle}></Terminal>}
+            {/*{mode === "module" && <Actionpanel isOpen={isTerminalOpen} onToggle={handleToggle}></Actionpanel>}*/}
             
         </div>
         

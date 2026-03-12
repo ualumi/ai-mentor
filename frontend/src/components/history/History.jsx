@@ -15,7 +15,7 @@ export default function History({mode}) {
       {mode === "module" && <p className="history-label">LAST MODULES</p>}
       {mode === "free" && <p className="history-label">HISTORY</p>}
       
-        {mode === "module" && <Modules />}
+        {mode === "module" && <Modules mode="history"/>}
         {mode === "free" && 
           <div className="menu-list history-list">
             <AttemptsHistory onSelectAttempt={handleSelectAttempt} />

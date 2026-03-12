@@ -26,11 +26,20 @@
 }
 
 .section-panel {
-    display: grid;
-    grid-template-columns: min-content min-content auto auto;
-    grid-auto-flow: column;
+    display:flex;
+    justify-content: space-between;
     gap: 10px;
     margin-bottom: 10px;
+    
+}
+
+.section-panel-main {
+    background: #202022;
+    display: flex;
+    flex: 1;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0px -10px 40px -20px rgba(255, 255, 255, 0.08);
+    border-radius: var(--border-radius);
 }
 
 .insight-panel {

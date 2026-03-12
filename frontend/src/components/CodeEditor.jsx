@@ -471,7 +471,7 @@ export default function CodeEditor({ analysis = [] }) {
         domNode.style.background = "rgba(255,255,255,0.04)";
 
         // цвет полоски слева
-        let borderColor = "#3B68FF";
+        let borderColor = "#6F90FF";
 
         if (item.type === "strength") borderColor = "#4CAF50";
         if (item.type === "recommendation") borderColor = "#FFC107";

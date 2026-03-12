@@ -153,7 +153,7 @@ export default function Recommendation({mode}) {
         <div className="recomendation-content">
 
           {/* вкладка рекомендации */}
-          <div style={{ display: activeTab === "recommendation" ? "block" : "none" }}>
+          <div className="reco-content" style={{ display: activeTab === "recommendation" ? "flex" : "none" }}>
             {recommendation ? (
               <>
                 <div className='menu-caption mentor-caption'>
@@ -177,7 +177,7 @@ export default function Recommendation({mode}) {
                   Начать модуль
                 </button>*/}
                 <StartModuleButton
-                  competency="Clustering"
+                  competency={recommendation.data}
                   /*onStart={resetRecommendation}*/
                 />
               </>
@@ -187,7 +187,7 @@ export default function Recommendation({mode}) {
           </div>
 
           {/* вкладка ментора */}
-          <div style={{ display: activeTab === "mentor" ? "block" : "none" }}>
+          <div className="reco-content" style={{ display: activeTab === "mentor" ? "flex" : "none" }}>
             <div className='menu-caption mentor-caption'>
               AI mentor
             </div>

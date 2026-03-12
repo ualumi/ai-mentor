@@ -1,4 +1,5 @@
 import ModuleTask from "./module/ModuleTask";
+import "./module.css"
 
 export default function TasksPanel({ mode }) {
 

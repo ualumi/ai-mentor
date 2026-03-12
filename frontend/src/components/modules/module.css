@@ -1,3 +1,25 @@
 .taskspanel {
     height: 100vh;
+        padding-inline: 27px !important;
+    height: calc(100% - 20px);
+    display: flex;
+    flex-direction: column;
+
+    background-color:#161616 ;
+    height: calc(100vh - 20px);
+}
+
+.section-caption-module {
+    font-family: "Stolz regular", monospace;
+    font-size: 28px;
+    color: var(--text-color);
+}
+
+.modules-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background-color: var(--block-color);
+    padding-inline: 30px;
 }

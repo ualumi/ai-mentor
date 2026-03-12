@@ -18,10 +18,10 @@ TASK_POOL = {
 def generate_condition(competency: str, attempts: list):
 
     tasks = TASK_POOL.get(competency, [])
-
+    cse= random.randint(1, 100)
     if not tasks:
         return {
-            "description": f"Решите задачу по компетенции {competency}"
+            "description": f"Пример задачи {cse} по компетенции {competency}"
         }
 
     return {

@@ -21,11 +21,13 @@
     --border-radius: 13px;
     height: 100vh;
     width: 100vw;
+    background-color: #161616;
 }
 
 .body {
     display: flex;
     overflow: hidden;
+    background-color: #161616;
 }
 
 
@@ -264,7 +266,7 @@
 
 .free-mode .module {
     display: grid;
-    grid-template-columns:  1fr 0.4fr ;
+    grid-template-columns:  1fr 0.3fr ;
     width: 100%;
 }
 
@@ -332,13 +334,23 @@
     overflow-y: auto;
     padding-inline: 0px;
     margin-bottom: 0px;
-        padding-inline: 27px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     transition: width 0.25s 
 ease;
     background-color: #161616;
+    color: #fff;
+}
+
+.terminal-output {
+    font-family: "Stolz light";
+    padding-inline: 27px;
+}
+
+.terminal-output-text {
+    color: #fff;
+    opacity: 0.5;
 }
 
 .terminal-item {
@@ -401,6 +413,14 @@ input:focus::placeholder {
     width: 100%;
     display: flex;
     flex-direction: column;
+    flex: 1;
+}
+
+.reco-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    justify-content: space-between;
 }
 
 .module-button {

@@ -55,7 +55,7 @@ export default function SideBar ({ mode="free", isOpen, toggleSidebar }) {
 
   const items = [
     { type:"input_item", text:"Search", clas:"", icon:<Search strokeWidth={1}/> },
-    { type:"button_item", text:"Home", icon:<House strokeWidth={1}/> },
+    { type:"button_item", text:"Home", icon:<House strokeWidth={1}/>, link:"home"},
     { type:"button_item", text:"Progress", icon:<Activity strokeWidth={1}/>, link:"progress"},
     { type:"button_item", text:"Tasks", link:"mentor"},
     { type:"button_item", text:"Modules", link:"modules"}

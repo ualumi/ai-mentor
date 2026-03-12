@@ -46,7 +46,12 @@ export default function StartModuleButton({ competency }) {
       console.log("🧩 session_id =", sessionId);
       // ⭐ сообщаем родителю
       /*if (onStart) onStart();*/
-      navigate(`/module/${sessionId}`);
+
+      /*navigate(`/module/${sessionId}`);*/
+      navigate(`/module/${sessionId}`, {
+        state: { competency }
+      });
+      console.log(competency)
 
     } catch (err) {
       console.error("Start module error:", err);

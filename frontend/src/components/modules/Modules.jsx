@@ -1,9 +1,12 @@
 // components/Modules.jsx
 import { useQuery } from '@tanstack/react-query';
 import "../../App.css"
+import "./module.css"
 const LEARNING_SERVICE = "http://localhost:8001";
 
-export default function Modules() {
+export default function Modules({mode}) {
+  const containerClass =
+    mode === "history" ? "history-container" : "modules-container";
 
   const token = localStorage.getItem("token");
   console.log("TOKEN:", token);
@@ -40,8 +43,10 @@ export default function Modules() {
   }
 
   return (
-    <div className="modules-container">
-
+    <div className={containerClass}>
+      {mode === "modules" && (
+        <h3 className="section-caption-module">Modules</h3>
+      )}
       {sessions.map((session) => (
         <div key={session.session_id} className="item item-light">
           <span className='menu-item-text'>{session.competency}</span>
