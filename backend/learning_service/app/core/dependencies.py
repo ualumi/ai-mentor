@@ -7,5 +7,5 @@ def get_current_user(authorization: str = Header(...)):
 
     token = authorization.replace("Bearer ", "")
     payload = verify_access_token(token)
-
+    print(f"access token {token}")
     return payload

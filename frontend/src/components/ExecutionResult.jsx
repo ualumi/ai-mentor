@@ -168,20 +168,13 @@ export default function ExecutionResult() {
 
   return (
     <div className={s["execution-result"]}>
-      <div className="result-header">
-        <h3>Результат выполнения</h3>
-        <div className={`connection-status ${connectionState.toLowerCase()}`}>
-          WebSocket: {connectionState}
-        </div>
-      </div>
 
       {mentorReplies.length > 0 && (
         <div className="mentor-replies">
           {mentorReplies.map((reply, i) => (
             <div key={i} className="mentor-message">
-              <div className={s["insight-panel"]}>
+              <div>
                 <div className="menu-item mentor-item item-light">
-                  <p className="menu-caption mentor-caption">Mentor</p>
                   <p>{reply.text}</p>
                 </div>
               </div>

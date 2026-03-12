@@ -1,0 +1,6 @@
+.home {
+    background-color: var(--block-color);
+    padding-inline: 30px;
+    display: flex;
+    flex: 1;
+}

@@ -57,7 +57,7 @@ export default function Terminal({ isOpen, onToggle }) {
   return (
     <div>
       {isOpen && (
-        <div className="sidebar menu-item terminal">
+        <div className="menu-item terminal">
           <Item
             type="text_item"
             text="Terminal 1"
@@ -65,7 +65,8 @@ export default function Terminal({ isOpen, onToggle }) {
           />
 
           <pre className="terminal-output">
-            {output}
+            <span className="terminal-output-text">workspace&gt; </span>
+            <span >{output}</span>
           </pre>
         </div>
       )}

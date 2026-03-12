@@ -26,6 +26,10 @@ def extract_evidence(raw_analysis: dict) -> list[dict]:
     compliance = raw_analysis.get("task_compliance", {})
     tags = compliance.get("tag_alignment", {})
 
+    # Добавляем is_correct из correctness
+    correctness = raw_analysis.get("correctness", {})
+    is_correct = correctness.get("is_correct", False)
+    
     for tag, data in tags.items():
         evidence.append({
             "competency": tag,

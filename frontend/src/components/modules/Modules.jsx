@@ -1,12 +1,15 @@
 // components/Modules.jsx
 import { useQuery } from '@tanstack/react-query';
+import "../../App.css"
+import "./module.css"
+const LEARNING_SERVICE = "http://localhost:8001";
 
-const LEARNING_SERVICE = "http://learning_service:8001";
+export default function Modules({mode}) {
+  const containerClass =
+    mode === "history" ? "history-container" : "modules-container";
 
-export default function Modules() {
-
-  const token = localStorage.getItem("access_token");
-
+  const token = localStorage.getItem("token");
+  console.log("TOKEN:", token);
   const { data: sessions, isLoading, error } = useQuery({
     queryKey: ['activeSessions'],
     queryFn: async () => {
@@ -28,26 +31,25 @@ export default function Modules() {
   });
 
   if (isLoading) {
-    return <div>⏳ Загрузка активных модулей...</div>;
+    return <div className='item'> Загрузка активных модулей...</div>;
   }
 
   if (error) {
-    return <div>❌ Ошибка загрузки: {error.message}</div>;
+    return <div className='item'> Ошибка загрузки: {error.message}</div>;
   }
 
   if (!sessions || sessions.length === 0) {
-    return <div>📭 Нет активных модулей</div>;
+    return <div className='item'> Нет активных модулей</div>;
   }
 
   return (
-    <div className="modules-container">
-      <h3>📚 Активные модули</h3>
-
+    <div className={containerClass}>
+      {mode === "modules" && (
+        <h3 className="section-caption-module">Modules</h3>
+      )}
       {sessions.map((session) => (
-        <div key={session.session_id} className="module-card">
-          <h4>{session.competency}</h4>
-          <p>Session ID: {session.session_id}</p>
-          <p>Status: {session.status}</p>
+        <div key={session.session_id} className="item item-light">
+          <span className='menu-item-text'>{session.competency}</span>
         </div>
       ))}
     </div>
