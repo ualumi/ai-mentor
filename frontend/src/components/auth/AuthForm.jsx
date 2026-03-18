@@ -79,7 +79,7 @@ export default function AuthForm() {
         email: email,
       });
 
-      navigate("/mentor");
+      navigate("/");
 
     } catch (err) {
       alert(err.message);

@@ -187,7 +187,7 @@ async def redis_listener():
 
                 print("получено mentor_response")
 
-                attempt.mentor_reply = payload.get("hint")
+                attempt.mentor_action = payload.get("hint")
                 attempt.user_id = user_id
                 
 

@@ -53,8 +53,8 @@ export default function Progress({ labels, values }) {
   };
   return (
     <div className="modules-container">
-        <h3 className="section-caption-module">Progress</h3>
-      <Line data={data} options={options} width={600} height={260} />
+        {/*<h3 className="section-caption-module">Progress</h3>*/}
+      <Line data={data} options={options} width={450} height={260} />
     </div>
   );
 }

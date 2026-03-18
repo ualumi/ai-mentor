@@ -1,18 +1,14 @@
-// context/CodeContext.jsx
-/*import React, { createContext, useContext, useState } from 'react';
 
-const CodeContext = createContext(null); // лучше null для явной проверки
+
+{/*import React, { createContext, useContext, useState } from 'react';
+
+const CodeContext = createContext(null);
 
 export const CodeProvider = ({ children }) => {
-  const [code, setCode] = useState();
-  
-  const value = {
-    code,
-    setCode
-  };
+  const [code, setCode] = useState(''); // ✅ строка по умолчанию
   
   return (
-    <CodeContext.Provider value={value}>
+    <CodeContext.Provider value={{ code, setCode }}>
       {children}
     </CodeContext.Provider>
   );
@@ -20,19 +16,27 @@ export const CodeProvider = ({ children }) => {
 
 export const useCode = () => {
   const context = useContext(CodeContext);
-  if (context === null) {  // более строгая проверка
+  if (context === null) {
     throw new Error('useCode must be used within CodeProvider');
   }
   return context;
-};*/
+};*/}
 
-import React, { createContext, useContext, useState } from 'react';
+
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const CodeContext = createContext(null);
 
-export const CodeProvider = ({ children }) => {
-  const [code, setCode] = useState(''); // ✅ строка по умолчанию
-  
+export const CodeProvider = ({ children, initialCode = "" }) => {
+  const [code, setCode] = useState(initialCode);
+
+  // 🔥 важно: обновлять код, когда приходит новый attempt
+  useEffect(() => {
+    if (initialCode) {
+      setCode(initialCode);
+    }
+  }, [initialCode]);
+
   return (
     <CodeContext.Provider value={{ code, setCode }}>
       {children}

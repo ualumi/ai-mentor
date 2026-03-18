@@ -11,13 +11,13 @@ export default function History({mode}) {
     console.log("Выбран attempt_id:", attemptId);
   };
   return (
-    <div>
+    <div className="">
       {mode === "module" && <p className="history-label">LAST MODULES</p>}
       {mode === "free" && <p className="history-label">HISTORY</p>}
       
         {mode === "module" && <Modules mode="history"/>}
         {mode === "free" && 
-          <div className="menu-list history-list">
+          <div className="menu-list history-list history-scroll">
             <AttemptsHistory onSelectAttempt={handleSelectAttempt} />
             {/*<Item type="text_item" text="Gjgsnrf1" clas="l" />
             <Item type="text_item" text="Gjgsnrf1gghj..." clas="l" />

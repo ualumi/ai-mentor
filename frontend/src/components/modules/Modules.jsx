@@ -4,6 +4,12 @@ import "../../App.css"
 import "./module.css"
 const LEARNING_SERVICE = "http://localhost:8001";
 
+import icon1 from "../../assets/module-icons/Scale.svg";
+import icon2 from "../../assets/module-icons/Box2.svg";
+import icon3 from "../../assets/module-icons/Layers.svg";
+
+const icons = [icon1, icon2, icon3];
+
 export default function Modules({mode}) {
   const containerClass =
     mode === "history" ? "history-container" : "modules-container";
@@ -44,12 +50,40 @@ export default function Modules({mode}) {
 
   return (
     <div className={containerClass}>
+      
       {mode === "modules" && (
         <h3 className="section-caption-module">Modules</h3>
       )}
-      {sessions.map((session) => (
+      {/*{sessions.map((session) => (
         <div key={session.session_id} className="item item-light">
           <span className='menu-item-text'>{session.competency}</span>
+        </div>
+      ))}*/}
+      {sessions.map((session, index) => (
+        <div key={session.session_id} className="item item-light item-module">
+          <div className='module-info'>
+            {/* 🔹 картинка */}
+            <div className="module-icon">
+              <img
+                src={icons[index % icons.length]}
+                alt="module icon"
+                className="module-icon-img"
+              />
+            </div>
+
+            <div className='modules-description'>
+              <span className='modules-item-text'>
+                {session.competency}
+              </span>
+
+              <p className='modules-item-p'>Задач решено: n</p>
+            </div>
+          </div>
+
+          {mode ==! "history" && (
+            <div className='menu-item-processflag'>In process</div>
+          )}
+
         </div>
       ))}
     </div>

@@ -75,7 +75,7 @@ async def get_attempt_detail(attempt_id: str, db=Depends(get_session)):
         "attempt_id": str(attempt.attempt_id),
         "user_id": str(attempt.user_id),
         "code": attempt.code_hash,
-        "mentor_reply": attempt.mentor_reply,
+        "mentor_reply": attempt.mentor_action,
         "analysis": attempt.analysis,
         "skill_scores": attempt.skill_scores,
         "total_score": attempt.total_score,

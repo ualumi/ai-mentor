@@ -88,10 +88,10 @@ export default function SideBar({ mode = "free", isOpen, toggleSidebar }) {
   const location = useLocation();
 
   const items = [
-    { type:"input_item", text:"Search", icon:<Search strokeWidth={1}/> },
-    { type:"button_item", text:"Home", icon:<House strokeWidth={1}/>, link:"/" },
-    { type:"button_item", text:"Progress", icon:<Activity strokeWidth={1}/>, link:"/progress" },
-    { type:"button_item", text:"Tasks", link:"/mentor" },
+    { type:"input_item", text:"Search", icon:<Search strokeWidth={1} size={20}/> },
+    { type:"button_item", text:"Home", icon:<House strokeWidth={1} size={20}/>, link:"/" },
+    { type:"button_item", text:"Progress", icon:<Activity strokeWidth={1} size={20}/>, link:"/progress" },
+    { type:"button_item", text:"Code", link:"/mentor" },
     { type:"button_item", text:"Modules", link:"/module" }
   ];
 
@@ -137,7 +137,7 @@ export default function SideBar({ mode = "free", isOpen, toggleSidebar }) {
             <div
               className="menu-highlight"
               style={{
-                transform: `translateY(${activeIndex * 48}px)`
+                transform: `translateY(${activeIndex * 39}px)`
               }}
             />
           )}

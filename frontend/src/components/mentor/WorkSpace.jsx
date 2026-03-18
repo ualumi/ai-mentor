@@ -1,5 +1,5 @@
 
-import SandBox from "./SandBox";
+{/*import SandBox from "./SandBox";
 import React, { useState } from 'react';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -29,5 +29,64 @@ export default function WorkSpace({ mode }) {
                 
             </div>
         </CodeProvider>
+  );
+}*/}
+
+import SandBox from "./SandBox";
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { CodeProvider } from "../CodeContext";
+import Recommendation from "./Recommendation";
+import TasksPanel from "../modules/TasksPanel";
+import { useLocation, useParams } from "react-router-dom";
+
+const ATTEMPTS_SERVICE = "http://localhost:8009";
+
+export default function WorkSpace({ mode }) {
+  const location = useLocation();
+  const { id } = useParams(); // 🔥 attempt_id
+
+  const competency = location.state?.competency;
+
+  // 🔥 Загружаем attempt ТОЛЬКО если есть id
+  const {
+    data: attempt,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["attempt", id],
+    queryFn: async () => {
+      const res = await fetch(`${ATTEMPTS_SERVICE}/attempt/${id}`);
+      if (!res.ok) throw new Error("Failed to fetch attempt");
+      return res.json();
+    },
+    enabled: !!id, // важно!
+  });
+
+  // 🔥 LOADING / ERROR только для history режима
+  if (mode === "history") {
+    if (isLoading) return <div>Загрузка попытки...</div>;
+    if (error) return <div>Ошибка загрузки</div>;
+  }
+  console.log(attempt)
+
+  return (
+    <CodeProvider initialCode={attempt?.code}>
+      <div className="free-mode">
+
+        <div className={mode}>
+          <SandBox
+            mode={mode}
+            name={competency}
+            attempt={attempt} // 🔥 прокидываем данные
+          />
+
+          {mode === "module" && <TasksPanel />}
+        </div>
+
+        <Recommendation mode={mode} attempt={attempt} />
+
+      </div>
+    </CodeProvider>
   );
 }
