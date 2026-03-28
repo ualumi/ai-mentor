@@ -93,7 +93,7 @@ async def redis_listener(pubsub):
 
         user_id = payload.get("user_id")
         raw_analysis = payload.get("analysis")
-
+        score = payload.get('analysis', {}).get('correctness')
         if not user_id or not raw_analysis:
             print("не то")
             continue
@@ -132,7 +132,8 @@ async def redis_listener(pubsub):
             json.dumps({
                 "user_id": user_id,
                 "progress": user_progress,
-                "recommendations": USER_RECOMMENDATIONS[user_id]
+                "recommendations": USER_RECOMMENDATIONS[user_id],
+                "score": score
             })
         )
 

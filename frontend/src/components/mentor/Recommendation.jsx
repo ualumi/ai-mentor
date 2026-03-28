@@ -1,166 +1,7 @@
 
 
+
 {/*import { MessageCircleCode, BookMarked, ChevronDown } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { wsService } from '../../services/websocket';
-import Item from './Item';
-import "../../App.css"
-import { Link, useNavigate } from "react-router-dom";
-import ExecutionResult from "../ExecutionResult";
-import StartModuleButton from "../modules/StartModuleButton";
-
-export default function Recommendation({mode}) {
-  const resetRecommendation = () => {
-    setRecommendation(null);
-    setIsCollapsed(true);
-  };
-
-  const [activeTab, setActiveTab] = useState("mentor");
-  const navigate = useNavigate();
-  const [recommendation, setRecommendation] = useState(null);
-
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isHighlighted, setIsHighlighted] = useState(false);
-
-  useEffect(() => { 
-    const handler = (data) => {
-
-      const uniqueCompetencies = [
-        ...new Set((data.data?.recommendations || []).map(item => item.competency))
-      ];
-
-      console.log(data)
-
-      if (
-        data.source?.startsWith("user_progress") &&
-        data.data?.recommendations
-      ) {
-
-        setRecommendation({
-          time: new Date().toLocaleTimeString(),
-          data: uniqueCompetencies[0]
-        });
-
-        // ⭐ автоматически открыть панель
-        setIsCollapsed(false);
-
-        // ⭐ подсветка
-        setIsHighlighted(true);
-
-        setTimeout(() => {
-          setIsHighlighted(false);
-        }, 2000);
-
-      }
-    };
-
-    wsService.on('user_progress', handler);
-
-    return () => {
-      wsService.off('user_progress', handler);
-    };
-
-  }, []);
-
-  // ⭐ toggle collapse
-  const toggleCollapse = () => {
-    setIsCollapsed(prev => !prev);
-  };
-
-  return (
-
-    <div
-      className={`item menu-item menu-item-input item-light
-      ${recommendation && !isCollapsed ? "recomendation-item-active" : "recomendation-item"}
-      ${isHighlighted ? "recommendation-highlight" : ""}`}
-    >
-
-
-      {recommendation && (
-        <button
-          className="recommendation-collapse"
-          onClick={toggleCollapse}
-        >
-          {isCollapsed ? "Открыть" : <ChevronDown strokeWidth={1} />}
-        </button>
-      )}
-
-      {!isCollapsed && (
-
-        <>
-
-        <div className="recomendation-content">
-
-
-          <div className="reco-content" style={{ display: activeTab === "recommendation" ? "flex" : "none" }}>
-            {recommendation ? (
-              <>
-                <div className='menu-caption mentor-caption'>
-                  Module recomendation
-                </div>
-
-                <div>
-                  Рекомендован модуль
-                </div>
-
-                <div className="menu-caption mentor-caption">
-                  {typeof recommendation.data === "string"
-                    ? recommendation.data
-                    : JSON.stringify(recommendation.data, null, 2)}
-                </div>
-
-
-                <StartModuleButton
-                  competency={recommendation.data}
-                  //onStart={resetRecommendation}
-                />
-              </>
-            ) : (
-              <p>a</p>
-            )}
-          </div>
-
-          //вкладка ментора
-          <div className="reco-content" style={{ display: activeTab === "mentor" ? "flex" : "none" }}>
-            <div className='menu-caption mentor-caption'>
-              AI mentor
-            </div>
-
-            <ExecutionResult />
-          </div>
-
-        </div>
-
-        <div className="recomentation-tabs">
-
-          <div
-            className={`mentor-tab ${activeTab === "mentor" ? "mentor-tab-active" : ""}`}
-            onClick={() => setActiveTab("mentor")}
-          >
-            <MessageCircleCode strokeWidth={1} />
-            <span>Mentor reply</span>
-          </div>
-
-          <div
-            className={`mentor-tab ${activeTab === "recommendation" ? "mentor-tab-active" : ""}`}
-            onClick={() => setActiveTab("recommendation")}
-          >
-            <BookMarked strokeWidth={1} />
-            <span>Recomendations</span>
-          </div>
-
-        </div>
-
-        </>
-
-      )}
-
-    </div>
-  );
-}*/}
-
-
-import { MessageCircleCode, BookMarked, ChevronDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { wsService } from '../../services/websocket';
 import Item from './Item';
@@ -279,4 +120,495 @@ export default function Recommendation({ mode, attempt }) {
       )}
     </div>
   );
+}*/}
+
+
+import { MessageCircleCode, BookMarked, ChevronDown } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { wsService } from '../../services/websocket';
+import "../../App.css";
+import ExecutionResult from "../ExecutionResult";
+import StartModuleButton from "../modules/StartModuleButton";
+import Module from '../modules/module/Module';
+
+export default function Recommendation({ mode, attempt }) {
+
+  const [activeTab, setActiveTab] = useState("mentor");
+
+  // ✅ теперь массивы (не теряются)
+  const [recommendations, setRecommendations] = useState([]);
+  const [mentorReplies, setMentorReplies] = useState([]);
+  const [score, setScore] = useState(null);
+
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isHighlighted, setIsHighlighted] = useState(false);
+
+  const [hasNewRecommendation, setHasNewRecommendation] = useState(false);
+  const [hasNewMentorReply, setHasNewMentorReply] = useState(false);
+
+  const [showBubbleMessage, setShowBubbleMessage] = useState(false);
+  const [eyePos, setEyePos] = useState({ x: 0, y: 0 });
+
+  // -----------------------------
+  // 👁️ ГЛАЗА
+  // -----------------------------
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 10;
+      const y = (e.clientY / window.innerHeight - 0.5) * 10;
+      setEyePos({ x, y });
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
+  // -----------------------------
+  // 🔹 WebSocket (единая точка)
+  // -----------------------------
+  useEffect(() => {
+    if (mode === "history") return;
+
+    const handler = (data) => {
+
+      // -----------------
+      // 📘 RECOMMENDATIONS + SCORE
+      // -----------------
+      if (data.source?.startsWith("user_progress")) {
+
+        // ✅ SCORE
+        if (data.data?.score) {
+          setScore(data.data.score);
+        }
+
+        // ✅ RECOMMENDATIONS
+        if (data.data?.recommendations) {
+          const unique = [
+            ...new Set(data.data.recommendations.map(r => r.competency))
+          ];
+
+          setRecommendations(prev => {
+            const newOnes = unique.filter(r => !prev.includes(r));
+            if (!newOnes.length) return prev;
+            return [...prev, ...newOnes];
+          });
+
+          if (activeTab !== "recommendation") {
+            setHasNewRecommendation(true);
+          }
+
+          setIsCollapsed(false);
+          setIsHighlighted(true);
+          setTimeout(() => setIsHighlighted(false), 2000);
+        }
+      }
+
+      // -----------------
+      // 🤖 MENTOR
+      // -----------------
+      if (data.source?.startsWith("mentor_response")) {
+        const hint = data.data?.hint;
+        if (!hint) return;
+
+        setMentorReplies(prev => {
+          const exists = prev.some(m => m.text === hint);
+          if (exists) return prev;
+          console.log("MENTOR", hint)
+          return [
+            ...prev,
+            {
+              time: new Date().toLocaleTimeString(),
+              text: hint
+            }
+          ];
+        });
+
+        if (activeTab !== "mentor") {
+          setHasNewMentorReply(true);
+        }
+      }
+    };
+
+    wsService.on("user_progress", handler);
+    wsService.on("mentor_response", handler);
+
+    return () => {
+      wsService.off("user_progress", handler);
+      wsService.off("mentor_response", handler);
+    };
+
+  }, [mode, activeTab]);
+
+  // -----------------------------
+  // 🔹 History режим
+  // -----------------------------
+  useEffect(() => {
+    if (mode === "history" && attempt?.analysis) {
+
+      setRecommendations(attempt.analysis.recommendations || []);
+
+      setMentorReplies(
+        (attempt.analysis.hints || []).map(h => ({
+          text: h,
+          time: new Date(attempt.timestamp).toLocaleTimeString()
+        }))
+      );
+
+      setIsCollapsed(false);
+    }
+  }, [mode, attempt]);
+
+  // -----------------------------
+  const toggleCollapse = () => {
+    setIsCollapsed(prev => !prev);
+    setShowBubbleMessage(false);
+  };
+
+  const handleBubbleClick = () => {
+    if (!recommendations.length && !mentorReplies.length) {
+      setShowBubbleMessage(true);
+    } else {
+      setIsCollapsed(false);
+    }
+  };
+
+  // -----------------------------
+  // 🔘 BUBBLE
+  // -----------------------------
+  if (isCollapsed) {
+    return (
+      <div className="recommendation-bubble" onClick={handleBubbleClick}>
+
+        <div className="ai-face">
+          <div className="eye" style={{ transform: `translate(${eyePos.x}px, ${eyePos.y}px)` }} />
+          <div className="eye" style={{ transform: `translate(${eyePos.x}px, ${eyePos.y}px)` }} />
+        </div>
+
+        {showBubbleMessage && (
+          <div className="bubble-message">
+            Привет, я AI-ментор 👋  
+            Готов помочь тебе!
+          </div>
+        )}
+
+      </div>
+    );
+  }
+
+  // -----------------------------
+  // 🧩 UI
+  // -----------------------------
+  return (
+    <div
+      className={`item menu-item menu-item-input item-light
+      ${recommendations.length ? "recomendation-item-active" : "recomendation-item"}
+      ${isHighlighted ? "recommendation-highlight" : ""}`}
+    >
+
+      {(recommendations.length || mentorReplies.length) && (
+        <button className="recommendation-collapse" onClick={toggleCollapse}>
+          <ChevronDown strokeWidth={1} />
+        </button>
+      )}
+
+      <div className="recomendation-content">
+
+        {/* 📘 RECOMMENDATIONS */}
+        <div
+          className="reco-content"
+          style={{ display: activeTab === "recommendation" ? "flex" : "none" }}
+        >
+          {recommendations.length ? (
+            <>
+              <div className="menu-caption mentor-caption">
+                Module recommendation
+              </div>
+
+              <div className='menu-list history-list recommendation-list'>
+                {recommendations.map((r, i) => (
+                  <div key={i}>
+                    <Module competency={r} />
+                  </div>
+                ))}
+              </div>
+
+              <StartModuleButton competency={recommendations[0]} />
+            </>
+          ) : (
+            <p>Нет рекомендаций</p>
+          )}
+        </div>
+
+        {/* 🤖 MENTOR */}
+        <div
+          className="reco-content"
+          style={{ display: activeTab === "mentor" ? "flex" : "none" }}
+        >
+          <div className="menu-caption mentor-caption">
+            AI mentor
+          </div>
+          <div className='recommendation-list'>
+            {score && (
+              <div className="menu-item mentor-item item-light mentor-score">
+                Score: {score.score} / 10
+              </div>
+            )}
+            <div className="menu-item mentor-item item-light">
+              {mentorReplies.length > 0 
+                ? mentorReplies[mentorReplies.length - 1].text 
+                : null}
+            </div>
+            {/*<ExecutionResult replies={mentorReplies} />*/}
+          </div>
+          {/* ⭐ SCORE */}
+          
+        </div>
+
+      </div>
+
+      {/* TABS */}
+      <div className="recomentation-tabs">
+
+        <div
+          className={`mentor-tab ${activeTab === "mentor" ? "mentor-tab-active" : ""}`}
+          onClick={() => {
+            setActiveTab("mentor");
+            setHasNewMentorReply(false);
+          }}
+        >
+          <MessageCircleCode strokeWidth={1} />
+          <span>Mentor reply</span>
+          {hasNewMentorReply && <span className="new-dot"></span>}
+        </div>
+
+        <div
+          className={`mentor-tab ${activeTab === "recommendation" ? "mentor-tab-active" : ""}`}
+          onClick={() => {
+            setActiveTab("recommendation");
+            setHasNewRecommendation(false);
+          }}
+        >
+          <BookMarked strokeWidth={1} />
+          <span>Recommendations</span>
+          {hasNewRecommendation && <span className="new-dot"></span>}
+        </div>
+
+      </div>
+    </div>
+  );
 }
+
+
+{/*import { MessageCircleCode, BookMarked, ChevronDown } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { wsService } from '../../services/websocket';
+import "../../App.css"
+import ExecutionResult from "../ExecutionResult";
+import StartModuleButton from "../modules/StartModuleButton";
+import Module from '../modules/module/Module';
+
+export default function Recommendation({ mode, attempt }) {
+
+  const [activeTab, setActiveTab] = useState("mentor");
+  const [recommendation, setRecommendation] = useState(null);
+
+  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isHighlighted, setIsHighlighted] = useState(false);
+
+  // ⭐ новое
+  const [hasNewRecommendation, setHasNewRecommendation] = useState(false);
+  const [showBubbleMessage, setShowBubbleMessage] = useState(false);
+
+  const [eyePos, setEyePos] = useState({ x: 0, y: 0 });
+
+  // -----------------------------
+  // 👁️ СЛЕЖЕНИЕ ГЛАЗ
+  // -----------------------------
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      const x = (e.clientX / window.innerWidth - 0.5) * 10;
+      const y = (e.clientY / window.innerHeight - 0.5) * 10;
+      setEyePos({ x, y });
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
+  // -----------------------------
+  // 🔹 WebSocket
+  // -----------------------------
+  useEffect(() => {
+    if (mode === "history") return;
+
+    const handler = (data) => {
+      if (data.source?.startsWith("user_progress") && data.data?.recommendations) {
+
+        const uniqueCompetencies = [
+          ...new Set(data.data.recommendations.map(item => item.competency))
+        ];
+
+        setRecommendation({
+          time: new Date().toLocaleTimeString(),
+          data: uniqueCompetencies[0],
+        });
+
+        // ⭐ если пользователь НЕ на вкладке рекомендаций
+        if (activeTab !== "recommendation") {
+          setHasNewRecommendation(true);
+        }
+
+        setIsCollapsed(false);
+        setIsHighlighted(true);
+        setTimeout(() => setIsHighlighted(false), 2000);
+      }
+    };
+
+    wsService.on("user_progress", handler);
+    return () => wsService.off("user_progress", handler);
+
+  }, [mode, activeTab]);
+
+  // -----------------------------
+  // 🔹 History режим
+  // -----------------------------
+  useEffect(() => {
+    if (mode === "history" && attempt?.analysis) {
+      setRecommendation({
+        time: new Date(attempt.timestamp).toLocaleTimeString(),
+        data: attempt.analysis.recommendations || [],
+      });
+      setIsCollapsed(false);
+    }
+  }, [mode, attempt]);
+
+  const toggleCollapse = () => {
+    setIsCollapsed(prev => !prev);
+    setShowBubbleMessage(false);
+  };
+
+  // -----------------------------
+  // 🤖 BUBBLE CLICK
+  // -----------------------------
+  const handleBubbleClick = () => {
+    if (!recommendation) {
+      setShowBubbleMessage(true);
+    } else {
+      setIsCollapsed(false);
+    }
+  };
+
+  // -----------------------------
+  // ⭐ если свернуто — показываем AI кружок
+  // -----------------------------
+  if (isCollapsed) {
+    return (
+      <div className="recommendation-bubble" onClick={handleBubbleClick}>
+
+
+        <div className="ai-face">
+          <div
+            className="eye"
+            style={{ transform: `translate(${eyePos.x}px, ${eyePos.y}px)` }}
+          />
+          <div
+            className="eye"
+            style={{ transform: `translate(${eyePos.x}px, ${eyePos.y}px)` }}
+          />
+        </div>
+
+        {showBubbleMessage && (
+          <div className="bubble-message">
+            Привет, я AI-ментор 👋  
+            Готов помочь тебе с задачей!
+          </div>
+        )}
+
+      </div>
+    );
+  }
+
+  // -----------------------------
+  // ⭐ ОСНОВНОЙ UI
+  // -----------------------------
+  return (
+    <div
+      className={`item menu-item menu-item-input item-light
+      ${recommendation ? "recomendation-item-active" : "recomendation-item"}
+      ${isHighlighted ? "recommendation-highlight" : ""}`}
+    >
+
+      {recommendation && (
+        <button className="recommendation-collapse" onClick={toggleCollapse}>
+          <ChevronDown strokeWidth={1} />
+        </button>
+      )}
+
+      <div className="recomendation-content">
+
+
+        <div
+          className="reco-content"
+          style={{ display: activeTab === "recommendation" ? "flex" : "none" }}
+        >
+          {recommendation ? (
+            <>
+              <div className="menu-caption mentor-caption">
+                Module recommendation
+              </div>
+
+              <div>
+                
+                {Array.isArray(recommendation.data)
+                  ? recommendation.data.map((r, i) => <div key={i}><Module competency={r}/></div>)
+                  : <div><Module competency={recommendation.data}/>{recommendation.data}</div>}
+              </div>
+
+              <StartModuleButton competency={recommendation.data} />
+            </>
+          ) : (
+            <p>Нет рекомендаций</p>
+          )}
+        </div>
+
+
+        <div
+          className="reco-content"
+          style={{ display: activeTab === "mentor" ? "flex" : "none" }}
+        >
+          <div className="menu-caption mentor-caption">AI mentor</div>
+          <ExecutionResult attempt={attempt} />
+        </div>
+
+      </div>
+
+      <div className="recomentation-tabs">
+
+        <div
+          className={`mentor-tab ${activeTab === "mentor" ? "mentor-tab-active" : ""}`}
+          onClick={() => setActiveTab("mentor")}
+        >
+          <MessageCircleCode strokeWidth={1} />
+          <span>Mentor reply</span>
+        </div>
+
+        <div
+          className={`mentor-tab ${activeTab === "recommendation" ? "mentor-tab-active" : ""}`}
+          onClick={() => {
+            setActiveTab("recommendation");
+            setHasNewRecommendation(false); // ⭐ убираем индикатор
+          }}
+        >
+          <BookMarked strokeWidth={1} />
+          <span>Recommendations</span>
+
+          {hasNewRecommendation && (
+            <span className="new-dot"></span>
+          )}
+
+        </div>
+
+      </div>
+    </div>
+  );
+}*/}

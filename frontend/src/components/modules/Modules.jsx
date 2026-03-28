@@ -7,6 +7,8 @@ const LEARNING_SERVICE = "http://localhost:8001";
 import icon1 from "../../assets/module-icons/Scale.svg";
 import icon2 from "../../assets/module-icons/Box2.svg";
 import icon3 from "../../assets/module-icons/Layers.svg";
+import ProgressBar from "./module/ProgressBar"
+import Module from "./module/Module";
 
 const icons = [icon1, icon2, icon3];
 
@@ -59,10 +61,18 @@ export default function Modules({mode}) {
           <span className='menu-item-text'>{session.competency}</span>
         </div>
       ))}*/}
-      {sessions.map((session, index) => (
+      {sessions.map((session) => (
+        <Module
+          key={session.session_id}
+          competency={session.competency}
+          session={session} // если захочешь расширить
+          mode={mode}
+        />
+      ))}
+      {/*{sessions.map((session, index) => (
         <div key={session.session_id} className="item item-light item-module">
           <div className='module-info'>
-            {/* 🔹 картинка */}
+
             <div className="module-icon">
               <img
                 src={icons[index % icons.length]}
@@ -81,11 +91,15 @@ export default function Modules({mode}) {
           </div>
 
           {mode ==! "history" && (
-            <div className='menu-item-processflag'>In process</div>
+            <div>
+              <div className='menu-item-processflag'>In process</div>
+              <ProgressBar />
+            </div>
+            
           )}
 
         </div>
-      ))}
+      ))}*/}
     </div>
   );
 }

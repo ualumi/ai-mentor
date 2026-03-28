@@ -84,6 +84,9 @@
     flex-direction: row;
     padding-block: 8px;
     align-items: start;
+    background: #2F3032; /*#202123*/
+    border: none;
+    box-shadow: none;
     
 }
 
@@ -99,9 +102,9 @@
 }
 
 .profile-ava {
-    background-color: #202022;
+    background-color: #444547;
     border-radius: 500px;
     padding: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: inset 0px -10px 40px -20px rgba(255, 255, 255, 0.08);
+    /*border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0px -10px 40px -20px rgba(255, 255, 255, 0.08);*/
 }

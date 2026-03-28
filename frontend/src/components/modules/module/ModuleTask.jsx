@@ -80,7 +80,12 @@ export default function ModuleTask() {
           <div className="item item-light">
             <p>{condition.description}</p>
           </div>
-
+          <button
+            className="module-next-button"
+            onClick={handleNextStep}
+          >
+            Проверить
+          </button>
           <button
             className="module-next-button"
             onClick={handleNextStep}

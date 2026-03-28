@@ -2,10 +2,12 @@ import { NavLink } from "react-router-dom";
 import Modules from "../modules/Modules";
 import Progress from "./Progress";
 import "./home.css"
+import MentorLink from "./MentorLink";
 export default function Home () {
     return (
         <section className="home">
             <h1 className="home-label">Hi, username</h1>
+            <MentorLink/>
             <div className="home-summary">
                     <div className="home-summary-block">
                         <div className="home-summary-block-label">

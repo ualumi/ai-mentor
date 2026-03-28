@@ -5,6 +5,7 @@ import { useCode } from './CodeContext';
 import { useState } from "react";
 import "./ai.css";
 
+
 const defaultCode = `import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
@@ -41,11 +42,37 @@ import "./ai.css";
 export default function CodeEditor({ analysis = [], mode, attempt }) {
   const { code, setCode } = useCode();
   const editorRef = useRef(null);
+  const containerRef = useRef(null);
   const zonesRef = useRef(new Map());
   const decorationsRef = useRef([]);
   const monaco = useMonaco();
 
   const [localAnalysis, setLocalAnalysis] = useState([]);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const observer = new ResizeObserver(() => {
+      if (editorRef.current) {
+        requestAnimationFrame(() => {
+          editorRef.current.layout();
+        });
+      }
+    });
+
+    observer.observe(containerRef.current);
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      editorRef.current?.layout();
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // 🔹 синхронизация анализа
   useEffect(() => {
@@ -107,7 +134,7 @@ export default function CodeEditor({ analysis = [], mode, attempt }) {
       filteredAnalysis.forEach((item) => {
         const domNode = document.createElement("div");
         domNode.style.padding = "4px 8px";
-        domNode.style.fontSize = "13px";
+        domNode.style.fontSize = "12px";
         domNode.style.background = "rgba(255,255,255,0.04)";
         let borderColor = "#6F90FF";
         if (item.type === "strength") borderColor = "#4CAF50";
@@ -149,31 +176,34 @@ export default function CodeEditor({ analysis = [], mode, attempt }) {
       base: "vs-dark",
       inherit: true,
       rules: [],
-      colors: { "editor.background": "#202022" },
+      colors: { "editor.background": "#202123" },
     });
     monaco.editor.setTheme("custom-dark");
   }, [monaco]);
 
   return (
-    <Editor
-      height="57.5vh"
-      language="python"
-      theme="custom-dark"
-      value={code}
-      options={{
-        minimap: { enabled: false },
-        fontSize: 12,
-        automaticLayout: true,
-        padding: { top: 15 },
-        lineHeight: 20,
-        readOnly: false // можешь добавить readOnly={mode==='history'} из SandBox
-      }}
-      onMount={(editor) => {
-        handleMount(editor);
-        if (!code) setCode(defaultCode);
-      }}
-      onChange={(value) => setCode(value || "")}
-    />
+    <div ref={containerRef} style={{ height: "57.5vh", width: "100%", minWidth: 0}}>
+      <Editor
+        height="100%"
+        language="python"
+        theme="custom-dark"
+        value={code}
+        options={{
+          minimap: { enabled: false },
+          fontSize: 12,
+          automaticLayout: true,
+          padding: { top: 15 },
+          lineHeight: 20,
+          readOnly: false // можешь добавить readOnly={mode==='history'} из SandBox
+        }}
+        onMount={(editor) => {
+          handleMount(editor);
+          if (!code) setCode(defaultCode);
+        }}
+        onChange={(value) => setCode(value || "")}
+      />
+    </div>
+    
   );
 }
 

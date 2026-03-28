@@ -7,6 +7,7 @@ CHANNEL_ANALYSIS_PATTERN = "analytics_response:*"
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 import asyncio
+from fastapi.middleware.cors import CORSMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -25,28 +26,19 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+    allow_credentials=True
+)
+
 @app.get("/health")
 async def health():
     return {"status": "ok"}
 
-'''@app.get("/progress/{session_id}")
-async def get_progress(session_id: str):
-    """
-    Возвращает текущий прогресс пользователя и рекомендации (если есть)
-    """
-    progress = USER_PROGRESS.get(session_id)
-    if not progress:
-        raise HTTPException(status_code=404, detail=progress)
-
-    # Здесь можно расширять логику рекомендаций
-    recommendations = progress.get("recommendations", [])
-
-    return {
-        "progress": progress,
-        "recommendations": recommendations
-    }'''
-
-@app.get("/progress/{user_id}")
+'''@app.get("/progress/{user_id}")
 async def get_progress(user_id: str):
     print("USER_PROGRESS:", USER_PROGRESS)
     progress = USER_PROGRESS.get(user_id)
@@ -55,6 +47,36 @@ async def get_progress(user_id: str):
         raise HTTPException(
             status_code=404,
             detail=f"No progress found for {user_id}"
+        )
+
+    return {
+        "progress": progress,
+        "recommendations": USER_RECOMMENDATIONS.get(user_id, [])
+    }'''
+
+from jose import jwt, JWTError
+
+SECRET_KEY = "supersecret"
+ALGORITHM = "HS256"
+
+
+@app.get("/progress/{token}")
+async def get_progress(token: str):
+    # 🔐 Декодируем токен
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = int(payload["sub"])
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+
+    print("USER_PROGRESS:", USER_PROGRESS)
+
+    progress = USER_PROGRESS.get(user_id)
+
+    if not progress:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No progress found for user {user_id}"
         )
 
     return {
