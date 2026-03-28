@@ -29,7 +29,14 @@ async def analitics_worker():
             attempt_id = payload.get("attempt_id")
             learning_session_id = payload.get("learning_session_id")
             step_id = payload.get("step_id")
+            condition_description = payload.get("condition")
+            condition = condition_description.get("description")
 
+            if condition:
+                print("condition received", condition)
+            else:
+                print("нет условия")
+                
             if not user_id or not code:
                 continue
 
@@ -45,7 +52,8 @@ async def analitics_worker():
                 "analysis": analysis,
                 "learning_session_id": learning_session_id,
                 "step_id": step_id,
-                "code": code
+                "code": code,
+                "condition": condition
             }
 
             # 🔥 Публикуем ТОЛЬКО в канал пользователя

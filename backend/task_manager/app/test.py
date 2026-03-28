@@ -77,7 +77,7 @@ async def test_free_mode():
 
 asyncio.run(test_free_mode())
 
-r = requests.post(
+'''r = requests.post(
     f"{LEARNING_SERVICE}/learning/start",
     headers={"Authorization": f"Bearer {token}"},
     json={"competency": "Clustering"},
@@ -85,7 +85,8 @@ r = requests.post(
 assert r.status_code == 200, f"Failed to start session: {r.status_code}, {r.text}"
 print("Response from Learning Service:", r.status_code, r.text)
 
-session_id = r.json()["session_id"]
+session = r.json()["session"]
+session_id = session["session_id"]
 print(f"🧩 session_id = {session_id}")
 
 # -------------------------------
@@ -113,9 +114,9 @@ assert any(s.get("session_id") == session_id for s in sessions), \
 assert all(s.get("status") == "active" for s in sessions), \
     "❌ Non-active session returned when filtering by status=active!"
 
-print("✅ /learning/my returned correct active sessions!")
+print("✅ /learning/my returned correct active sessions!")'''
 
-'''MAX_STEPS = 3
+MAX_STEPS = 3
 
 
 async def wait_for_condition(ws):
@@ -154,7 +155,7 @@ async def read_responses(ws, timeout=2):
             response = await asyncio.wait_for(ws.recv(), timeout=timeout)
             print("⬅️", response)
         except asyncio.TimeoutError:
-            break'''
+            break
 
 
 
@@ -206,12 +207,67 @@ async def read_responses(ws, timeout=2):
 
             print("📘 condition:", condition["condition"]["description"])
 
+        print("🏁 тест завершён")'''
+
+async def test_module_mode():
+
+    async with websockets.connect(
+        f"ws://localhost:8004/ws?token={token}"
+    ) as websocket:
+
+        await websocket.send(json.dumps({
+            "type": "set_mode",
+            "mode": "module"
+        }))
+
+        r = requests.post(
+            f"{LEARNING_SERVICE}/learning/start",
+            headers={"Authorization": f"Bearer {token}"},
+            json={"competency": "Clustering"},
+        )
+
+        assert r.status_code == 200
+        session = r.json()["session"]
+        session_id = session["session_id"]
+
+        print(f"🧩 session_id = {session_id}")
+
+        condition = await wait_for_condition(websocket)
+
+        for step in range(MAX_STEPS):
+            print(f"\n===== STEP {step} =====")
+
+            await send_code(websocket)
+            await read_responses(websocket)
+
+            await websocket.send(json.dumps({
+                "type": "next_step"
+            }))
+
+            condition = await wait_for_condition(websocket)
+
         print("🏁 тест завершён")
 
+        return session_id 
 
-asyncio.run(test_module_mode())'''
 
-# -------------------------------
+#asyncio.run(test_module_mode())
+session_id = asyncio.run(test_module_mode())
+
+print("\n🔍 Проверка /state")
+
+r_state = requests.get(
+    f"{LEARNING_SERVICE}/learning/session/{session_id}/state",
+    headers={"Authorization": f"Bearer {token}"}
+)
+
+assert r_state.status_code == 200, f"/state failed: {r_state.status_code}, {r_state.text}"
+
+state = r_state.json()
+
+print("📦 STATE:", json.dumps(state, indent=2))
+
+'''# -------------------------------
 # 2️⃣ Тест эндпоинта истории попыток
 # -------------------------------
 history_resp = requests.get(f"{ATTEMPTS_SERVICE}/attempts/{token}/history")
@@ -245,4 +301,4 @@ if history_data:
     assert "analysis" in attempt_detail
     assert "skill_scores" in attempt_detail
     assert "total_score" in attempt_detail
-    assert "is_correct" in attempt_detail
+    assert "is_correct" in attempt_detail'''

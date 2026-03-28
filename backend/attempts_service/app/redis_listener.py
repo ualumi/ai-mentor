@@ -154,8 +154,11 @@ async def redis_listener():
 
                 attempt = Attempt(
                     attempt_id=attempt_id,
-                    user_id=user_id
+                    user_id=user_id,
+                    learning_session_id=payload.get("learning_session_id"),
                 )
+
+                learning_session_id = payload.get("learning_session_id")
 
                 db.add(attempt)
                 await db.commit()
@@ -228,10 +231,11 @@ async def redis_listener():
                 )
 
                 attempt.code_hash = payload.get("code")
+                attempt.condition = payload.get("condition")
 
             await db.commit()
 
-            print(f"✏️ Attempt {attempt_id} updated from {channel}")
+            print(f"✏️ Attempt {attempt_id} updated from {channel}, learning_session_id: {learning_session_id}, condition: {attempt.condition}")
 
 '''import json
 from sqlalchemy import select

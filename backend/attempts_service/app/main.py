@@ -117,6 +117,107 @@ async def get_attempts(user_id: str, db=Depends(get_session)):
         for r in rows
     ]
 
+
+@app.get("/attempts/code/{user_id}/{learning_session_id}")
+
+async def get_session_attempts(user_id: str, learning_session_id: str, db=Depends(get_session)):
+    
+    learning_session_id_str = str(learning_session_id)
+    print("learning_session_id_str", learning_session_id_str)
+
+    result = await db.execute(
+        select(
+            Attempt.timestamp,
+            Attempt.skill_scores,
+            Attempt.total_score,
+            Attempt.is_correct,
+            Attempt.code_hash,
+            Attempt.learning_session_id,
+            Attempt.condition,
+            Attempt.attempt_id
+            
+        )
+        .where(Attempt.user_id == user_id)
+        .where(Attempt.learning_session_id == learning_session_id_str)
+        .order_by(Attempt.timestamp.asc())
+    )
+
+    rows = result.all()
+
+    return [
+        {
+            "timestamp": r.timestamp,
+            "skill_scores": r.skill_scores,
+            "total_score": r.total_score,
+            "is_correct": r.is_correct,
+            "code": r.code_hash,
+            "learning_session_id": str(r.learning_session_id) if r.learning_session_id else None,
+            "condition": str(r.condition) if r.condition else None,
+            "attempt_id": str(r.attempt_id)
+        }
+        for r in rows
+    ]
+
+
+
+
+
+from fastapi import Query
+from datetime import datetime, timedelta
+from sqlalchemy import func
+
+@app.get("/attempts/activity")
+async def get_user_activity(
+    token: str = Query(...),
+    days: int = 30,
+    db=Depends(get_session)
+):
+    """
+    Возвращает активность пользователя по дням (для heatmap)
+    """
+
+    # 🔐 Декодируем токен
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = str(payload["sub"])
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    # 📅 дата начала
+    since_date = datetime.utcnow() - timedelta(days=days)
+
+    result = await db.execute(
+        select(
+            func.date(Attempt.timestamp).label("date"),
+            func.count().label("count")
+        )
+        .where(Attempt.user_id == user_id)
+        .where(Attempt.timestamp >= since_date)
+        .group_by(func.date(Attempt.timestamp))
+        .order_by(func.date(Attempt.timestamp))
+    )
+
+    rows = result.all()
+
+    # 📊 map: дата → количество
+    activity_map = {
+        str(r.date): r.count
+        for r in rows
+    }
+
+    # 🔥 заполняем пропущенные дни
+    full_data = []
+    for i in range(days):
+        day = (since_date + timedelta(days=i)).date()
+        full_data.append({
+            "date": str(day),
+            "count": activity_map.get(str(day), 0)
+        })
+
+    return full_data
+
 '''@app.get("/episodes/{session_id}")
 async def get_episodes(session_id: str, db=Depends(get_session)):
     res = await db.execute(

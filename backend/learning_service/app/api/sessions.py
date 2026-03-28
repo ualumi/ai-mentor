@@ -5,7 +5,8 @@ from app.application.queries.get_session import get_session
 from app.schemas.session import StartSessionRequest
 from app.infrastructure.redis import redis_client
 from app.application.queries.get_user_sessions import get_user_sessions
-
+from app.infrastructure.attempt_client import get_session_attempts
+import json
 router = APIRouter(prefix="/learning", tags=["learning"])
 
 
@@ -21,12 +22,36 @@ async def start_learning_session(
         competency=data.competency,
     )
 
-    return {
+    """return {
         "user_id": session.user_id,
         "session_id": session.id,
         "competency": session.competency,
         "methodology": session.methodology,
         "current_step": session.current_step
+    }"""
+    print(session)
+    return session
+
+@router.get("/session/{session_id}/state")
+async def get_session_state(
+    session_id: str,
+    user=Depends(get_current_user)
+):
+    session = await get_session(session_id)
+
+    if not session:
+        raise HTTPException(404)
+
+    # 🔹 попытки
+    attempts = await get_session_attempts(session["user_id"], session_id)
+
+    # 🔹 прогресс (можно хранить в redis или дергать progress_service)
+    progress = await redis_client.get(f"user_progress:{session['user_id']}")
+
+    return {
+        "session": session,
+        "attempts": attempts,
+        "progress": json.loads(progress) if progress else {},
     }
 
 
