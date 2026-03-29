@@ -30,13 +30,16 @@ async def analitics_worker():
             learning_session_id = payload.get("learning_session_id")
             step_id = payload.get("step_id")
             condition_description = payload.get("condition")
-            condition = condition_description.get("description")
+            condition = None
+            if condition_description:
+                condition = condition_description.get("description")
+            #condition = condition_description.get("description")
 
             if condition:
                 print("condition received", condition)
             else:
                 print("нет условия")
-                
+
             if not user_id or not code:
                 continue
 

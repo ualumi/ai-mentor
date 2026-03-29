@@ -47,7 +47,11 @@ async def get_session_state(
 
     # 🔹 прогресс (можно хранить в redis или дергать progress_service)
     progress = await redis_client.get(f"user_progress:{session['user_id']}")
-
+    print({
+        "session": session,
+        "attempts": attempts,
+        "progress": json.loads(progress) if progress else {},
+    })
     return {
         "session": session,
         "attempts": attempts,

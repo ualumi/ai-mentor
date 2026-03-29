@@ -1,7 +1,7 @@
 import ModuleTask from "./module/ModuleTask";
 import "./module.css"
 
-export default function TasksPanel({ mode }) {
+export default function TasksPanel({ mode, restoredState }) {
 
     
   return (
@@ -12,7 +12,7 @@ export default function TasksPanel({ mode }) {
             
 
         </div>
-        <ModuleTask></ModuleTask>
+        <ModuleTask restoredState={restoredState}></ModuleTask>
     </div>
   );
 }

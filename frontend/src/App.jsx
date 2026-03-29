@@ -25,9 +25,9 @@ export default function App() {
 
     wsService.connect(token);
 
-    return () => {
+    /*return () => {
       wsService.disconnect();
-    };
+    };*/
   }, [token]);
   return (
     <QueryClientProvider client={queryClient}>

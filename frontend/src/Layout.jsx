@@ -7,43 +7,8 @@ import WorkSpace from "./components/mentor/WorkSpace";
 import Home from "./components/home/Home";
 import Progress from "./components/home/Progress";
 import ProtectedRoute from "./ProtectedRoute";
-
-/*export default function Layout({ isSidebarOpen, toggleSidebar }) {
-
-  const location = useLocation();
-
-  let mode = "free";
-
-  if (location.pathname.startsWith("/module")) {
-    mode = "module";
-  }
-
-  return (
-    <>
-      <SideBar
-        mode={mode}
-        isOpen={isSidebarOpen}
-        toggleSidebar={toggleSidebar}
-      />
-
-      <Routes>
-        <Route path="/mentor" element={<WorkSpace mode="free" isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}/>} />
-        <Route path="/modules" element={<Modules mode="modules"/>} />
-        <Route path="/module/:id" element={<WorkSpace mode="module" isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}/>} />
-        <Route path="/auth" element={<AuthForm />} />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/progress" element={<Progress labels={["Навык 1", "Навык 2", "Навык 3", "Навык 4"]} values={[20, 40, 30, 80]}/>} />
-      </Routes>
-    </>
-  );
-}*/
+import { wsService } from "./services/websocket";
+import { useEffect } from 'react';
 
 export default function Layout({ isSidebarOpen, toggleSidebar }) {
   const location = useLocation();
@@ -54,6 +19,26 @@ export default function Layout({ isSidebarOpen, toggleSidebar }) {
   if (location.pathname.startsWith("/module")) {
     mode = "module";
   }
+
+  useEffect(() => {
+    const setMode = async () => {
+      try {
+        await wsService.connect(); // гарантируем подключение
+
+        await wsService.send({
+          type: "set_mode",
+          mode
+        });
+
+        console.log("📡 mode set:", mode);
+
+      } catch (e) {
+        console.error("WS mode error:", e);
+      }
+    };
+
+    setMode();
+  }, [mode]);
 
   return (
     <>

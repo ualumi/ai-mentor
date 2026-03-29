@@ -47,6 +47,10 @@ export default function WorkSpace({ mode }) {
   const { id } = useParams(); // 🔥 attempt_id
 
   const competency = location.state?.competency;
+  const restoredState = location.state?.restoredState;
+  const isExisting = location.state?.isExisting;
+
+  //const competency = location.state?.competency;
 
   // 🔥 Загружаем attempt ТОЛЬКО если есть id
   const {
@@ -79,9 +83,10 @@ export default function WorkSpace({ mode }) {
             mode={mode}
             name={competency}
             attempt={attempt} // 🔥 прокидываем данные
+            restoredState={restoredState}
           />
 
-          {mode === "module" && <TasksPanel />}
+          {mode === "module" && <TasksPanel restoredState={restoredState} />}
         </div>
 
         <Recommendation mode={mode} attempt={attempt} />

@@ -1,12 +1,28 @@
 import { useEffect, useState } from "react";
 import { wsService } from "../../../services/websocket";
 
-export default function ModuleTask() {
+export default function ModuleTask({ restoredState }) {
 
   const [condition, setCondition] = useState(null);
+
+  
+
   const [connectionState, setConnectionState] = useState(
     wsService.getConnectionState()
   );
+
+  // 🔹 восстановление состояния при монтировании
+  useEffect(() => {
+    if (!restoredState?.attempts) return;
+
+    const lastAttempt = restoredState.attempts.slice(-1)[0];
+
+    setCondition({
+      description: lastAttempt.condition
+    });
+
+  }, [restoredState]);
+
 
   // ✅ подписка на task_condition
   useEffect(() => {
@@ -29,7 +45,7 @@ export default function ModuleTask() {
   }, []);
 
   // ✅ устанавливаем режим module
-  useEffect(() => {
+  /*useEffect(() => {
 
     if (wsService.getConnectionState() !== "OPEN") return;
 
@@ -40,7 +56,7 @@ export default function ModuleTask() {
 
     console.log("📡 module mode enabled");
 
-  }, []);
+  }, []);*/
 
   // ✅ отслеживание состояния соединения
   useEffect(() => {

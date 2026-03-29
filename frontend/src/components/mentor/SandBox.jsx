@@ -96,9 +96,33 @@ import ProgressBar from "../modules/module/ProgressBar";
   );
 }*/}
 
-export default function SandBox({ mode, name, attempt }) {
+export default function SandBox({ mode, name, attempt, restoredState }) {
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [analysis, setAnalysis] = useState([]);
+
+  // 🔥 если есть восстановленное состояние
+  useEffect(() => {
+    if (!restoredState) return;
+
+    console.log("♻️ restoring state", restoredState);
+
+    // пример:
+    if (restoredState.attempts) {
+      setAnalysis(restoredState.attempts);
+    }
+
+  }, [restoredState]);
+  const competency = restoredState?.session?.competency;
+
+  const progress = restoredState?.progress;
+
+  // 🔥 последняя попытка
+  const lastAttempt = restoredState?.attempts?.length
+    ? restoredState.attempts[restoredState.attempts.length - 1]
+    : null;
+
+  const restoredCode = lastAttempt?.code;
+
 
   const handleToggle = () => {
     setIsTerminalOpen(!isTerminalOpen);
@@ -142,10 +166,14 @@ export default function SandBox({ mode, name, attempt }) {
 
       {mode === "module" && (
         <div className="progress">
-          <h1 className={s["section-caption-module"]}>Модуль: {name}</h1>
+          {/*<h1 className={s["section-caption-module"]}>Модуль: {name}</h1>*/}
+          <h1 className={s["section-caption-module"]}>
+            Модуль: {competency || name}
+          </h1>
           <div className="progress-info">
             <span className="progress-item-text">Прогресс по модулю: </span>
-            <ProgressBar progress={15} />
+            {/*<ProgressBar progress={15} />*/}
+            <ProgressBar progress={restoredState?.attempts?.length || 0} />
           </div>
         </div>
       )}
