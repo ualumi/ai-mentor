@@ -150,7 +150,8 @@ async def get_session_attempts(user_id: str, learning_session_id: str, db=Depend
             "skill_scores": r.skill_scores,
             "total_score": r.total_score,
             "is_correct": r.is_correct,
-            "code": r.code_hash,
+            "first_line": r.code_hash.splitlines()[0] if r.code_hash else "",
+            
             "learning_session_id": str(r.learning_session_id) if r.learning_session_id else None,
             "condition": str(r.condition) if r.condition else None,
             "attempt_id": str(r.attempt_id)
@@ -200,7 +201,7 @@ async def get_user_activity(
     )
 
     rows = result.all()
-
+    print(rows)
     # 📊 map: дата → количество
     activity_map = {
         str(r.date): r.count
@@ -215,7 +216,7 @@ async def get_user_activity(
             "date": str(day),
             "count": activity_map.get(str(day), 0)
         })
-
+    print(full_data)
     return full_data
 
 '''@app.get("/episodes/{session_id}")

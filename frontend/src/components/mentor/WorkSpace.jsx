@@ -32,39 +32,55 @@ export default function WorkSpace({ mode }) {
   );
 }*/}
 
+
+
 import SandBox from "./SandBox";
-import React from "react";
+import {React} from "react";
 import { useQuery } from "@tanstack/react-query";
 import { CodeProvider } from "../CodeContext";
 import Recommendation from "./Recommendation";
 import TasksPanel from "../modules/TasksPanel";
 import { useLocation, useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 const ATTEMPTS_SERVICE = "http://localhost:8009";
 
 export default function WorkSpace({ mode }) {
+  console.log(mode)
   const location = useLocation();
   const { id } = useParams(); // 🔥 attempt_id
+
+  const [stableRestoredState, setStableRestoredState] = useState(null);
+  const selectedAttemptId = location.state?.selectedAttemptId;
 
   const competency = location.state?.competency;
   const restoredState = location.state?.restoredState;
   const isExisting = location.state?.isExisting;
+  useEffect(() => {
+    if (restoredState && !stableRestoredState) {
+      setStableRestoredState(restoredState);
+    }
+  }, [restoredState]);
 
+  console.log("restoredState", mode)
   //const competency = location.state?.competency;
 
   // 🔥 Загружаем attempt ТОЛЬКО если есть id
+
+  const attemptIdToLoad = selectedAttemptId || id;
+
   const {
     data: attempt,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["attempt", id],
+    queryKey: ["attempt", attemptIdToLoad],
     queryFn: async () => {
-      const res = await fetch(`${ATTEMPTS_SERVICE}/attempt/${id}`);
+      const res = await fetch(`${ATTEMPTS_SERVICE}/attempt/${attemptIdToLoad}`);
       if (!res.ok) throw new Error("Failed to fetch attempt");
       return res.json();
     },
-    enabled: !!id, // важно!
+    enabled: !!attemptIdToLoad,
   });
 
   // 🔥 LOADING / ERROR только для history режима
@@ -73,6 +89,7 @@ export default function WorkSpace({ mode }) {
     if (error) return <div>Ошибка загрузки</div>;
   }
   console.log(attempt)
+  console.log("id", id, "selected_id", selectedAttemptId)
 
   return (
     <CodeProvider initialCode={attempt?.code}>
@@ -86,10 +103,15 @@ export default function WorkSpace({ mode }) {
             restoredState={restoredState}
           />
 
-          {mode === "module" && <TasksPanel restoredState={restoredState} />}
+          {mode === "module" && <TasksPanel restoredState={stableRestoredState} selectedAttemptId={selectedAttemptId} />}
         </div>
 
-        <Recommendation mode={mode} attempt={attempt} />
+
+        {attempt ? (
+          <Recommendation mode={"history"} attempt={attempt} />
+        ) : (
+          <Recommendation mode={mode} attempt={attempt} />
+        )}
 
       </div>
     </CodeProvider>

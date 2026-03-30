@@ -68,6 +68,7 @@ export default function Layout({ isSidebarOpen, toggleSidebar }) {
           path="/attempt/:id"
           element={<WorkSpace mode="history" />}
         />
+
         <Route path="/progress" element={<Progress labels={["Навык 1", "Навык 2", "Навык 3", "Навык 4"]} values={[20, 40, 30, 80]}/>} />
       </Routes>
     </>

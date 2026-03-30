@@ -44,20 +44,6 @@ export default function ModuleTask({ restoredState }) {
     };
   }, []);
 
-  // ✅ устанавливаем режим module
-  /*useEffect(() => {
-
-    if (wsService.getConnectionState() !== "OPEN") return;
-
-    wsService.send({
-      type: "set_mode",
-      mode: "module"
-    });
-
-    console.log("📡 module mode enabled");
-
-  }, []);*/
-
   // ✅ отслеживание состояния соединения
   useEffect(() => {
 
@@ -91,23 +77,25 @@ export default function ModuleTask({ restoredState }) {
       )}
 
       {condition && (
-        <div className="task-condition">
+        <div className="task-condition taskkk">
 
-          <div className="item item-light">
+          <div className="item item-light module-task-item">
             <p>{condition.description}</p>
           </div>
-          <button
-            className="module-next-button"
-            onClick={handleNextStep}
-          >
-            Проверить
-          </button>
-          <button
-            className="module-next-button"
-            onClick={handleNextStep}
-          >
-            Следующий шаг
-          </button>
+          <div className="buttons-module">
+            <button
+              className="module-next-button module-button"
+              onClick={handleNextStep}
+            >
+              Проверить
+            </button>
+            <button
+              className="module-next-button module-button disabled"
+              onClick={handleNextStep}
+            >
+              Следующий шаг
+            </button>
+          </div>
         </div>
       )}
 

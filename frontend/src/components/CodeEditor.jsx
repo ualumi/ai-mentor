@@ -1,6 +1,6 @@
 
 
-import { useExecuteCode } from '../hooks/useCodeExecution';
+{/*import { useExecuteCode } from '../hooks/useCodeExecution';
 import { useCode } from './CodeContext';
 import { useState } from "react";
 import "./ai.css";
@@ -109,13 +109,7 @@ export default function CodeEditor({ analysis = [], mode, attempt }) {
   }, [analysis, mode, attempt]);
   
 
-  useEffect(() => {
-    if (Array.isArray(analysis)) {
-      setLocalAnalysis(analysis);
-    } else {
-      setLocalAnalysis([]);
-    }
-  }, [analysis]);
+
 
   const handleMount = (editor) => {
     editorRef.current = editor;
@@ -205,55 +199,129 @@ export default function CodeEditor({ analysis = [], mode, attempt }) {
     </div>
     
   );
-}
+}*/}
 
-{/*export default function CodeEditor({ analysis = [] }) {
-  console.log({ analysis });
+
+import { useCode } from './CodeContext';
+import { useState, useRef, useEffect } from "react";
+import Editor, { useMonaco } from "@monaco-editor/react";
+import "./ai.css";
+
+const defaultCode = `import numpy as np
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import silhouette_score
+import matplotlib.pyplot as plt
+
+def cluster_data(data, n_clusters):
+    scaler = StandardScaler()
+    scaled = scaler.fit_transform(data)
+
+    best_score = -1
+    best_model = None
+
+    for k in range(2, n_clusters + 1):
+        model = KMeans(n_clusters=k)
+        labels = model.fit_predict(scaled)
+
+        score = silhouette_score(scaled, labels)
+
+        if score > best_score:
+            best_score = score
+            best_model = model
+    plt.scatter(scaled[:, 0], scaled[:, 1], c=best_model.labels_)
+    plt.show()
+
+    return best_model, scaler`;
+
+export default function CodeEditor({ analysis = [], mode, attempt }) {
   const { code, setCode } = useCode();
+
   const editorRef = useRef(null);
+  const containerRef = useRef(null);
   const zonesRef = useRef(new Map());
   const decorationsRef = useRef([]);
+
   const monaco = useMonaco();
 
+  const [localAnalysis, setLocalAnalysis] = useState([]);
+
+  // -----------------------------
+  // 🔹 Resize
+  // -----------------------------
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const observer = new ResizeObserver(() => {
+      editorRef.current?.layout();
+    });
+
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // -----------------------------
+  // 🔹 HISTORY (attempt)
+  // -----------------------------
+  useEffect(() => {
+    if (mode !== "history") return;
+    if (!attempt?.analysis) return;
+
+    const recommendations = attempt.analysis.recommendations || [];
+
+    const mapped = recommendations.map((msg, i) => ({
+      line: i + 1,
+      type: 'recommendation',
+      message: msg,
+      confidence: 1
+    }));
+
+    console.log("📜 HISTORY RECOMMENDATIONS", mapped);
+
+    setLocalAnalysis(mapped);
+
+  }, [mode, attempt?.analysis]); // 🔥 важно!
+
+  // -----------------------------
+  // 🔹 LIVE (WebSocket)
+  // -----------------------------
+  useEffect(() => {
+    if (mode === "history") return;
+
+    if (Array.isArray(analysis)) {
+      setLocalAnalysis(analysis);
+    }
+
+  }, [analysis, mode]);
+
+  // -----------------------------
+  // 🔹 Editor mount
+  // -----------------------------
   const handleMount = (editor) => {
     editorRef.current = editor;
   };
 
+  // -----------------------------
+  // 🔹 Render analysis
+  // -----------------------------
   useEffect(() => {
     if (!editorRef.current || !monaco) return;
 
     const editor = editorRef.current;
+    const filtered = localAnalysis.filter(a => a.confidence > 0.4);
 
-    const filteredAnalysis = analysis.filter(
-      (item) => item.confidence > 0.4
-    );
-
-    // ---------------- VIEW ZONES ----------------
     editor.changeViewZones((accessor) => {
-
-      zonesRef.current.forEach(({ zoneId }) => {
-        accessor.removeZone(zoneId);
-      });
-
+      zonesRef.current.forEach(({ zoneId }) => accessor.removeZone(zoneId));
       zonesRef.current.clear();
 
-      filteredAnalysis.forEach((item) => {
-
+      filtered.forEach((item) => {
         const domNode = document.createElement("div");
 
         domNode.style.padding = "4px 8px";
-        domNode.style.fontSize = "13px";
+        domNode.style.fontSize = "12px";
         domNode.style.background = "rgba(255,255,255,0.04)";
-
-        // цвет полоски слева
-        let borderColor = "#6F90FF";
-
-        if (item.type === "strength") borderColor = "#4CAF50";
-        if (item.type === "recommendation") borderColor = "#FFC107";
-        if (item.type === "weakness") borderColor = "#F44336";
-
-        domNode.style.borderLeft = `3px solid ${borderColor}`;
-        domNode.style.color = borderColor;
+        domNode.style.borderLeft = `3px solid #FFC107`;
+        domNode.style.color = "#FFC107";
         domNode.className = "ai-zone";
         domNode.textContent = `AI: ${item.message}`;
 
@@ -265,45 +333,25 @@ export default function CodeEditor({ analysis = [], mode, attempt }) {
 
         zonesRef.current.set(item.line, { zoneId });
       });
-
     });
 
-    // ---------------- DECORATIONS ----------------
     decorationsRef.current = editor.deltaDecorations(
       decorationsRef.current,
-      filteredAnalysis.map((item) => {
-
-        let className = "";
-        let gutterClass = "";
-
-        if (item.type === "strength") {
-          className = "ai-line-green";
-          gutterClass = "ai-gutter-green";
+      filtered.map((item) => ({
+        range: new monaco.Range(item.line, 1, item.line, 1),
+        options: {
+          isWholeLine: true,
+          className: "ai-line-yellow",
+          linesDecorationsClassName: "ai-gutter-yellow"
         }
-
-        if (item.type === "recommendation") {
-          className = "ai-line-yellow";
-          gutterClass = "ai-gutter-yellow";
-        }
-
-        if (item.type === "weakness") {
-          className = "ai-line-red";
-          gutterClass = "ai-gutter-red";
-        }
-
-        return {
-          range: new monaco.Range(item.line, 1, item.line, 1),
-          options: {
-            isWholeLine: true,
-            className: className,
-            linesDecorationsClassName: gutterClass,
-          },
-        };
-      })
+      }))
     );
 
-  }, [analysis, monaco]);
+  }, [localAnalysis, monaco]);
 
+  // -----------------------------
+  // 🔹 Theme
+  // -----------------------------
   useEffect(() => {
     if (!monaco) return;
 
@@ -311,36 +359,35 @@ export default function CodeEditor({ analysis = [], mode, attempt }) {
       base: "vs-dark",
       inherit: true,
       rules: [],
-      colors: { "editor.background": "#202022" },
+      colors: {
+        "editor.background": "#202123"
+      },
     });
 
     monaco.editor.setTheme("custom-dark");
+
   }, [monaco]);
 
+  // -----------------------------
   return (
-    <Editor
-      height="57.5vh"
-      language="python"
-      theme="custom-dark"
-      value={code}
-      options={{
-            minimap: { enabled: false },
-            fontSize: 15,
-            automaticLayout: true,
-            padding: { top: 15 },
-            lineHeight: 20,
-          }}
-      onMount={(editor) => {
-        handleMount(editor);
-
-        // если код ещё пустой — инициализируем дефолтным
-        if (!code) {
-          setCode(defaultCode);
-        }
-      }}
-      onChange={(value) => {
-        setCode(value || "");
-      }}
-    />
+    <div ref={containerRef} style={{ height: "57.5vh", width: "100%" }}>
+      <Editor
+        height="100%"
+        language="python"
+        theme="custom-dark"
+        value={code}
+        options={{
+          minimap: { enabled: false },
+          fontSize: 12,
+          lineHeight: 20,
+          readOnly: mode === "history"
+        }}
+        onMount={(editor) => {
+          handleMount(editor);
+          if (!code) setCode(defaultCode);
+        }}
+        onChange={(value) => setCode(value || "")}
+      />
+    </div>
   );
-}*/}
+}

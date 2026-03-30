@@ -206,7 +206,7 @@ export default function SandBox({ mode, name, attempt, restoredState }) {
         <CodeEditor
           mode={mode}
           attempt={attempt}
-          analysis={analysis}  // для free/module
+          analysis={analysis}  //для free/module
         />
         {/*<CodeEditor
           analysis={mode === "history" ? attempt?.analysis || [] : analysis}
@@ -221,7 +221,7 @@ export default function SandBox({ mode, name, attempt, restoredState }) {
       </div>
 
       {/* 🔥 ДОП. ИНФА ИЗ ATTEMPT */}
-      {mode === "history" && attempt && (
+      {/*{mode === "history" && attempt && (
         <div className={s["history-info"]}>
           <div>
             <h3>Оценка</h3>
@@ -234,7 +234,7 @@ export default function SandBox({ mode, name, attempt, restoredState }) {
           </div>
 
         </div>
-      )}
+      )}*/}
 
     </section>
   );

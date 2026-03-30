@@ -84,9 +84,9 @@ class WebSocketService {
         this.reconnectAttempts = 0;
 
         // отправляем накопленные сообщения
-        //while (this.pendingMessages.length > 0) {
-        //  ws.send(this.pendingMessages.shift());
-        //}
+        while (this.pendingMessages.length > 0) {
+          ws.send(this.pendingMessages.shift());
+        }
 
         resolve();
       };
@@ -153,7 +153,7 @@ class WebSocketService {
   // --------------------------------------------------
   // SEND
   // --------------------------------------------------
-  async send(data) {
+  /*async send(data) {
     if (!this.url) {
       throw new Error("WebSocket URL not set");
     }
@@ -166,7 +166,27 @@ class WebSocketService {
 
     const message = JSON.stringify(data);
     this.ws.send(message);
-  }
+  }*/
+
+    async send(data) {
+      if (!this.url) {
+        throw new Error("WebSocket URL not set");
+      }
+
+      const message = JSON.stringify(data);
+
+      // 🔥 если сокет НЕ открыт → кладем в очередь
+      if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+        console.log("⏳ WS not ready, queue message:", data);
+
+        this.pendingMessages.push(message);
+
+        await this.connect();
+        return;
+      }
+
+      this.ws.send(message);
+    }
 
   // --------------------------------------------------
   // EVENTS

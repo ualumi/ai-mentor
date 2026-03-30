@@ -1,0 +1,20 @@
+.heatmap {
+  display: flex;
+  gap: 4px;
+}
+.heatmap-week {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.heatmap-day {
+  width: 20px;
+  height: 20px;
+  background-color: #3B68FF; /* синий */
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.heatmap-day:hover {
+  transform: scale(1.2);
+}
