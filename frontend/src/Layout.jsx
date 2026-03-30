@@ -51,11 +51,39 @@ export default function Layout({ isSidebarOpen, toggleSidebar }) {
       )}
 
       <Routes>
-        <Route path="/mentor" element={<WorkSpace mode="free" isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}/>} />
+        {/*<Route path="/mentor" element={<WorkSpace mode="free" isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}/>} />
         <Route path="/module" element={<Modules mode="modules"/>} />
-        <Route path="/module/:id" element={<WorkSpace mode="module" isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}/>} />
+        <Route path="/module/:id" element={<WorkSpace mode="module" isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}/>} />*/}
         <Route path="/auth" element={<AuthForm />} />
         
+        <Route
+          path="/mentor"
+          element={
+            <ProtectedRoute>
+              <WorkSpace mode="free" isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}/>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/module"
+          element={
+            <ProtectedRoute>
+              <Modules mode="modules"/>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/module/:id"
+          element={
+            <ProtectedRoute>
+              <WorkSpace mode="module" isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}/>
+            </ProtectedRoute>
+          }
+        />
+
+
         <Route
           path="/"
           element={
@@ -64,12 +92,33 @@ export default function Layout({ isSidebarOpen, toggleSidebar }) {
             </ProtectedRoute>
           }
         />
+
+        
         <Route
-          path="/attempt/:id"
+          path="/mentor/attempt/:id"
+          element={
+            <ProtectedRoute>
+              <WorkSpace mode="history" />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/progress"
+          element={
+            <ProtectedRoute>
+              <Progress />
+            </ProtectedRoute>
+          }
+        />
+        
+        {/*НЕЗАПРОТЕКТЕНЫЕ РОУТЫ*/}
+        {/*<Route
+          path="/mentor/attempt/:id"
           element={<WorkSpace mode="history" />}
         />
 
-        <Route path="/progress" element={<Progress labels={["Навык 1", "Навык 2", "Навык 3", "Навык 4"]} values={[20, 40, 30, 80]}/>} />
+        <Route path="/progress" element={<Progress labels={["Навык 1", "Навык 2", "Навык 3", "Навык 4"]} values={[20, 40, 30, 80]}/>} />*/}
       </Routes>
     </>
   );

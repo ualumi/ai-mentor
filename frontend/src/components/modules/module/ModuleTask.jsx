@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { wsService } from "../../../services/websocket";
+import CheckTaskButton from "./CheckTaskButton";
+import NextStepButton from "./NextStepButton";
 
 export default function ModuleTask({ restoredState }) {
 
@@ -83,18 +85,15 @@ export default function ModuleTask({ restoredState }) {
             <p>{condition.description}</p>
           </div>
           <div className="buttons-module">
-            <button
-              className="module-next-button module-button"
-              onClick={handleNextStep}
-            >
-              Проверить
-            </button>
-            <button
+            
+            <CheckTaskButton />
+            <NextStepButton onNext={handleNextStep} />
+            {/*<button
               className="module-next-button module-button disabled"
               onClick={handleNextStep}
             >
               Следующий шаг
-            </button>
+            </button>*/}
           </div>
         </div>
       )}

@@ -29,7 +29,7 @@ export default function Attempt({ attempt, mode }) {
         }
       });
     } else {
-      navigate(`/attempt/${attempt.attempt_id}`);
+      navigate(`/mentor/attempt/${attempt.attempt_id}`);
     }
   };
 

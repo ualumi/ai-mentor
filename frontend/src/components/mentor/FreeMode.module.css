@@ -7,7 +7,7 @@
 
 .section-sandbox {
     background-color: var(--block-color);
-    padding-inline: 30px;
+    padding-inline: 25px;
     display: flex;
     flex: 1;
     flex-direction: column;

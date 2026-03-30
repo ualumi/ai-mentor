@@ -29,10 +29,15 @@
   overflow: hidden; /* 🔥 ключ */
 }
 
+.new-attempt {
+  border-radius: var(--border-radius);
+  background: #202123;
+}
+
 .menu-highlight::after {
   content: "";
   position: absolute;     /* 🔥 ключевой момент */
-  top: 5px;
+  top: 6px;
   right: 0;               /* 🔥 прижимаем вправо */
   width: 5px;
   height: 70%;

@@ -79,7 +79,7 @@ import Item from "./Item";
 import ToggleButton from "./ToggleButton";
 import { useLocation } from "react-router-dom";
 import History from "../history/History";
-import { House, ChevronLeft, ChevronRight, Search, Activity } from 'lucide-react';
+import { House, ChevronLeft, ChevronRight, Search, Activity, Layers, Sparkles } from 'lucide-react';
 import ProfileItem from "./ProfileItem";
 import MenuItem from "./menu/MenuItem";
 
@@ -88,11 +88,11 @@ export default function SideBar({ mode = "free", isOpen, toggleSidebar }) {
   const location = useLocation();
 
   const items = [
-    { type:"input_item", text:"Search", icon:<Search strokeWidth={1} size={20}/> },
-    { type:"button_item", text:"Home", icon:<House strokeWidth={1} size={20}/>, link:"/" },
-    { type:"button_item", text:"Progress", icon:<Activity strokeWidth={1} size={20}/>, link:"/progress" },
-    { type:"button_item", text:"Code", link:"/mentor" },
-    { type:"button_item", text:"Modules", link:"/module" }
+    { type:"input_item", text:"Поиск", icon:<Search strokeWidth={1} size={20}/> },
+    { type:"button_item", text:"Главная", icon:<House strokeWidth={1} size={20}/>, link:"/" },
+    { type:"button_item", text:"Прогресс", icon:<Activity strokeWidth={1} size={20}/>, link:"/progress" },
+    { type:"button_item", text:"Практика", link:"/mentor", icon: <Sparkles strokeWidth={1} size={20}/> },
+    { type:"button_item", text:"Модули", link:"/module", icon: <Layers strokeWidth={1} size={20}/> }
   ];
 
   // 🔥 вычисляем активный индекс из URL
@@ -137,7 +137,7 @@ export default function SideBar({ mode = "free", isOpen, toggleSidebar }) {
             <div
               className="menu-highlight"
               style={{
-                transform: `translateY(${activeIndex * 39}px)`
+                transform: `translateY(${activeIndex * 40}px)`
               }}
             />
           )}

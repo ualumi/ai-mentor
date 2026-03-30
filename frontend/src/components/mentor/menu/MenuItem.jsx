@@ -21,7 +21,7 @@ export default function MenuItem({ type, text, icon, link }) {
   return (
     <div className="item">
       {icon}
-      {text && <span>{text}</span>}
+      {text && <span className="menu-item-text">{text}</span>}
     </div>
   );
 }

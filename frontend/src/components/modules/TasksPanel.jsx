@@ -147,6 +147,8 @@ export default function TasksPanel({
           </div>
         )}
 
+        <p className="history-label">Пройденные задачи</p>
+
         {Object.entries(conditionsToRender).map(([condition, attempts]) => (
           <div key={condition} className="condition-block">
 

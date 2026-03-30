@@ -2,7 +2,7 @@
 .home {
     background-color: var(--block-color);
     background-color: #1B1C1E;
-    padding-inline: 20px;
+    padding-inline: 25px;
     display: flex;
     flex: 1;
     flex-direction: column;
@@ -63,6 +63,11 @@ border-radius: 15px;;
 .mentor-button {
     width: min-content;
     height: min-content;
+    
+}
+
+.mintor-link {
+  color: #ffff;
 }
 
 .mentor-link {
