@@ -1,4 +1,4 @@
-import re
+"""import re
 import aiohttp
 from app.core.model_client import get_llm_hint
 import random;
@@ -16,9 +16,9 @@ async def generate_hint(code: str) -> str:
     for error_type, hint in HINTS.items():
         if re.search(error_type, code, re.IGNORECASE):
             return hint
-    return random.choice(lst); #get_llm_hint(code_snippet=code)
+    return random.choice(lst); #get_llm_hint(code_snippet=code)"""
 
-"""import re
+import re
 from app.core.model_client import get_llm_hint
 
 MIN_CODE_LENGTH = 10
@@ -43,5 +43,5 @@ async def generate_hint(code: str) -> str:
         if re.search(pattern, code, re.IGNORECASE):
             return hint
     # основной путь
-    return await get_llm_hint(code_snippet=code)"""
+    return await get_llm_hint(code_snippet=code)
 
