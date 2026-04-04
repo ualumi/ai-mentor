@@ -58,3 +58,23 @@ async def verify_token(token: str = Query(...)):
         }
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid token")
+
+
+from pydantic import BaseModel
+
+class SSOLoginRequest(BaseModel):
+    token: str
+
+class SSOLoginResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: dict
+
+@router.post("/sso-login", response_model=SSOLoginResponse)
+async def sso_login(data: SSOLoginRequest, db: AsyncSession = Depends(get_db)):
+    try:
+        from app.application.commands.sso_login import sso_login_command
+        token, user = await sso_login_command(data.token, db)
+        return SSOLoginResponse(access_token=token, user=user)
+    except ValueError as e:
+        raise HTTPException(status_code=401, detail=str(e))

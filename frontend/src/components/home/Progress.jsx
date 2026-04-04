@@ -8,6 +8,79 @@
 
 import {
   Chart as ChartJS,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import { Bar } from "react-chartjs-2";
+import { useProgress } from "../../hooks/useProgress"; // ← твой хук
+
+ChartJS.register(
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  Tooltip,
+  Legend
+);
+
+export default function ProgressChart() {
+  const { data, isLoading, error } = useProgress();
+
+  // -------------------------
+  // Loading / Error
+  // -------------------------
+  if (isLoading) return <div>⏳ Загрузка прогресса...</div>;
+  if (error) return <div>❌ Ошибка: {error.message}</div>;
+
+  // -------------------------
+  // Transform data
+  // -------------------------
+  const progress = data?.progress || {};
+
+  const labels = Object.keys(progress);
+
+  const values = Object.values(progress).map((item) => item.ema);
+
+  // -------------------------
+  // Chart config
+  // -------------------------
+  const chartData = {
+    labels,
+    datasets: [
+      {
+        label: "Освоение компетенций",
+        data: values,
+        backgroundColor: "#3B68FF",
+      },
+    ],
+  };
+
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        display: false,
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: 1,
+      },
+    },
+  };
+
+  return (
+    <div className="modules-container">
+      <Bar data={chartData} options={options} />
+    </div>
+  );
+}
+
+{/*import {
+  Chart as ChartJS,
   LineElement,
   PointElement,
   CategoryScale,
@@ -53,8 +126,7 @@ export default function Progress({ labels, values }) {
   };
   return (
     <div className="modules-container">
-        <h3 className="section-caption-module">Progress</h3>
-      <Line data={data} options={options} width={600} height={260} />
+      <Line data={data} options={options} width={450} height={260} />
     </div>
   );
-}
+}*/}

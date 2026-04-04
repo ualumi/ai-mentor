@@ -17,7 +17,7 @@
     --block-color: #1B1B1D;
     --line-color:rgba(255, 255, 255, 0.1);
     --side-color: rgba(255, 255, 255, 0.5);
-    --font-size-p: 14px;
+    --font-size-p: 11.5px;
     --border-radius: 13px;
     height: 100vh;
     width: 100vw;
@@ -30,22 +30,27 @@
     background-color: #161616;
 }
 
-
-
-
-
-.menu-caption {
-    color: var(--text-color);
-    font-family:  "Stolz regular";
-    font-size: 22px;
-    
-    padding-block: 6px;
-    
+.history {
+    display: flex;
 }
+
+
+
+
+.recommendation-list {
+    overflow-y: scroll;
+    height: 50%;
+}
+
+.recommendation-list::-webkit-scrollbar {
+    display: none;
+}
+
 
 .menu-list {
     border-block-end: 1px solid var(--line-color);
-    padding-block-end: 20px;
+    /*padding-block-end: 20px;*/
+    padding-block-end: 10px;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -56,10 +61,11 @@
 }
 
 .history-label {
-    margin-bottom: 15px;
+    /*margin-bottom: 15px;*/
     color: var(--side-color);
     font-size: var(--font-size-p);
-    margin-top: 30px;
+    /*margin-top: 30px;*/
+    margin-top: 15px;
 }
 
 .item {
@@ -67,7 +73,7 @@
     color: var(--side-color);
     font-size: var(--font-size-p);
     padding-inline: 11px;
-    padding-block: 9px;
+    padding-block: 7px;
     vertical-align: middle;
     display: inline-flex;
     gap: 9px;
@@ -165,7 +171,7 @@
     right: 20px;
     width: 35px;
     height: 35px;
-    display: flex;
+    /*display: flex;
     border-radius: 50px;
     background: linear-gradient(253.45deg, rgba(59, 104, 255, 0.1) 12.5%, rgba(59, 104, 255, 0.5) 90.78%), #272729 !important;
     border: 1.25px solid rgba(255, 255, 255, 0.08);
@@ -174,21 +180,50 @@
     filter: drop-shadow(-10px 4px 20px rgba(22, 22, 22, 0.15));
 
     color: transparent;
-    border: none;
+    border: none;*/
+}
+
+.recommendation-bubble {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 65px;
+    height: 65px;
+    border-radius: 50px;
+    background: linear-gradient(253.45deg, rgba(59, 104, 255, 0.1) 12.5%, rgba(59, 104, 255, 0.5) 90.78%), #272729 !important;
+    border: 1.25px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0px -12.5px 50px -25px rgba(255, 255, 255, 0.08);
+    border-radius: 62.5px;
+    filter: drop-shadow(-10px 4px 20px rgba(22, 22, 22, 0.15));
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.ai-face {
+  display: flex;
+  gap: 6px;
+}
+
+.eye {
+  width: 10px;
+  height: 10px;
+  background: #3B68FF;
+  border-radius: 50%;
 }
 
 
 .recomendation-item-active {
     display: flex;
     width: 350px;
-    height: 370px;
     position: fixed;
     bottom: 10px;
     right: 20px;
     background-color: #28282A !important;
     flex-direction: column;
     justify-content: space-between;
-    filter: drop-shadow(-10px 4px 20px rgba(22, 22, 22, 0.15));
     padding: 15px !important;
     transition: 1s ease;
 }
@@ -233,6 +268,8 @@
     grid-template-columns: 1fr 1fr;
     border-block-start: 1px solid var(--line-color);
     padding-top: 15px;
+    position: relative;
+    bottom: 0;
 }
 
 .mentor-tab {
@@ -252,11 +289,14 @@
     background-color: var(--backround-color);
     /*display: grid;
     /*grid-template-columns: 1.2fr 2.5fr 1fr;
-    width: 100vw;*/
-    display: flex;
+    width: 100vw;
+    width: 100%;
+    display: flex;*/
     flex: 1;
     height: 100vh;
+    width: 100%;
     transition: grid-template-columns 0.3s ease;
+    
 }
 
 .free-mode .free {
@@ -288,32 +328,7 @@
   min-width: 100px;
 }*/
 
-.profile-item {
-    display: flex;
-    flex-direction: row;
-    padding-block: 12px;
-    align-items: start;
-    
-}
 
-.profile-item p {
-    margin: 0px;
-}
-
-.profile-name {
-    font-size: 16px;
-    padding-block-end: 6px;
-    color: var(--text-color);
-    
-}
-
-.profile-ava {
-    background-color: #202022;
-    border-radius: 500px;
-    padding: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: inset 0px -10px 40px -20px rgba(255, 255, 255, 0.08);
-}
 
 .editor {
     background: #202022;
@@ -419,8 +434,7 @@ input:focus::placeholder {
 .reco-content {
     display: flex;
     flex-direction: column;
-    flex: 1;
-    justify-content: space-between;
+    width: 100%;
 }
 
 .module-button {

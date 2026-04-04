@@ -1,12 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import "../../App.css"
+import { useNavigate } from "react-router-dom";
+import Attempt from './Attempt';
 
 const ATTEMPTS_SERVICE = "http://155.212.237.86:8009";
 
 export default function AttemptsHistory({ onSelectAttempt }) {
   const token = localStorage.getItem("token");
-
+  const navigate = useNavigate();
   const { data: history, isLoading, error } = useQuery({
     queryKey: ['attemptsHistory'],
     queryFn: async () => {
@@ -39,14 +41,15 @@ export default function AttemptsHistory({ onSelectAttempt }) {
   return (
     <div className="menu-list history-list">
       {history.map((attempt) => (
-        <button
+        <Attempt attempt={attempt} />
+        /*<button
           key={attempt.attempt_id}
           className="item"
-          onClick={() => onSelectAttempt(attempt.attempt_id)}
+
+          onClick={() => navigate(`/attempt/${attempt.attempt_id}`)}
         >
           <span className='menu-item-text'>{attempt.first_line}...</span>
-          {/*<small>Attempt ID: {attempt.attempt_id}</small>*/}
-        </button>
+        </button>*/
       ))}
     </div>
   );

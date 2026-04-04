@@ -30,6 +30,14 @@ async def start_session(
         methodology=methodology
     )
 
+    existing = await find_active_session(user_id, competency)
+
+    if existing:
+        return {
+            "session": existing,
+            "is_existing": True
+        }
+
     # сохранить сессию
     key = f"learning:session:{session.id}"
     await redis_client.hset(key, mapping=session.to_dict())
@@ -63,8 +71,14 @@ async def start_session(
         }
     print(payload)
 
+    # 🔥 индекс активной сессии
+    active_key = f"learning:active:{user_id}:{competency}"
+    await redis_client.set(active_key, session.id)
 
     # сгенерировать первое задание
     #await generate_next_task(session.id)
 
-    return session
+    return  {
+        "session": session.to_dict(),
+        "is_existing": False
+    }

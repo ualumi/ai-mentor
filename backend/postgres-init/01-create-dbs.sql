@@ -7,6 +7,7 @@ CREATE SCHEMA IF NOT EXISTS attempts;
 CREATE TABLE attempts.attempts (
     attempt_id UUID PRIMARY KEY,
     learning_session_id VARCHAR,
+    condition VARCHAR,
     timestamp TIMESTAMPTZ NOT NULL,
     mode VARCHAR,
     code_hash VARCHAR,

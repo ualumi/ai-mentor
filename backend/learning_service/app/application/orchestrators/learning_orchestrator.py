@@ -16,6 +16,11 @@ async def complete_session(session_id):
         }
     )
 
+    session = await redis_client.hgetall(key)
+
+    active_key = f"learning:active:{session['user_id']}:{session['competency']}"
+    await redis_client.delete(active_key)
+
     await EventBus.publish(
         "learning.events",
         {

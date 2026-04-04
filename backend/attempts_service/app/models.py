@@ -33,6 +33,6 @@ class Attempt(Base):
     skill_scores = Column(JSON)      # нормализованные skill score
     total_score = Column(Float)
     is_correct = Column(Boolean)
-    learning_session_id = Column(UUID, index=True, nullable=True)
-
+    learning_session_id = Column(String, index=True, nullable=True)
+    condition = Column(String, index=True, nullable=True)
     episode_id = Column(UUID(as_uuid=True), ForeignKey("episodes.episode_id"))

@@ -70,29 +70,6 @@ async def listen_user_channels(user_id: str):
         logger.info(f"source: {channel}, value: {data}")
 
 
-'''async def listen_task_condition(user_id: str):
-    pubsub = redis_client.pubsub()
-    await pubsub.subscribe("task_condition")
-
-    async for message in pubsub.listen():
-        if message["type"] != "message":
-            continue
-
-        payload = json.loads(message["data"])
-
-        if payload.get("user_id") != user_id:
-            continue
-
-        USER_STATE[user_id].update({
-            "learning_session_id": payload["learning_session_id"],
-            "condition": payload["condition"],
-            "module_ready": True
-        })
-
-        await manager.send_to_user(user_id, {
-            "type": "task_condition",
-            "condition": payload["condition"]
-        })'''
 
 async def listen_task_condition(user_id: str):
     stream_key = f"task_condition:{user_id}"
@@ -122,16 +99,6 @@ async def listen_task_condition(user_id: str):
                         "condition": condition
                     })
                     continue
-                '''if user_id not in USER_STATE:
-                    USER_STATE[user_id] = {"mode": None, "module_ready": False}'''
-                '''if user_id in PENDING_TASKS:
-                        for task in PENDING_TASKS[user_id]:
-                            USER_STATE[user_id].update(task)
-                            await manager.send_to_user(user_id, {
-                                "type": "task_condition",
-                                "condition": task["condition"]
-                            })
-                        del PENDING_TASKS[user_id]'''
 
                 USER_STATE[user_id].update({
                     "learning_session_id": learning_session_id,
@@ -148,39 +115,7 @@ async def listen_task_condition(user_id: str):
                 # отмечаем последнее сообщение
                 last_id = message_id
 #получает одно тупое сообщение и валится
-'''async def listen_task_condition(user_id: str):
-    pubsub = redis_client.pubsub()
-    
-    # Подписка на канал конкретного пользователя
-    await pubsub.psubscribe(f"task_condition:*")
 
-    async for message in pubsub.listen():
-        print(message)
-        if message["type"] != "pmessage":
-            continue
-
-        payload = json.loads(message["data"])
-        user_id = payload.get("user_id")
-        # Обновляем состояние пользователя в USER_STATE
-        if user_id not in USER_STATE:
-            # Если вдруг WS ещё не инициализирован — создаём минимальное состояние
-            USER_STATE[user_id] = {
-            "learning_session_id": payload["learning_session_id"],
-            "condition": payload["condition"],
-            "module_ready": True
-        }
-            
-        USER_STATE[user_id].update({
-            "learning_session_id": payload["learning_session_id"],
-            "condition": payload["condition"],
-            "module_ready": True
-        })
-
-        # Отправляем задачу пользователю
-        await manager.send_to_user(user_id, {
-            "type": "task_condition",
-            "condition": payload["condition"]
-        })'''
 
 
 # -----------------------------
@@ -244,6 +179,7 @@ async def websocket_endpoint(websocket: WebSocket):
             # -----------------
             if data.type == "set_mode":
                 USER_STATE[user_id]["mode"] = data.mode
+                print("Для данной попытки mode", data.mode)
 
                 if data.mode == "free":
                     USER_STATE[user_id]["module_ready"] = True
@@ -251,7 +187,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 continue
 
             state = USER_STATE[user_id]
-
+            print("Для данной попытки mode", state["mode"])
             # -----------------
             # Проверка module режима
             # -----------------

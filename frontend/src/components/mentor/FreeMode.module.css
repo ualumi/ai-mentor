@@ -7,7 +7,7 @@
 
 .section-sandbox {
     background-color: var(--block-color);
-    padding-inline: 30px;
+    padding-inline: 25px;
     display: flex;
     flex: 1;
     flex-direction: column;
@@ -15,7 +15,7 @@
 
 .section-caption {
     font-family: "Stolz regular", monospace;
-    font-size: 44px;
+    font-size: 30px;
     color: var(--text-color);
 }
 

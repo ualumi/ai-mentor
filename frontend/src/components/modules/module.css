@@ -1,12 +1,18 @@
 .taskspanel {
     height: 100vh;
-        padding-inline: 27px !important;
+    padding-inline: 20px !important;
     height: calc(100% - 20px);
     display: flex;
     flex-direction: column;
-
+    gap: 5px;
     background-color:#161616 ;
     height: calc(100vh - 20px);
+}
+
+.history-container {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
 }
 
 .section-caption-module {
@@ -16,10 +22,97 @@
 }
 
 .modules-container {
-    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    background-color: var(--block-color);
-    padding-inline: 30px;
+    gap: 7px;
+    /*background-color: var(--block-color);
+    padding-inline: 30px;*/
+    
+    
+}
+
+.item-module {
+    background: #2F3032 !important;
+    box-shadow: none !important;
+    border: none;
+    padding-inline: 7px;
+    display: flex;
+    justify-content: space-between;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.module-info {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+}
+
+.modules-description {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.module-icon {
+    background-color: #161616;
+    padding: 10px 15px;
+    border-radius: 10px;
+}
+
+.modules-container .modules-item-text {
+    font-family: "Stolz regular", monospace;
+    padding: 0;
+    font-size: 14px;
+    color: #ffff;
+}
+
+.menu-item-processflag {
+    padding: 5px 10px;
+    background-color: #444547;
+    border-radius: 10px;
+}
+
+.modules-item-p {
+    margin: 0;
+    padding: 0;
+}
+
+.disabled {
+    background-color: #2F3032;
+    box-shadow: none;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.buttons-module {
+    display: flex;
+    gap: 5px;
+}
+
+.module-task-item {
+    background-color: #2F3032 !important;
+    border: none;
+    box-shadow: none;
+    margin-bottom: 10px;
+}
+
+.module-task-item-history {
+    background-color: #202123;
+    box-shadow: none;
+    border: none;
+}
+
+.taskkk {
+    background-color: #202123;
+    border-radius: 15px;
+    padding: 10px;
+}
+
+.module-next-button {
+    font-size: 11.5px;
+}
+
+.condition-block {
+    margin-bottom: 5px;
 }

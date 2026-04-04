@@ -184,10 +184,20 @@ services:
     volumes:
       - ./logs/annotation_service:/app/logs
 
-  frontend:
-    build: ../frontend
+  integration_service:
+    build:
+      context: ./integration_service
+    container_name: integration_service
     ports:
-      - "5173:5173"
+      - "8012:8012"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    depends_on:
+      - redis
+    networks:
+      - mentor-net
+
 
 
 

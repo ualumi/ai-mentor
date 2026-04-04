@@ -1,12 +1,30 @@
 import { useEffect, useState } from "react";
 import { wsService } from "../../../services/websocket";
+import CheckTaskButton from "./CheckTaskButton";
+import NextStepButton from "./NextStepButton";
 
-export default function ModuleTask() {
+export default function ModuleTask({ restoredState }) {
 
   const [condition, setCondition] = useState(null);
+
+  
+
   const [connectionState, setConnectionState] = useState(
     wsService.getConnectionState()
   );
+
+  // 🔹 восстановление состояния при монтировании
+  useEffect(() => {
+    if (!restoredState?.attempts) return;
+
+    const lastAttempt = restoredState.attempts.slice(-1)[0];
+
+    setCondition({
+      description: lastAttempt.condition
+    });
+
+  }, [restoredState]);
+
 
   // ✅ подписка на task_condition
   useEffect(() => {
@@ -26,20 +44,6 @@ export default function ModuleTask() {
       wsService.off("task_condition", handler);
       console.log("🔴 ModuleSession unmounted");
     };
-  }, []);
-
-  // ✅ устанавливаем режим module
-  useEffect(() => {
-
-    if (wsService.getConnectionState() !== "OPEN") return;
-
-    wsService.send({
-      type: "set_mode",
-      mode: "module"
-    });
-
-    console.log("📡 module mode enabled");
-
   }, []);
 
   // ✅ отслеживание состояния соединения
@@ -75,18 +79,22 @@ export default function ModuleTask() {
       )}
 
       {condition && (
-        <div className="task-condition">
+        <div className="task-condition taskkk">
 
-          <div className="item item-light">
+          <div className="item item-light module-task-item">
             <p>{condition.description}</p>
           </div>
-
-          <button
-            className="module-next-button"
-            onClick={handleNextStep}
-          >
-            Следующий шаг
-          </button>
+          <div className="buttons-module">
+            
+            <CheckTaskButton />
+            <NextStepButton onNext={handleNextStep} />
+            {/*<button
+              className="module-next-button module-button disabled"
+              onClick={handleNextStep}
+            >
+              Следующий шаг
+            </button>*/}
+          </div>
         </div>
       )}
 
