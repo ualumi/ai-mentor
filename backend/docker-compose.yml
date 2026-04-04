@@ -112,6 +112,7 @@ services:
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      HF_TOKEN: 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
     depends_on:
       - redis
     networks:

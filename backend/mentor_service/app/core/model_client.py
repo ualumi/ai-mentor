@@ -14,7 +14,7 @@ import os
 import aiohttp
 import json
 
-HF_TOKEN    = os.getenv("HF_TOKEN", "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")
+HF_TOKEN    = os.getenv("HF_TOKEN", "")
 HF_MODEL_ID = os.getenv("HF_MODEL_ID", "disemenova/qwen2.5-7b-ai-mentor")
 
 HF_API_URL  = f"https://api-inference.huggingface.co/models/{HF_MODEL_ID}"
