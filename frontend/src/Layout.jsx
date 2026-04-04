@@ -9,6 +9,7 @@ import Progress from "./components/home/Progress";
 import ProtectedRoute from "./ProtectedRoute";
 import { wsService } from "./services/websocket";
 import { useEffect } from 'react';
+import { SSOCallback } from "./components/auth/SSOCallback";
 
 export default function Layout({ isSidebarOpen, toggleSidebar }) {
   const location = useLocation();
@@ -55,7 +56,7 @@ export default function Layout({ isSidebarOpen, toggleSidebar }) {
         <Route path="/module" element={<Modules mode="modules"/>} />
         <Route path="/module/:id" element={<WorkSpace mode="module" isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}/>} />*/}
         <Route path="/auth" element={<AuthForm />} />
-        
+        <Route path="/sso-callback" element={<SSOCallback />} />
         <Route
           path="/mentor"
           element={

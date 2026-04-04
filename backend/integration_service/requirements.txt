@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+httpx
+
+redis>=5.0
+aiohttp
+requests
+
+python-jose==3.3.0
+python-multipart>=0.0.7
+PyJWT>=2.8.0
