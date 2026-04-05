@@ -463,6 +463,7 @@ export default function Recommendation({ mode, attempt }) {
       }
 
       if (data.source?.startsWith("mentor_response")) {
+        setIsCollapsed(true);
         const hint = data.data?.hint;
         if (!hint) return;
 
@@ -524,8 +525,8 @@ export default function Recommendation({ mode, attempt }) {
     return (
       <div className="recommendation-bubble" onClick={handleBubbleClick}>
         <div className="ai-face">
-          <div className="eye" style={{ transform: `translate(${eyePos.x}px, ${eyePos.y}px)` }} />
-          <div className="eye" style={{ transform: `translate(${eyePos.x}px, ${eyePos.y}px)` }} />
+          {/*<div className="eye" style={{ transform: `translate(${eyePos.x}px, ${eyePos.y}px)` }} />
+          <div className="eye" style={{ transform: `translate(${eyePos.x}px, ${eyePos.y}px)` }} />*/}
         </div>
 
         {showBubbleMessage && (
@@ -537,6 +538,8 @@ export default function Recommendation({ mode, attempt }) {
       </div>
     );
   }
+
+  console.log(isCollapsed)
 
   return (
     <div
@@ -561,7 +564,7 @@ export default function Recommendation({ mode, attempt }) {
               <div className='menu-list history-list recommendation-list'>
                 {recommendations.map((r, i) => <div key={i}><Module competency={r} /></div>)}
               </div>
-              <StartModuleButton competency={recommendations[0]} />
+              {/*<StartModuleButton competency={recommendations[0]} />*/}
             </>
           ) : <p>Нет рекомендаций</p>}
         </div>

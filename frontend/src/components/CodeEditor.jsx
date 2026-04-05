@@ -234,7 +234,7 @@ def cluster_data(data, n_clusters):
 
     return best_model, scaler`;
 
-export default function CodeEditor({ analysis = [], mode, attempt }) {
+export default function CodeEditor({ analysis = [], mode, attempt, hideHints = false}) {
   const { code, setCode } = useCode();
 
   const editorRef = useRef(null);
@@ -304,7 +304,7 @@ export default function CodeEditor({ analysis = [], mode, attempt }) {
   // -----------------------------
   // 🔹 Render analysis
   // -----------------------------
-  useEffect(() => {
+  {/*useEffect(() => {
     if (!editorRef.current || !monaco) return;
 
     const editor = editorRef.current;
@@ -320,8 +320,8 @@ export default function CodeEditor({ analysis = [], mode, attempt }) {
         domNode.style.padding = "4px 8px";
         domNode.style.fontSize = "12px";
         domNode.style.background = "rgba(255,255,255,0.04)";
-        domNode.style.borderLeft = `3px solid #FFC107`;
-        domNode.style.color = "#FFC107";
+        domNode.style.borderLeft = `3px solid #3B68FF`;
+        domNode.style.color = "#3B68FF";
         domNode.className = "ai-zone";
         domNode.textContent = `AI: ${item.message}`;
 
@@ -347,7 +347,65 @@ export default function CodeEditor({ analysis = [], mode, attempt }) {
       }))
     );
 
-  }, [localAnalysis, monaco]);
+  }, [localAnalysis, monaco]);*/}
+  useEffect(() => {
+    if (!editorRef.current || !monaco) return;
+
+    const editor = editorRef.current;
+
+    // 🔥 ВСЕГДА очищаем сначала
+    editor.changeViewZones((accessor) => {
+      zonesRef.current.forEach(({ zoneId }) => accessor.removeZone(zoneId));
+      zonesRef.current.clear();
+    });
+
+    decorationsRef.current = editor.deltaDecorations(
+      decorationsRef.current,
+      []
+    );
+
+    // ❗ если скрыто — просто выходим
+    if (hideHints) return;
+
+    const filtered = localAnalysis.filter(a => a.confidence > 0.4);
+
+    // 🔥 добавляем зоны заново
+    editor.changeViewZones((accessor) => {
+      filtered.forEach((item) => {
+        const domNode = document.createElement("div");
+
+        domNode.style.padding = "4px 8px";
+        domNode.style.fontSize = "12px";
+        domNode.style.background = "rgba(255,255,255,0.04)";
+        domNode.style.borderLeft = `3px solid #3B68FF`;
+        domNode.style.color = "#3B68FF";
+        domNode.className = "ai-zone";
+        domNode.textContent = `AI: ${item.message}`;
+
+        const zoneId = accessor.addZone({
+          afterLineNumber: item.line,
+          heightInLines: 2,
+          domNode,
+        });
+
+        zonesRef.current.set(item.line, { zoneId });
+      });
+    });
+
+    // 🔥 добавляем decorations заново (без старых ID)
+    decorationsRef.current = editor.deltaDecorations(
+      [],
+      filtered.map((item) => ({
+        range: new monaco.Range(item.line, 1, item.line, 1),
+        options: {
+          isWholeLine: true,
+          className: "ai-line-yellow",
+          linesDecorationsClassName: "ai-gutter-yellow"
+        }
+      }))
+    );
+
+  }, [localAnalysis, monaco, hideHints]);
 
   // -----------------------------
   // 🔹 Theme

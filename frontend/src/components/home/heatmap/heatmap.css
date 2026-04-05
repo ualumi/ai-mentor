@@ -1,19 +1,24 @@
 .heatmap {
   display: flex;
   gap: 4px;
+  background-color: #2F3032 !important;
+  border-radius: 15px;
+  padding: 7px;
 }
 .heatmap-week {
   display: flex;
-  flex-direction: column;
+  /*flex-direction: column;*/
   gap: 4px;
+  flex: 1;
 }
 .heatmap-day {
   width: 20px;
   height: 20px;
-  background-color: #3B68FF; /* синий */
+  background-color: #161616; /* синий */
   border-radius: 4px;
   cursor: pointer;
   transition: 0.2s;
+  margin-bottom: 4px;
 }
 .heatmap-day:hover {
   transform: scale(1.2);

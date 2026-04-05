@@ -2,7 +2,7 @@ import httpx
 import os
 
 BASE_URL = os.getenv("EXTERNAL_API_URL", "http://external_platform:8000")
-TOKEN = os.getenv("INTEGRATION_TOKEN", "secret")
+TOKEN = os.getenv("INTEGRATION_TOKEN", "supersecret")
 
 class ExternalClient:
 

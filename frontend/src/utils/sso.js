@@ -50,7 +50,7 @@ export async function generateTestSSOToken() {
   const data = `${encodedHeader}.${encodedPayload}`;
 
   // 🔹 Подпись HMAC-SHA256 с секретом
-  const secret = "secret"; // должен совпадать с SSO_SECRET на сервере
+  const secret = "supersecret"; // должен совпадать с SSO_SECRET на сервере
   const enc = new TextEncoder();
   const key = await crypto.subtle.importKey(
     "raw",

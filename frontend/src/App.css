@@ -437,6 +437,10 @@ input:focus::placeholder {
     width: 100%;
 }
 
+.reco-content .recommendation-list {
+    margin-top: 10px;
+}
+
 .module-button {
     background: #3B68FF;
     box-shadow: inset 0px -10px 40px -20px #FFFFFF;
@@ -476,5 +480,5 @@ input:focus::placeholder {
 }
 
 .progress-item-text {
-    font-size: 14px;
+    font-size: var(--font-size-p);
 }

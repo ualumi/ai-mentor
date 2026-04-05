@@ -21,8 +21,16 @@
 
 .section-caption-module {
     font-family: "Stolz regular", monospace;
-    font-size: 28px;
+    font-size: 20px;
     color: var(--text-color);
+    margin-top: 10px;
+}
+
+.progress {
+    display: flex;
+    margin-bottom: 10px;
+    padding-top: 10px;
+    flex-direction: column;
 }
 
 .section-panel {

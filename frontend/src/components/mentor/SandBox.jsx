@@ -97,6 +97,7 @@ import ProgressBar from "../modules/module/ProgressBar";
 }*/}
 
 export default function SandBox({ mode, name, attempt, restoredState }) {
+  const [hideHints, setHideHints] = useState(false);
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [analysis, setAnalysis] = useState([]);
 
@@ -165,13 +166,13 @@ export default function SandBox({ mode, name, attempt, restoredState }) {
       {mode === "free" && <h1 className={s["section-caption"]}>Самостоятельная практика</h1>}
 
       {mode === "module" && (
-        <div className="progress">
+        <div className={s["progress"]}>
           {/*<h1 className={s["section-caption-module"]}>Модуль: {name}</h1>*/}
           <h1 className={s["section-caption-module"]}>
-            Модуль: {competency || name}
+            Модуль: <span className={s["section-caption-module-name"]}>{competency || name}</span>
           </h1>
           <div className="progress-info">
-            <span className="progress-item-text">Прогресс по модулю: </span>
+            {/*<span className="progress-item-text">Прогресс по модулю: </span>
             {/*<ProgressBar progress={15} />*/}
             <ProgressBar progress={restoredState?.attempts?.length || 0} />
           </div>
@@ -186,12 +187,19 @@ export default function SandBox({ mode, name, attempt, restoredState }) {
       <div className={s["section-panel"]}>
         <div className={s["section-panel-main"]}>
 
-          {mode === "free" && (
+          {/*{mode === "free" && (
             <Item type="text_item" clas="item-light icon-only" icon={<Paperclip strokeWidth={1} />} />
-          )}
+          )}*/}
+          
 
           {/* ❌ отключаем submit в history */}
           {mode !== "history" && <SubmitCodeButton />}
+          <button
+            onClick={() => setHideHints(prev => !prev)}
+            className="item item-light"
+          >
+            {hideHints ? "Показать подсказки" : "Скрыть подсказки"}
+          </button>
 
         </div>
 
@@ -207,6 +215,7 @@ export default function SandBox({ mode, name, attempt, restoredState }) {
           mode={mode}
           attempt={attempt}
           analysis={analysis}  //для free/module
+          hideHints={hideHints} 
         />
         {/*<CodeEditor
           analysis={mode === "history" ? attempt?.analysis || [] : analysis}

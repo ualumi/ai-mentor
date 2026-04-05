@@ -1,0 +1,47 @@
+.def-button {
+    font-family: "Stolz regular", monospace;
+    font-size: 14px;
+    color: #000;
+    border: none;
+    outline: none;
+    height: min-content;
+    border-radius: 15px;
+}
+
+.default-page {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    background-image: url("../../assets/Group\ 1143.png");
+    background-position: center;
+    flex-direction: column;
+}
+
+.head {
+    display: flex;
+    justify-content: space-between;
+    margin-inline: 35px;
+    align-items: center;
+}
+
+.def-content-info {
+    text-align: center;
+    width: 55%;
+}
+
+.def-content {
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+}
+
+.def-content-caption {
+    font-size: 50px;
+    width: 60%;
+    text-align: center;
+    margin: 0;
+    line-height: 45px;
+}

@@ -10,5 +10,5 @@ async def import_user_progress(user=Depends(get_current_user)):
     user_id = int(user["sub"])
     print(user_id)
     result = await import_progress(user_id)
-
+    print(result)
     return result
