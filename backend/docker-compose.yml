@@ -107,12 +107,21 @@ services:
     build:
       context: ./mentor_service
     container_name: mentor_service
+    gpus: all
     ports:
       - "8006:8006"
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379
-      HF_TOKEN: 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
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+      MENTOR_MODEL_ID: disemenova/qwen2.5-7b-ai-mentor
+      MENTOR_MAX_SEQ_LENGTH: 1024
+      MENTOR_MAX_NEW_TOKENS: 256
+      MENTOR_TEMPERATURE: 0.7
+      MENTOR_REPETITION_PENALTY: 1.1
+      MENTOR_LOAD_IN_4BIT: "true"
+      MENTOR_EAGER_LOAD: "true"
     depends_on:
       - redis
     networks:
