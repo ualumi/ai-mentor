@@ -408,11 +408,14 @@ input:focus::placeholder {
 }
 
 .mentor-item {
+    display: flex;
     flex-direction: column;
     justify-content: left;
     font-size: var(--font-size-p);
     padding-inline: 11px;
     padding-block: 9px;
+    /*overflow: visible;
+   white-space: initial;*/
 }
 
 .mentor-caption {
@@ -435,6 +438,10 @@ input:focus::placeholder {
     display: flex;
     flex-direction: column;
     width: 100%;
+}
+
+.reco-content .recommendation-list {
+    margin-top: 10px;
 }
 
 .module-button {
@@ -476,5 +483,5 @@ input:focus::placeholder {
 }
 
 .progress-item-text {
-    font-size: 14px;
+    font-size: var(--font-size-p);
 }

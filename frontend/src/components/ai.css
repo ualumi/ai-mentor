@@ -172,7 +172,7 @@
 }
 
 .glyph-recommendation {
-  background: #ffc107;
+  background: #3B68FF;
   width: 8px;
   height: 8px;
   border-radius: 50%;
@@ -221,7 +221,7 @@
 }
 
 .ai-line-yellow {
-  background: rgba(255, 193, 7, 0.15);
+  background: rgba(59, 104, 255, 0.15);
 }
 
 .ai-line-red {

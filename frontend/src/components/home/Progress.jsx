@@ -31,8 +31,8 @@ export default function ProgressChart() {
   // -------------------------
   // Loading / Error
   // -------------------------
-  if (isLoading) return <div>⏳ Загрузка прогресса...</div>;
-  if (error) return <div>❌ Ошибка: {error.message}</div>;
+  if (isLoading) return <div className='item'>Loading...</div>;
+  if (error) return <div className='item'>Здесь будет Ваш прогресс на платформе</div>;
 
   // -------------------------
   // Transform data
@@ -66,6 +66,7 @@ export default function ProgressChart() {
     },
     scales: {
       y: {
+        display:false,
         beginAtZero: true,
         max: 1,
       },

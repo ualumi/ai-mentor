@@ -444,6 +444,7 @@ export default function Recommendation({ mode, attempt }) {
     if (mode === "history") return;
 
     const handler = (data) => {
+      console.log("📡 WS EVENT RECEIVED:", data);
       if (data.source?.startsWith("user_progress")) {
         if (data.data?.score) setScore(data.data.score);
 
@@ -463,13 +464,20 @@ export default function Recommendation({ mode, attempt }) {
       }
 
       if (data.source?.startsWith("mentor_response")) {
+        console.log("MENTOR", data)
         const hint = data.data?.hint;
         if (!hint) return;
 
-        setMentorReplies(prev => {
+        /*setMentorReplies(prev => {
           if (prev.some(m => m.text === hint)) return prev;
           return [...prev, { text: hint, time: new Date().toLocaleTimeString() }];
-        });
+        });*/
+        if (!hint || hint.trim() === "") return;
+
+        setMentorReplies(prev => [
+          ...prev,
+          { text: hint, time: new Date().toLocaleTimeString() }
+        ]);
 
         setIsCollapsed(false);
         if (activeTabRef.current !== "mentor") setHasNewMentorReply(true);
@@ -524,8 +532,8 @@ export default function Recommendation({ mode, attempt }) {
     return (
       <div className="recommendation-bubble" onClick={handleBubbleClick}>
         <div className="ai-face">
-          <div className="eye" style={{ transform: `translate(${eyePos.x}px, ${eyePos.y}px)` }} />
-          <div className="eye" style={{ transform: `translate(${eyePos.x}px, ${eyePos.y}px)` }} />
+          {/*<div className="eye" style={{ transform: `translate(${eyePos.x}px, ${eyePos.y}px)` }} />
+          <div className="eye" style={{ transform: `translate(${eyePos.x}px, ${eyePos.y}px)` }} />*/}
         </div>
 
         {showBubbleMessage && (
@@ -537,6 +545,8 @@ export default function Recommendation({ mode, attempt }) {
       </div>
     );
   }
+
+  console.log(isCollapsed)
 
   return (
     <div
@@ -561,7 +571,7 @@ export default function Recommendation({ mode, attempt }) {
               <div className='menu-list history-list recommendation-list'>
                 {recommendations.map((r, i) => <div key={i}><Module competency={r} /></div>)}
               </div>
-              <StartModuleButton competency={recommendations[0]} />
+              {/*<StartModuleButton competency={recommendations[0]} />*/}
             </>
           ) : <p>Нет рекомендаций</p>}
         </div>

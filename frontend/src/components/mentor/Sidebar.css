@@ -89,9 +89,12 @@
     flex-direction: row;
     padding-block: 8px;
     align-items: start;
-    background: #2F3032; /*#202123*/
+    background: #202123; /*#202123*/
     border: none;
     box-shadow: none;
+    position: fixed;
+    bottom: 10px;
+    flex: 1;
     
 }
 

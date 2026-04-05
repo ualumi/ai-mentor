@@ -2,7 +2,7 @@ import jwt
 import time
 import os
 
-SECRET = os.getenv("SECRET_KEY", "secret")
+SECRET = os.getenv("SECRET_KEY", "supersecret")
 ALGORITHM = "HS256"
 
 def create_internal_token(payload: dict):

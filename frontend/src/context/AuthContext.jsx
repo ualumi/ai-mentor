@@ -49,24 +49,32 @@ export function AuthProvider({ children }) {
     return stored ? JSON.parse(stored) : null;
   });
 
-  const login = (newToken, userData) => {
+  const [isSSO, setIsSSO] = useState(() =>
+    localStorage.getItem("isSSO") === "true"
+  );
+
+  const login = (newToken, userData, isSSOLogin = false) => {
     localStorage.setItem("token", newToken);
     localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("isSSO", isSSOLogin);
 
     setToken(newToken);
     setUser(userData);
+    setIsSSO(isSSOLogin);
   };
 
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("isSSO");
 
     setToken(null);
     setUser(null);
+    setIsSSO(false);
   };
 
   return (
-    <AuthContext.Provider value={{ token, user, login, logout }}>
+    <AuthContext.Provider value={{ token, user, isSSO, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

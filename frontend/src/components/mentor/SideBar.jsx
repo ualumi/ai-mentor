@@ -82,17 +82,19 @@ import History from "../history/History";
 import { House, ChevronLeft, ChevronRight, Search, Activity, Layers, Sparkles } from 'lucide-react';
 import ProfileItem from "./ProfileItem";
 import MenuItem from "./menu/MenuItem";
+import { useAuth } from "../../context/AuthContext";
 
-export default function SideBar({ mode = "free", isOpen, toggleSidebar }) {
-
+export default function SideBar({ mode = "free", isOpen, toggleSidebar, openAuth }) {
+  const { token, user } = useAuth();
   const location = useLocation();
 
   const items = [
     { type:"input_item", text:"Поиск", icon:<Search strokeWidth={1} size={20}/> },
     { type:"button_item", text:"Главная", icon:<House strokeWidth={1} size={20}/>, link:"/" },
-    { type:"button_item", text:"Прогресс", icon:<Activity strokeWidth={1} size={20}/>, link:"/progress" },
+    
     { type:"button_item", text:"Практика", link:"/mentor", icon: <Sparkles strokeWidth={1} size={20}/> },
-    { type:"button_item", text:"Модули", link:"/module", icon: <Layers strokeWidth={1} size={20}/> }
+    { type:"button_item", text:"Модули", link:"/module", icon: <Layers strokeWidth={1} size={20}/> },
+    { type:"button_item", text:"Прогресс", icon:<Activity strokeWidth={1} size={20}/>, link:"/progress" }
   ];
 
   // 🔥 вычисляем активный индекс из URL
@@ -155,11 +157,21 @@ export default function SideBar({ mode = "free", isOpen, toggleSidebar }) {
 
         </div>
 
-        {isOpen && <History mode={mode}/>}
+        {isOpen && (token ? <History mode={mode}/>: '') }
 
       </div>
 
-      {isOpen && <ProfileItem name="User" email="test@gmail.com"/>}
+      {/*{isOpen && <ProfileItem name="User" email="test@gmail.com"/>}*/}
+      {isOpen && (
+        token
+          ? <ProfileItem name={user.username} email={user.email} />
+          : <button 
+              className="auth-open-button" 
+              onClick={openAuth}
+            >
+              Личный кабинет
+            </button>
+      )}
 
     </div>
   );

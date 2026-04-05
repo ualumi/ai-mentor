@@ -3,7 +3,7 @@ import os
 from app.infrastructure.db import save_external_identity, get_external_identity
 from app.application.services.token_service import create_internal_token
 
-SECRET = os.getenv("SSO_SHARED_SECRET", "secret")
+SECRET = os.getenv("SSO_SHARED_SECRET", "supersecret")
 
 async def handle_sso_login(token: str):
 
