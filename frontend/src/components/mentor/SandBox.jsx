@@ -96,7 +96,7 @@ import ProgressBar from "../modules/module/ProgressBar";
   );
 }*/}
 
-export default function SandBox({ mode, name, attempt, restoredState }) {
+export default function SandBox({ mode, name, attempt, restoredState, code, titletask}) {
   const [hideHints, setHideHints] = useState(false);
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [analysis, setAnalysis] = useState([]);
@@ -163,7 +163,12 @@ export default function SandBox({ mode, name, attempt, restoredState }) {
     <section className={s["section-sandbox"]}>
 
       {/* 🔥 HEADER */}
-      {mode === "free" && <h1 className={s["section-caption"]}>Самостоятельная практика</h1>}
+      {/*{mode === "free" && <h1 className={s["section-caption"]}>Самостоятельная практика</h1>}*/}
+      {mode === "free" && (
+          titletask 
+              ? <h1 className={s["section-caption"]}>Задача: {titletask}</h1>
+              : <h1 className={s["section-caption"]}>Самостоятельная практика</h1>
+      )}
 
       {mode === "module" && (
         <div className={s["progress"]}>
@@ -216,6 +221,7 @@ export default function SandBox({ mode, name, attempt, restoredState }) {
           attempt={attempt}
           analysis={analysis}  //для free/module
           hideHints={hideHints} 
+          taskCode={code}
         />
         {/*<CodeEditor
           analysis={mode === "history" ? attempt?.analysis || [] : analysis}

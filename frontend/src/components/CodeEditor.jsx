@@ -234,7 +234,7 @@ def cluster_data(data, n_clusters):
 
     return best_model, scaler`;
 
-export default function CodeEditor({ analysis = [], mode, attempt, hideHints = false}) {
+export default function CodeEditor({ analysis = [], mode, attempt, hideHints = false, taskCode}) {
   const { code, setCode } = useCode();
 
   const editorRef = useRef(null);
@@ -442,7 +442,10 @@ export default function CodeEditor({ analysis = [], mode, attempt, hideHints = f
         }}
         onMount={(editor) => {
           handleMount(editor);
-          if (!code) setCode(defaultCode);
+          //if (!code) setCode(defaultCode);
+          if (!code) {
+              setCode(taskCode ? taskCode : defaultCode);
+          }
         }}
         onChange={(value) => setCode(value || "")}
       />

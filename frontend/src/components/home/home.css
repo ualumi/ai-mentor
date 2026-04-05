@@ -7,6 +7,11 @@
     flex: 1;
     flex-direction: column;
     height: 100vh;
+    overflow-y: scroll;
+}
+
+.home::-webkit-scrollbar {
+  display: none;
 }
 
 .home-label {
@@ -224,4 +229,38 @@ animation: shimmer 6s linear infinite;
 
 .heatmap-itself {
   flex-direction: row;
+}
+
+.weak-cases-block {
+  background-color: #202123 !important;
+  outline: none !important;
+  padding: 20px;
+  box-shadow: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: left;
+  align-items: start;
+  margin-bottom: 15px;
+  overflow: visible;
+}
+
+.weak-case-item {
+    background: #2F3032 !important;
+    box-shadow: none !important;
+    border: none;
+    padding-block: 7px;
+    padding-inline: 14px;
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    overflow: visible;
+    transition: background-color 0.3s ease;
+}
+
+.weak-item-text {
+    font-family: "Stolz regular", monospace;
+    padding: 0;
+    font-size: 13px;
+    color: #ffff;
+    opacity: 1;
 }

@@ -408,11 +408,14 @@ input:focus::placeholder {
 }
 
 .mentor-item {
+    display: flex;
     flex-direction: column;
     justify-content: left;
     font-size: var(--font-size-p);
     padding-inline: 11px;
     padding-block: 9px;
+    /*overflow: visible;
+   white-space: initial;*/
 }
 
 .mentor-caption {

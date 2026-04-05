@@ -50,6 +50,13 @@ export default function WorkSpace({ mode }) {
   const location = useLocation();
   const { id } = useParams(); // 🔥 attempt_id
 
+
+  const taskData = location.state;
+
+  console.log("TASK FROM SSO:", taskData);
+  const initialCode = taskData?.code;
+  const taskTitle = taskData?.title;
+
   const [stableRestoredState, setStableRestoredState] = useState(null);
   const selectedAttemptId = location.state?.selectedAttemptId;
 
@@ -101,6 +108,8 @@ export default function WorkSpace({ mode }) {
             name={competency}
             attempt={attempt} // 🔥 прокидываем данные
             restoredState={restoredState}
+            code={initialCode}
+            titletask={taskTitle}
           />
 
           {mode === "module" && <TasksPanel restoredState={stableRestoredState} selectedAttemptId={selectedAttemptId} />}

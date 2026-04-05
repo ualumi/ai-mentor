@@ -28,7 +28,8 @@
 
 .scroll-container {
     overflow-y: scroll;
-    max-height: 40vh;
+    max-height: 30vh;
+    margin-bottom: 15px;
 }
 
 .tasks-label {
