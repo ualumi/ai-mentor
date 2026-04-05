@@ -16,13 +16,24 @@
 }
 
 .modules-block {
-    display: grid;
-    grid-template-rows: 1fr 1fr;
+    /*display: grid;
+    grid-template-rows: 1fr 1fr;*/
+    display: flex;
+    flex-direction: column;
+}
+
+.modules-block-sso {
+    flex-direction: column-reverse;
 }
 
 .scroll-container {
     overflow-y: scroll;
     max-height: 40vh;
+}
+
+.tasks-label {
+    border-block-start: 1px solid var(--line-color);
+    padding-top: 10px;
 }
 
 .scroll-container::-webkit-scrollbar {

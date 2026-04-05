@@ -170,7 +170,7 @@ export default function Modules({ mode}) { // добавили флаг ssoLogin
   }
 
   return (
-    <div className='modules-block'>
+    <div className={`modules-block ${isSSO ? "modules-block-sso" : "modules-block-default"}`}>
       <div className={containerClass}>
         {/*{mode ==! "modules" && <h3 className="section-caption-module">Modules</h3>}*/}
         {mode ==! "free" && <div className="home-summary-block-label">

@@ -444,6 +444,7 @@ export default function Recommendation({ mode, attempt }) {
     if (mode === "history") return;
 
     const handler = (data) => {
+      console.log("📡 WS EVENT RECEIVED:", data);
       if (data.source?.startsWith("user_progress")) {
         if (data.data?.score) setScore(data.data.score);
 
@@ -463,14 +464,20 @@ export default function Recommendation({ mode, attempt }) {
       }
 
       if (data.source?.startsWith("mentor_response")) {
-        setIsCollapsed(true);
+        console.log("MENTOR", data)
         const hint = data.data?.hint;
         if (!hint) return;
 
-        setMentorReplies(prev => {
+        /*setMentorReplies(prev => {
           if (prev.some(m => m.text === hint)) return prev;
           return [...prev, { text: hint, time: new Date().toLocaleTimeString() }];
-        });
+        });*/
+        if (!hint || hint.trim() === "") return;
+
+        setMentorReplies(prev => [
+          ...prev,
+          { text: hint, time: new Date().toLocaleTimeString() }
+        ]);
 
         setIsCollapsed(false);
         if (activeTabRef.current !== "mentor") setHasNewMentorReply(true);

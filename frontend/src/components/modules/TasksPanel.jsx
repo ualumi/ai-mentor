@@ -76,35 +76,35 @@ export default function TasksPanel({ mode, restoredState }) {
   );
 }*/}
 
-import ModuleTask from "./module/ModuleTask";
+import ModuleTask from "./module/ModuleTask"; 
 import "./module.css";
 import { useMemo, useState, useEffect } from "react";
 import Attempt from "../history/Attempt";
 import { getLearningState } from "../../api/learningService";
 import { useAuth } from "../../context/AuthContext";
 
-export default function TasksPanel({ restoredState, selectedAttemptId, onSelectAttempt }) {
-  const [openCondition, setOpenCondition] = useState(null);
-  const [attempts, setAttempts] = useState([]);
-
+export default function TasksPanel({ restoredState }) {
   const { token } = useAuth();
   const sessionId = restoredState?.session?.session_id;
 
-  // 🔹 начальная инициализация
-  useEffect(() => {
-    if (!restoredState?.attempts) return;
-    setAttempts([...restoredState.attempts]);
-  }, [restoredState?.attempts?.length]);
+  // 🔹 локальное состояние
+  const [localRestoredState, setLocalRestoredState] = useState(restoredState);
+  const [attempts, setAttempts] = useState(restoredState?.attempts || []);
+  const [selectedAttemptId, setSelectedAttemptId] = useState(null);
+  const [openCondition, setOpenCondition] = useState(null);
 
-  // 🔹 polling с сервера
+  const isAttemptView = !!selectedAttemptId;
+
+  // 🔹 Polling для автоподгрузки состояния
   useEffect(() => {
     if (!sessionId || !token) return;
 
     const fetchState = async () => {
       try {
         const data = await getLearningState(sessionId, token);
-        if (data?.attempts) {
-          setAttempts(data.attempts);
+        if (data) {
+          setLocalRestoredState(data);
+          if (data.attempts) setAttempts(data.attempts);
         }
       } catch (e) {
         console.error("Failed to refresh attempts", e);
@@ -113,12 +113,156 @@ export default function TasksPanel({ restoredState, selectedAttemptId, onSelectA
 
     fetchState();
     const interval = setInterval(fetchState, 2000);
+
     return () => clearInterval(interval);
   }, [sessionId, token]);
 
+  // 🔹 Группировка попыток
+  const groupedAttempts = useMemo(() => {
+    if (!attempts.length) return {};
+    return attempts.reduce((acc, attempt) => {
+      const condition = attempt.condition;
+      if (!acc[condition]) acc[condition] = [];
+      acc[condition].push(attempt);
+      return acc;
+    }, {});
+  }, [attempts]);
+
+  const selectedAttempt = attempts.find(a => a.attempt_id === selectedAttemptId);
+  const activeCondition = selectedAttempt?.condition;
+
+  // 🔹 если просмотр attempt, автоматически раскрываем условие
+  useEffect(() => {
+    if (isAttemptView && activeCondition) {
+      setOpenCondition(activeCondition);
+    }
+  }, [isAttemptView, activeCondition]);
+
+  const conditionsToRender = isAttemptView
+    ? { [activeCondition]: groupedAttempts[activeCondition] }
+    : groupedAttempts;
+
+  // 🔹 Возврат к ModuleTask
+  const handleBackToModule = () => {
+    setSelectedAttemptId(null);
+    setOpenCondition(null);
+
+    if (sessionId && token) {
+      getLearningState(sessionId, token)
+        .then(data => {
+          if (data) {
+            setLocalRestoredState(data);
+            if (data.attempts) setAttempts(data.attempts);
+          }
+        })
+        .catch(err => console.error(err));
+    }
+  };
+
+  return (
+    <div className="taskspanel">
+      <div className="sidebar-label">
+        <h2 className="menu-caption">Текущая задача</h2>
+      </div>
+
+      {isAttemptView && (
+        <button className="item back-button" onClick={handleBackToModule}>
+          ← К списку заданий
+        </button>
+      )}
+
+      {!isAttemptView && <ModuleTask restoredState={localRestoredState} />}
+
+      <div className="module-session">
+        {!attempts.length && (
+          <div className="result-empty">
+          </div>
+        )}
+
+        <p className="history-label tasks-label">Пройденные задачи</p>
+        <div className="modiles-reversed">
+          {Object.entries(conditionsToRender).map(([condition, conditionAttempts]) => (
+            <div key={condition} className="condition-block">
+              <div
+                className={`item item-light module-task-item-history ${
+                  condition === activeCondition ? "active-condition" : ""
+                }`}
+                onClick={() => {
+                  if (isAttemptView) return;
+                  setOpenCondition(prev => (prev === condition ? null : condition));
+                }}
+                style={{ cursor: "pointer" }}
+              >
+                <p>{condition}</p>
+              </div>
+
+              {(isAttemptView || openCondition === condition) && (
+                <div className="attempts-list">
+                  {conditionAttempts?.map(attempt => {
+                    const isActive = attempt.attempt_id === selectedAttemptId;
+                    return (
+                      <div key={attempt.attempt_id} className={isActive ? "active-attempt" : ""}>
+                        <Attempt
+                          attempt={attempt}
+                          mode="module"
+                          onClick={() => setSelectedAttemptId(attempt.attempt_id)}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+//все работает но не подсвечивается активная попытка
+{/*import ModuleTask from "./module/ModuleTask";
+import "./module.css";
+import { useMemo, useState, useEffect } from "react";
+import Attempt from "../history/Attempt";
+import { getLearningState } from "../../api/learningService";
+import { useAuth } from "../../context/AuthContext";
+
+export default function TasksPanel({ restoredState }) {
+  const { token } = useAuth();
+  const sessionId = restoredState?.session?.session_id;
+
+  // 🔹 локальное состояние
+  const [localRestoredState, setLocalRestoredState] = useState(restoredState);
+  const [attempts, setAttempts] = useState(restoredState?.attempts || []);
+  const [selectedAttemptId, setSelectedAttemptId] = useState(null);
+  const [openCondition, setOpenCondition] = useState(null);
+
   const isAttemptView = !!selectedAttemptId;
 
-  // 🔹 группировка
+  // 🔹 Polling для автоподгрузки состояния
+  useEffect(() => {
+    if (!sessionId || !token) return;
+
+    const fetchState = async () => {
+      try {
+        const data = await getLearningState(sessionId, token);
+        if (data) {
+          setLocalRestoredState(data);
+          if (data.attempts) setAttempts(data.attempts);
+        }
+      } catch (e) {
+        console.error("Failed to refresh attempts", e);
+      }
+    };
+
+    fetchState(); // первый вызов сразу
+    const interval = setInterval(fetchState, 2000);
+
+    return () => clearInterval(interval);
+  }, [sessionId, token]);
+
+  // 🔹 Группировка попыток
   const groupedAttempts = useMemo(() => {
     if (!attempts.length) return {};
     return attempts.reduce((acc, attempt) => {
@@ -136,25 +280,37 @@ export default function TasksPanel({ restoredState, selectedAttemptId, onSelectA
     ? { [activeCondition]: groupedAttempts[activeCondition] }
     : groupedAttempts;
 
+  // 🔹 Возврат к ModuleTask
+  const handleBackToModule = () => {
+    setSelectedAttemptId(null);
+    setOpenCondition(null);
+
+    // сразу обновляем данные при возврате
+    if (sessionId && token) {
+      getLearningState(sessionId, token)
+        .then(data => {
+          if (data) {
+            setLocalRestoredState(data);
+            if (data.attempts) setAttempts(data.attempts);
+          }
+        })
+        .catch(err => console.error(err));
+    }
+  };
+
   return (
     <div className="taskspanel">
       <div className="sidebar-label">
         <h2 className="menu-caption">Module tasks</h2>
       </div>
 
-      {isAttemptView && typeof onSelectAttempt === "function" && (
-        <button
-          className="item back-button"
-          onClick={() => {
-            onSelectAttempt(null); // сбрасываем выбранную попытку
-            setOpenCondition(null); // закрываем раскрытые условия
-          }}
-        >
+      {isAttemptView && (
+        <button className="item back-button" onClick={handleBackToModule}>
           ← К списку заданий
         </button>
       )}
 
-      {!isAttemptView && <ModuleTask restoredState={restoredState} />}
+      {!isAttemptView && <ModuleTask restoredState={localRestoredState} />}
 
       <div className="module-session">
         {!attempts.length && (
@@ -165,7 +321,7 @@ export default function TasksPanel({ restoredState, selectedAttemptId, onSelectA
 
         <p className="history-label">Пройденные задачи</p>
         <div className="modiles-reversed">
-          {Object.entries(conditionsToRender).map(([condition, attempts]) => (
+          {Object.entries(conditionsToRender).map(([condition, conditionAttempts]) => (
             <div key={condition} className="condition-block">
               <div
                 className={`item item-light module-task-item-history ${
@@ -182,14 +338,14 @@ export default function TasksPanel({ restoredState, selectedAttemptId, onSelectA
 
               {(isAttemptView || openCondition === condition) && (
                 <div className="attempts-list">
-                  {attempts?.map(attempt => {
+                  {conditionAttempts?.map(attempt => {
                     const isActive = attempt.attempt_id === selectedAttemptId;
                     return (
                       <div key={attempt.attempt_id} className={isActive ? "active-attempt" : ""}>
                         <Attempt
                           attempt={attempt}
                           mode="module"
-                          onClick={() => onSelectAttempt(attempt.attempt_id)}
+                          onClick={() => setSelectedAttemptId(attempt.attempt_id)}
                         />
                       </div>
                     );
@@ -202,7 +358,7 @@ export default function TasksPanel({ restoredState, selectedAttemptId, onSelectA
       </div>
     </div>
   );
-}
+}*/}
 
 
 //работает одновление но не работает кнопка к списку заданий

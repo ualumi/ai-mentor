@@ -7,9 +7,9 @@ export default function DefaultPage({ openAuth }) {
       <button className="def-button" onClick={openAuth}>Авторизация</button>
       </div>
       <section className="def-content">
-        <h1 className="home-label def-content-caption">Open Sourse Code krutoe super nazvanie</h1>
-        <p  className="def-content-info">Позволяет работать с кодом в свободном формате, без привязки к конкретным заданиям.
-Позволяет работать с кодом в свободном  заданиям.</p>
+        <h1 className="home-label def-content-caption">AI-платформа для обучения программированию</h1>
+        <p  className="def-content-info">
+Персональные рекомендации и помощь в обучении в реальном времени. Интеллектуальная система подсказывает и помогает двигаться дальше.</p>
         <button className="def-button" onClick={openAuth}>Личный кабинет</button>
       </section>
     </div>
