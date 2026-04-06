@@ -445,7 +445,7 @@ export default function Recommendation({ mode, attempt }) {
 
     const handler = (data) => {
       console.log("📡 WS EVENT RECEIVED:", data);
-      if (data.source?.startsWith("user_progress")) {
+      /*if (data.source?.startsWith("user_progress")) {
         if (data.data?.score) setScore(data.data.score);
 
         if (data.data?.recommendations) {
@@ -454,6 +454,7 @@ export default function Recommendation({ mode, attempt }) {
             const newOnes = unique.filter(r => !prev.includes(r));
             return newOnes.length ? [...prev, ...newOnes] : prev;
           });
+        
 
           if (activeTabRef.current !== "recommendation") setHasNewRecommendation(true);
 
@@ -461,6 +462,28 @@ export default function Recommendation({ mode, attempt }) {
           setIsHighlighted(true);
           setTimeout(() => setIsHighlighted(false), 2000);
         }
+      }*/
+
+      if (data.source?.startsWith("user_progress")) {
+        if (data.data?.score) setScore(data.data.score);
+
+        // ← ЗАКРОЙТЕ КОММЕНТАРИЙ ЗДЕСЬ, а не после старого блока
+        if (data.data?.recommendations && data.data.recommendations.length > 0) {
+          const unique = [...new Set(data.data.recommendations.map(r => r.competency))];
+          setRecommendations(prev => {
+            const newOnes = unique.filter(r => !prev.includes(r));
+            return newOnes.length ? [...prev, ...newOnes] : prev;
+          });
+        } else {
+          // Если рекомендаций нет или пустой массив
+          setRecommendations(["пока нет рекомендаций"]);
+        }
+
+        if (activeTabRef.current !== "recommendation") setHasNewRecommendation(true);
+
+        setIsCollapsed(false);
+        setIsHighlighted(true);
+        setTimeout(() => setIsHighlighted(false), 2000);
       }
 
       if (data.source?.startsWith("mentor_response")) {

@@ -116,7 +116,7 @@ assert all(s.get("status") == "active" for s in sessions), \
 
 print("✅ /learning/my returned correct active sessions!")'''
 
-MAX_STEPS = 3
+"""MAX_STEPS = 3
 
 
 async def wait_for_condition(ws):
@@ -155,61 +155,13 @@ async def read_responses(ws, timeout=2):
             response = await asyncio.wait_for(ws.recv(), timeout=timeout)
             print("⬅️", response)
         except asyncio.TimeoutError:
-            break
+            break"""
 
 
 
 
-'''async def test_module_mode():
 
-    async with websockets.connect(
-        f"ws://localhost:8004/ws?token={token}"
-    ) as websocket:
-
-        # 1️⃣ режим module
-        await websocket.send(json.dumps({
-            "type": "set_mode",
-            "mode": "module"
-        }))
-
-        r = requests.post(
-            f"{LEARNING_SERVICE}/learning/start",
-            headers={"Authorization": f"Bearer {token}"},
-            json={"competency": "Clustering"},
-        )
-
-        assert r.status_code == 200, f"Failed to start session: {r.status_code}, {r.text}"
-
-        session_id = r.json()["session_id"]
-        print(f"🧩 session_id = {session_id}")
-
-        # 2️⃣ получаем первое условие
-        condition = await wait_for_condition(websocket)
-        print("📘 first condition:", condition["condition"]["description"])
-
-        for step in range(MAX_STEPS):
-
-            print(f"\n===== STEP {step} =====")
-
-            # 3️⃣ отправляем код
-            await send_code(websocket)
-
-            # 4️⃣ читаем ответы mentor / analytics
-            await read_responses(websocket)
-
-            # 5️⃣ просим следующий шаг
-            await websocket.send(json.dumps({
-                "type": "next_step"
-            }))
-
-            # 6️⃣ ждём новое условие
-            condition = await wait_for_condition(websocket)
-
-            print("📘 condition:", condition["condition"]["description"])
-
-        print("🏁 тест завершён")'''
-
-async def test_module_mode():
+"""async def test_module_mode():
 
     async with websockets.connect(
         f"ws://localhost:8004/ws?token={token}"
@@ -265,7 +217,7 @@ assert r_state.status_code == 200, f"/state failed: {r_state.status_code}, {r_st
 
 state = r_state.json()
 
-print("📦 STATE:", json.dumps(state, indent=2))
+print("📦 STATE:", json.dumps(state, indent=2))"""
 
 '''# -------------------------------
 # 2️⃣ Тест эндпоинта истории попыток

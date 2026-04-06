@@ -207,32 +207,12 @@ import { useState, useRef, useEffect } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
 import "./ai.css";
 
-const defaultCode = `import numpy as np
-from sklearn.cluster import KMeans
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import silhouette_score
-import matplotlib.pyplot as plt
-
-def cluster_data(data, n_clusters):
-    scaler = StandardScaler()
-    scaled = scaler.fit_transform(data)
-
-    best_score = -1
-    best_model = None
-
-    for k in range(2, n_clusters + 1):
-        model = KMeans(n_clusters=k)
-        labels = model.fit_predict(scaled)
-
-        score = silhouette_score(scaled, labels)
-
-        if score > best_score:
-            best_score = score
-            best_model = model
-    plt.scatter(scaled[:, 0], scaled[:, 1], c=best_model.labels_)
-    plt.show()
-
-    return best_model, scaler`;
+const defaultCode = `def factorial(n):
+if n == 0:
+return 1
+return n * factorial(n - 1)
+result = factorial(5)
+print(result)`;
 
 export default function CodeEditor({ analysis = [], mode, attempt, hideHints = false, taskCode}) {
   const { code, setCode } = useCode();
