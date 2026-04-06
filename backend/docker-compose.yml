@@ -131,11 +131,14 @@ services:
     build:
       context: ./analitics_service
     container_name: analitics_service
+    gpus: all
     ports:
       - "8007:8007"
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
     depends_on:
       - redis
     networks:

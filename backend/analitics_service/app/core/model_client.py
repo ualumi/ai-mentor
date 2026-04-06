@@ -144,8 +144,6 @@
 }"""
 
     
-
-# app/model.py
 import json
 import torch
 import asyncio
@@ -172,6 +170,10 @@ def load_model():
         return
 
     print("🔄 Loading Code Analyzer model...")
+    if not torch.cuda.is_available():
+        raise RuntimeError(
+            "Куды не найдено."
+        )
 
     tokenizer = AutoTokenizer.from_pretrained(
         MODEL_NAME,
@@ -182,12 +184,12 @@ def load_model():
     print("Model loading... ")
     model = AutoModelForCausalLM.from_pretrained(
         MODEL_NAME,
-        torch_dtype=torch.bfloat16 if torch.cuda.is_available() else torch.float32,
-        device_map="auto",
+        torch_dtype=torch.float16,
         trust_remote_code=True
-    )
+    ).to("cuda:0")
 
     model.eval()
+    print(f"✅ Model moved to device: {model.device}")
     print("✅ Model loaded successfully")
 
 

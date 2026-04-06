@@ -45,12 +45,17 @@ async def load_model() -> None:
                 "Установите torch/unsloth и связанные пакеты для mentor_service."
             ) from exc
 
+        if not torch.cuda.is_available():
+            raise RuntimeError(
+                "Куды нетy."
+            )
+
         print(f"Loading mentor model: {MODEL_NAME}")
 
         loaded_model, loaded_tokenizer = FastLanguageModel.from_pretrained(
             model_name=MODEL_NAME,
             max_seq_length=MAX_SEQ_LENGTH,
-            dtype=None,
+            dtype=torch.float16,
             load_in_4bit=LOAD_IN_4BIT,
         )
 
@@ -60,7 +65,7 @@ async def load_model() -> None:
         tokenizer = loaded_tokenizer
         _torch = torch
 
-        print("Mentor model loaded successfully")
+        print(f"Mentor model loaded successfully on device: {model.device}")
 
 
 def _generate_response(code_snippet: str) -> str:

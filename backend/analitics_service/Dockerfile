@@ -21,7 +21,7 @@ PY
 RUN pip install \
     --no-cache-dir \
     --default-timeout=600 \
-    torch torchvision torchaudio \
+    torch==2.4.1 torchvision==0.19.1 torchaudio==2.4.1 \
     --index-url https://download.pytorch.org/whl/cu121
 
 RUN pip install \
