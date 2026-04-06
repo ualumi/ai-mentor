@@ -191,7 +191,7 @@ import "./auth.css";
 import "../../App.css"
 import { generateTestSSOToken } from "../../utils/sso";
 
-const API_BASE = "http://localhost:8002";
+const API_BASE = "http://87.228.63.243:8002";
 
 // AuthForm.jsx
 export default function AuthForm({ isOpen, onClose }) {

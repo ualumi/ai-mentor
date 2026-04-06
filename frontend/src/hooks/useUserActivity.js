@@ -15,7 +15,7 @@ export function useUserActivity(token, days = 30) {
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 
-const PROGRESS_SERVICE = "http://localhost:8009"; // твой progress_service
+const PROGRESS_SERVICE = "http://87.228.63.243:8009"; // твой progress_service
 
 export function useUserActivity(token, days = 30) {
   return useQuery({

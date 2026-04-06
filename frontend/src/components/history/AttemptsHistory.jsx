@@ -4,7 +4,7 @@ import "../../App.css"
 import { useNavigate } from "react-router-dom";
 import Attempt from './Attempt';
 
-const ATTEMPTS_SERVICE = "http://155.212.237.86:8009";
+const ATTEMPTS_SERVICE = "http://87.228.63.243:8009";
 
 export default function AttemptsHistory({ onSelectAttempt }) {
   const token = localStorage.getItem("token");
