@@ -3,7 +3,10 @@ redis>=5.0.0
 uvicorn
 httpx
 asyncio
-torch
+#torch
+torch==2.1.2
+torchvision==0.16.2
+torchaudio==2.1.2
 accelerate
 peft
 trl
