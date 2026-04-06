@@ -113,24 +113,41 @@ export default function Modules({ mode}) { // добавили флаг ssoLogin
   });
 
   // 🔹 Запрос на импортированные SSO модули
-  /*const { data: importedSkills, isLoading: loadingImported, error: importedError } = useQuery({
+
+  const { data: importedSkills, isLoading: loadingImported, error: importedError } = useQuery({
     queryKey: ['importedSkills'],
     queryFn: async () => {
-      if (!isSSO) return null; // если не SSO — пропускаем
+      if (!isSSO) return null;
+
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      if (!user?.email) {
+        throw new Error("No user email found");
+      }
+
       const res = await fetch(`${INTEGRATION_SERVICE}/import-progress`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          "Content-Type": "application/json",
+          // ❌ Authorization можно убрать (он больше не нужен)
+        },
+        body: JSON.stringify({
+          email: user.email, // ✅ ОБЯЗАТЕЛЬНО строка
+        }),
       });
-      if (res.ok) {
-        localStorage.setItem("ssoImported", "true");
+
+      if (!res.ok) {
+        const text = await res.text();
+        console.error("IMPORT ERROR:", text);
+        throw new Error("Failed to fetch imported skills");
       }
-      if (!res.ok) throw new Error("Failed to fetch imported skills");
+
       return res.json();
     },
-    //enabled: !!isSSO && !!token, // выполняем только если SSO
-    enabled: !!isSSO && !!token && !localStorage.getItem("ssoImported")
-  });*/
-  const { data: importedSkills, isLoading: loadingImported, error: importedError } = useQuery({
+    enabled: !!isSSO,
+  });
+
+  /*const { data: importedSkills, isLoading: loadingImported, error: importedError } = useQuery({
     queryKey: ['importedSkills'],
     queryFn: async () => {
       if (!isSSO) return null;
@@ -148,10 +165,7 @@ export default function Modules({ mode}) { // добавили флаг ssoLogin
         }),
       });
 
-      /*if (res.ok) {
-        localStorage.setItem("ssoImported", "true");
-        console.log("ssoImported")
-      }*/
+
 
       if (!res.ok) throw new Error("Failed to fetch imported skills");
 
@@ -159,7 +173,7 @@ export default function Modules({ mode}) { // добавили флаг ssoLogin
     },
     enabled: !!isSSO && !!token,
     //enabled: !!isSSO && !!token && !localStorage.getItem("ssoImported"),
-  });
+  });*/
 
   if (loadingSessions || loadingImported) {
     return <div className='item'>Загрузка модулей...</div>;
@@ -174,7 +188,7 @@ export default function Modules({ mode}) { // добавили флаг ssoLogin
       <div className={containerClass}>
         {/*{mode ==! "modules" && <h3 className="section-caption-module">Modules</h3>}*/}
         {mode ==! "free" && <div className="home-summary-block-label">
-                            <h3 className="home-summary-block-label-text">Активные модули</h3>
+                            <h3 className="home-summary-block-label-text">Доступные модули</h3>
                             <NavLink to="/module" className={"home-summary-block-label-link"}>перейти</NavLink>
         </div>}
         

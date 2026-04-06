@@ -1,7 +1,7 @@
 .heatmap {
   display: flex;
   gap: 4px;
-  background-color: #2F3032 !important;
+  background-color: #1E1F21 !important;
   border-radius: 15px;
   padding: 7px;
 }
@@ -14,7 +14,7 @@
 .heatmap-day {
   width: 20px;
   height: 20px;
-  background-color: #161616; /* синий */
+  background-color: #FFF; /* синий */
   border-radius: 4px;
   cursor: pointer;
   transition: 0.2s;

@@ -6,15 +6,20 @@
     outline: none;
     height: min-content;
     border-radius: 15px;
+    padding: 15px;
 }
 
 .default-page {
     display: flex;
     width: 100vw;
     height: 100vh;
-    background-image: url("../../assets/Group\ 1143.png");
-    background-position: center;
+    /*background-image: url("../../assets/Group\ 1143.png");*/
+    background-image: url("../../assets/lines\ \(2\).png");
+    background-position: center bottom;
+    background-size: 120vw;
     flex-direction: column;
+    background-color: #121213;
+    background-repeat: no-repeat;
 }
 
 .head {
@@ -44,4 +49,11 @@
     text-align: center;
     margin: 0;
     line-height: 45px;
+
+    
+    background: radial-gradient(44.64% 44.64% at 49.97% 90.56%, #FFFFFF 1.44%, #FFFFFF 41.35%, rgba(255, 255, 255, 0.75) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
 }

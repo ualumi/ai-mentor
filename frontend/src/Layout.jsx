@@ -132,6 +132,8 @@ import { SSOCallback } from "./components/auth/SSOCallback";
 import { useAuth } from "./context/AuthContext";
 import { useState } from "react";
 import DefaultPage from "./components/defaultpage/DefaultPage";
+import ModulesPage from "./components/modules/ModulesPage";
+import ProgressPage from "./components/home/ProgressPage";
 
 export default function Layout({ isSidebarOpen, toggleSidebar }) {
   const location = useLocation();
@@ -306,7 +308,8 @@ export default function Layout({ isSidebarOpen, toggleSidebar }) {
           element={
             token ? (
               <ProtectedRoute>
-                <Modules mode="modules"/>
+                <ModulesPage />
+                {/*<Modules mode="modules"/>*/}
               </ProtectedRoute>
             ) : (
               <DefaultPage openAuth={() => setIsAuthOpen(true)} />
@@ -345,7 +348,7 @@ export default function Layout({ isSidebarOpen, toggleSidebar }) {
           element={
             token ? (
               <ProtectedRoute>
-                <Progress />
+                <ProgressPage />
               </ProtectedRoute>
             ) : (
               <DefaultPage openAuth={() => setIsAuthOpen(true)} />

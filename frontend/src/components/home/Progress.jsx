@@ -74,7 +74,7 @@ export default function ProgressChart() {
   };
 
   return (
-    <div className="modules-container">
+    <div className="modules-container progress-container">
       <Bar data={chartData} options={options} />
     </div>
   );

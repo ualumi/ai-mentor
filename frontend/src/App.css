@@ -12,22 +12,24 @@
 
 #root {
     font-family: "Stolz light";
-    --backround-color: #161616;
+    --backround-color: #121213;
     --text-color: #fff;
-    --block-color: #1B1B1D;
+    --block-color: #191A1C;/*#1B1B1D;*/
+    --block-content-color: #1B1C1E;
     --line-color:rgba(255, 255, 255, 0.1);
     --side-color: rgba(255, 255, 255, 0.5);
     --font-size-p: 11.5px;
     --border-radius: 13px;
+    --block-color: #191A1C;
     height: 100vh;
     width: 100vw;
-    background-color: #161616;
+    background-color: #121213;
 }
 
 .body {
     display: flex;
     overflow: hidden;
-    background-color: #161616;
+    background-color: #121213;
 }
 
 .history {
@@ -147,10 +149,15 @@
     margin-bottom: 15px;
 }
 
+.submitcodebutton {
+    background-color: #1E1F21 !important;
+    color: #fff;
+}
+
 .item-light {
-    background: #202022 !important;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: inset 0px -10px 40px -20px rgba(255, 255, 255, 0.08);
+    background: var(--block-content-color) !important;
+    /*border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0px -10px 40px -20px rgba(255, 255, 255, 0.08);*/
     border-radius: var(--border-radius);
     color: var(--text-color);
 }
@@ -331,10 +338,11 @@
 
 
 .editor {
-    background: #202022;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: inset 0px -10px 40px -20px rgba(255, 255, 255, 0.08);
+    background: #1B1C1E;
+    /*border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0px -10px 40px -20px rgba(255, 255, 255, 0.08);*/
     border-radius: var(--border-radius);
+    padding: 7px;
     height: max-content;
 }
 
@@ -354,7 +362,8 @@
     justify-content: space-between;
     transition: width 0.25s 
 ease;
-    background-color: #161616;
+    background-color: #1E1F21;
+    box-shadow: none !important;
     color: #fff;
 }
 
@@ -451,6 +460,12 @@ input:focus::placeholder {
     color: #fff;
     font-family: "Stolz regular";
     width: 100%;
+    font-size: 14px;
+    transition: box-shadow 0.3s ease;
+}
+
+.module-button:hover {
+    box-shadow: inset 0px -10px 60px -20px #FFFFFF;
 }
 
 .progress {
