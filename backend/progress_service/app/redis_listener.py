@@ -98,6 +98,18 @@ async def redis_listener(pubsub):
         user_id = payload.get("user_id")
         raw_analysis = payload.get("analysis")
         score = payload.get('analysis', {}).get('correctness')
+
+        # Если не нашли, пробуем распаковать raw_response
+        if score is None and raw_analysis:
+            raw_response = raw_analysis.get('raw_response')
+            if raw_response:
+                try:
+                    parsed = json.loads(raw_response)
+                    score = parsed.get('correctness')
+                    raw_analysis = raw_response
+                except json.JSONDecodeError:
+                    score = None
+
         if not user_id or not raw_analysis:
             print("не то")
             continue

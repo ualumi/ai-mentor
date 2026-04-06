@@ -110,8 +110,8 @@ class AnalysisListener:
                     continue
 
                 # если вдруг вложенность
-                if isinstance(analysis, dict) and "analysis_result" in analysis:
-                    analysis = analysis["analysis_result"]
+                if isinstance(analysis, dict) and "raw_response" in analysis:
+                    analysis = analysis["raw_response"]
 
                 # 🔎 Генерация аннотаций
                 resolver = PythonResolver(code)
