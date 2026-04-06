@@ -347,7 +347,7 @@ export default function CodeEditor({ analysis = [], mode, attempt, hideHints = f
     // ❗ если скрыто — просто выходим
     if (hideHints) return;
 
-    const filtered = localAnalysis.filter(a => a.confidence > 0.4);
+    const filtered = localAnalysis.filter(a => a.confidence > 0);
 
     // 🔥 добавляем зоны заново
     editor.changeViewZones((accessor) => {
