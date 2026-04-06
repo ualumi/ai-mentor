@@ -92,6 +92,7 @@ async def redis_listener(pubsub):
             payload = json.loads(msg["data"])
             print(payload)
         except Exception:
+            print("EXCEPTION WORKED")
             continue
 
         user_id = payload.get("user_id")
@@ -107,11 +108,13 @@ async def redis_listener(pubsub):
         # 1️⃣ сохраняем raw
         # -----------------------------
         RAW_ANALYSIS.setdefault(user_id, []).append(raw_analysis)
-
+        print("DONE")
         # -----------------------------
         # 2️⃣ извлекаем evidence
         # -----------------------------
+
         evidence_list = extract_evidence(raw_analysis)
+        print("evidence_list", evidence_list)
         EVIDENCE_STORE.setdefault(user_id, []).extend(evidence_list)
 
         # -----------------------------
