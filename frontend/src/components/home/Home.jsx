@@ -24,7 +24,7 @@ export default function Home () {
                     
                     <div className="home-summary-block">
                         <div className="home-summary-block-label">
-                            <h3 className="home-summary-block-label-text">My progress</h3>
+                            <h3 className="home-summary-block-label-text">Прогресс на платформе</h3>
                             <NavLink to="/module" className={"home-summary-block-label-link"}>перейти</NavLink>
                         </div>
                         <Progress labels={["Навык 1", "Навык 2", "Навык 3", "Навык 4"]} values={[20, 40, 30, 80]}></Progress>

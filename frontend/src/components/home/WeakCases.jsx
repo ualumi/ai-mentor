@@ -11,7 +11,7 @@ export default function WeakCases() {
   const navigate = useNavigate();
 
   // 🔹 запрос на weak-cases
-  const { data, isLoading, error } = useQuery({
+  {/*const { data, isLoading, error } = useQuery({
     queryKey: ["weakCases"],
     queryFn: async () => {
       const res = await fetch(`${INTEGRATION_SERVICE}/weak-cases`, {
@@ -25,7 +25,34 @@ export default function WeakCases() {
       return res.json();
     },
     enabled: !!isSSO && !!token, // 🔥 только для SSO
-  });
+  });*/}
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["weakCases"],
+    queryFn: async () => {
+        const user = JSON.parse(localStorage.getItem("user"));
+
+        const res = await fetch(`${INTEGRATION_SERVICE}/weak-cases`, {
+        method: "POST", // 🔥 ВАЖНО
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+            email: user?.email,
+        }),
+        });
+
+        if (!res.ok) {
+        const text = await res.text();
+        console.error("WEAK CASES ERROR:", text);
+        throw new Error("Failed to fetch weak cases");
+        }
+
+        return res.json();
+    },
+    enabled: !!isSSO && !!token,
+    });
 
   // 🔹 если не SSO — вообще не рендерим
   if (!isSSO) return null;
@@ -57,10 +84,11 @@ export default function WeakCases() {
 
   return (
     <div className="weak-cases-block item item-light">
-      <h3>
-        Обнаружили задачи, с которыми возникли трудности. <br />
+        <h3 className="home-summary-block-label-text">Рекомендованные задачи</h3>
+      <p className="home-summary-block-label-link mentor-link">
+        Обнаружили задачи, с которыми возникли трудности.
         Хотите разобрать их с ментором?
-      </h3>
+      </p>
 
       <div className="weak-cases-list">
         {visibleCases.map((task, idx) => (

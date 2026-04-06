@@ -201,6 +201,61 @@ export default function AuthForm({ isOpen, onClose }) {
     console.log(token);
     window.location.href = `/sso-callback?token=${token}`;
   };
+
+
+  const handleSSOAuth = async () => {
+    try {
+      setLoading(true);
+
+      // 🔹 если регистрация — сначала регистрируем
+      if (mode === "register") {
+        const registerResponse = await fetch(`${API_BASE}/auth/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email,
+            password,
+            username: email.split("@")[0],
+          }),
+        });
+
+        if (!registerResponse.ok) {
+          throw new Error("SSO registration failed");
+        }
+      }
+
+      // 🔹 потом всегда логинимся
+      const loginResponse = await fetch(`${API_BASE}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!loginResponse.ok) {
+        throw new Error("SSO login failed");
+      }
+
+      const data = await loginResponse.json();
+
+      // 🔥 ключевой момент
+      login(
+        data.access_token,
+        {
+          username: email.split("@")[0],
+          email,
+        },
+        true // ← SSO флаг
+      );
+
+      onClose();
+      navigate("/");
+
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
   const { login, token } = useAuth();
   const navigate = useNavigate();
 
@@ -209,6 +264,11 @@ export default function AuthForm({ isOpen, onClose }) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const ssoButtonText =
+  mode === "login"
+    ? 'Войти как пользователь "Экзаметрия"'
+    : 'Зарегистрироваться как пользователь "Экзаметрия"';
 
   if (!isOpen) return null; // 🔥 ключевая строка
 
@@ -321,6 +381,14 @@ export default function AuthForm({ isOpen, onClose }) {
           <p className="auth-text-regular">или</p>
           <button
             className="module-button"
+            onClick={handleSSOAuth}
+            disabled={loading}
+            style={{ marginTop: 16 }}
+          >
+            {ssoButtonText}
+          </button>
+          {/*<button
+            className="module-button"
             onClick={handleSSOTestRedirect}
             //onClick={() => {
               // редирект на внешний SSO сервер
@@ -336,7 +404,7 @@ export default function AuthForm({ isOpen, onClose }) {
             style={{ marginTop: 16 }}
           >
             Войти при помощи "Экзаметрия"
-          </button>
+          </button>*/}
         </form>
       </div>
     </div>

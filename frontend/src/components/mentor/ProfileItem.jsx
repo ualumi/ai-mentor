@@ -45,7 +45,7 @@ import { useAuth } from "../../context/AuthContext";
 
 export default function ProfileItem() {
   const { user, logout } = useAuth();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
 
   if (!user) return null;
 
@@ -74,7 +74,7 @@ export default function ProfileItem() {
           className="logout-button"
           onClick={() => {
             logout();
-            setIsOpen(false);
+            setIsOpen(true);
           }}
           style={{ marginTop: 8 }}
         >

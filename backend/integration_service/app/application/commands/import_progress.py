@@ -107,7 +107,7 @@ def mock_external_progress():
 
 client = ExternalClient()
 
-async def import_progress(user_id: int):
+'''async def import_progress(user_id: int):
 
     identity = await get_external_identity_by_internal(user_id)
 
@@ -117,8 +117,8 @@ async def import_progress(user_id: int):
     external_user_id = identity["external_user_id"]
     
     # 🔹 вместо реального запроса подставляем мок
-    # progress = await client.get_user_progress(external_user_id)
-    progress = mock_external_progress()  # <-- вот здесь подменяем
+    progress = await client.get_user_progress(external_user_id)
+    #progress = mock_external_progress()  # <-- вот здесь подменяем
 
     # 🔥 извлекаем навыки (упрощенная логика)
     skills = extract_skills(progress)
@@ -128,6 +128,36 @@ async def import_progress(user_id: int):
         {
             "event": "external_progress_imported",
             "user_id": user_id,
+            "skills": skills
+        }
+    )
+
+    return {
+        "status": "imported",
+        "skills": skills
+    }'''
+
+async def import_progress(email: str):
+
+    '''identity = await get_external_identity_by_internal(user_id)
+
+    if not identity:
+        return {"status": "no_external_account"}
+
+    external_user_id = identity["external_user_id"]'''
+    
+    # 🔹 вместо реального запроса подставляем мок
+    progress = await client.get_user_progress(email)
+    #progress = mock_external_progress()  # <-- вот здесь подменяем
+
+    # 🔥 извлекаем навыки (упрощенная логика)
+    skills = extract_skills(progress)
+
+    await EventBus.publish(
+        "integration.events",
+        {
+            "event": "external_progress_imported",
+            "email": email,
             "skills": skills
         }
     )

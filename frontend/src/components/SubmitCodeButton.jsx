@@ -83,7 +83,7 @@ export default function SubmitCodeButton({
 
   return (
     <button
-      className={`item item-light ${className}`}
+      className={`item submitcodebutton ${className}`}
       onClick={handleSubmit}
       disabled={executeMutation.isPending}
     >

@@ -398,7 +398,7 @@ export default function CodeEditor({ analysis = [], mode, attempt, hideHints = f
       inherit: true,
       rules: [],
       colors: {
-        "editor.background": "#202123"
+        "editor.background": "#1B1C1E"
       },
     });
 
@@ -408,7 +408,7 @@ export default function CodeEditor({ analysis = [], mode, attempt, hideHints = f
 
   // -----------------------------
   return (
-    <div ref={containerRef} style={{ height: "57.5vh", width: "100%" }}>
+    <div ref={containerRef} style={{ height: "57.5vh", width: "100%", marginTop: "10px" }}>
       <Editor
         height="100%"
         language="python"

@@ -105,19 +105,19 @@ def mock_external_progress():
 ]  # можешь переиспользовать свой мок
 
 
-async def get_weak_cases(user_id: int):
-    identity = await get_external_identity_by_internal(user_id)
+async def get_weak_cases(email: str):
+    '''identity = await get_external_identity_by_internal(email)
 
     if not identity:
         return {"status": "no_external_account"}
 
-    external_user_id = identity["external_user_id"]
+    external_user_id = identity["external_user_id"]'''
 
     # 🔹 либо реальный вызов:
-    # progress = await client.get_user_progress(external_user_id)
+    progress = await client.get_user_progress(email)
 
     # 🔹 пока мок:
-    progress = mock_external_progress()
+    #progress = mock_external_progress()
 
     weak_cases = extract_weak_cases(progress)
 
@@ -147,7 +147,7 @@ def extract_weak_cases(progress_data):
                     "last_code": submissions[-1]["code"] if submissions else None
                 })
 
-            elif attempts >= 3:
+            elif attempts >= 2:
                 weak_cases.append({
                     "title": title,
                     "reason": "too_many_attempts",
