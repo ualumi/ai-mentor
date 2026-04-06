@@ -65,7 +65,7 @@ async def test_free_mode():
         await websocket.send(json.dumps({
             "type": "code_event",
             "event": "submit_code",
-            "code": "def factorial(n):\n    if n == 0:\n        return 1\n    return n * factorial(n - 1)\n\nresult = factorial(5)\nprint(result)"
+            "code": "print(9/3)"
         }))
 
         while True:
