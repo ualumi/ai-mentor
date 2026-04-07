@@ -221,7 +221,7 @@
 }
 
 .ai-line-yellow {
-  background: rgba(59, 104, 255, 0.15);
+  background: rgba(104, 139, 255, 0.15); /*rgba(59, 104, 255, 0.15);*/
 }
 
 .ai-line-red {
@@ -233,7 +233,7 @@
 }
 
 .ai-gutter-yellow {
-  border-left: 4px solid #FFC107 !important;
+  border-left: 4px solid #688BFF !important;
 }
 
 .ai-gutter-red {

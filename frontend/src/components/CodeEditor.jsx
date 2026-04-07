@@ -207,12 +207,10 @@ import { useState, useRef, useEffect } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
 import "./ai.css";
 
-const defaultCode = `def factorial(n):
-if n == 0:
-return 1
-return n * factorial(n - 1)
-result = factorial(5)
-print(result)`;
+const defaultCode = `#напишите свой код здесь
+a=10
+if a:
+print("Hello World")`;
 
 export default function CodeEditor({ analysis = [], mode, attempt, hideHints = false, taskCode}) {
   const { code, setCode } = useCode();
@@ -357,8 +355,8 @@ export default function CodeEditor({ analysis = [], mode, attempt, hideHints = f
         domNode.style.padding = "4px 8px";
         domNode.style.fontSize = "12px";
         domNode.style.background = "rgba(255,255,255,0.04)";
-        domNode.style.borderLeft = `3px solid #3B68FF`;
-        domNode.style.color = "#3B68FF";
+        domNode.style.borderLeft = `3px solid #688BFF`;
+        domNode.style.color = "#688BFF";
         domNode.className = "ai-zone";
         domNode.textContent = `AI: ${item.message}`;
 
