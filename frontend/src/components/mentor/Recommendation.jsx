@@ -584,7 +584,7 @@ export default function Recommendation({ mode, attempt }) {
       )}
 
       <div className="recomendation-content">
-        <div
+        {/*<div
           className="reco-content"
           style={{ display: activeTab === "recommendation" ? "flex" : "none" }}
         >
@@ -594,7 +594,32 @@ export default function Recommendation({ mode, attempt }) {
               <div className='menu-list history-list recommendation-list'>
                 {recommendations.map((r, i) => <div key={i}><Module competency={r} /></div>)}
               </div>
-              {/*<StartModuleButton competency={recommendations[0]} />*/}
+
+            </>
+          ) : <p>Нет рекомендаций</p>}
+        </div>*/}
+        
+        <div
+          className="reco-content"
+          style={{ display: activeTab === "recommendation" ? "flex" : "none" }}
+        >
+          {recommendations.length ? (
+            <>
+              <div className="menu-caption mentor-caption">Module recommendation</div>
+              <div className='menu-list history-list recommendation-list'>
+                {recommendations.map((r, i) => {
+                  // Проверяем, является ли элемент последним и содержит ли текст "пока нет рекомендаций"
+                  const isLastAndNoRecommendations = 
+                    i === recommendations.length - 1 && 
+                    r === "пока нет рекомендаций";
+                  
+                  return isLastAndNoRecommendations ? (
+                    <p key={i}>{r}</p>
+                  ) : (
+                    <div key={i}><Module competency={r} /></div>
+                  );
+                })}
+              </div>
             </>
           ) : <p>Нет рекомендаций</p>}
         </div>
