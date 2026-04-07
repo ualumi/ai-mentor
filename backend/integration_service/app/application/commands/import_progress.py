@@ -173,7 +173,7 @@ def extract_skills(progress_data):
 
     for user in progress_data:
         # Задачи
-        for case in user.get("cases", []):
+        '''for case in user.get("cases", []):
             title = case.get("title", "unknown")
             success = any(sub.get("verdict") == "accepted" for sub in case.get("submissions", []))
             attempts = case.get("attempts_count", 0)
@@ -184,7 +184,7 @@ def extract_skills(progress_data):
             elif attempts > 0:
                 skills[title] = max(0.3, 1.0 - 0.2 * attempts)
             else:
-                skills[title] = 0.0
+                skills[title] = 0.0'''
 
         # Лекции
         for lecture in user.get("lectures", []):
@@ -198,7 +198,7 @@ def extract_skills(progress_data):
                 skills[title] = 0.0
 
         # Квизы
-        for quiz in user.get("quizzes", []):
+        '''for quiz in user.get("quizzes", []):
             lecture_id = quiz.get("lecture_id")
             best_score = quiz.get("best_score", 0)
             max_score = quiz.get("max_score", 1)
@@ -211,7 +211,7 @@ def extract_skills(progress_data):
             score = exam.get("score", 0)
             max_score = exam.get("max_score", 1)
             score_ratio = score / max_score
-            skills[f"exam_{exam_id}"] = score_ratio
+            skills[f"exam_{exam_id}"] = score_ratio'''
 
     return skills
 
