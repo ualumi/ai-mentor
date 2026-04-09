@@ -65,7 +65,7 @@ export default function ProfileItem() {
 
         <div style={{ marginLeft: 8 }}>
           <p className="profile-name">{username}</p>
-          <p>{email}</p>
+          <p className="example">{email}</p>
         </div>
       </div>
 
