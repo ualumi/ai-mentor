@@ -75,8 +75,8 @@ export default function Modules({mode}) {
 import { useQuery } from '@tanstack/react-query';
 import "../../App.css"
 import "./module.css"
-const LEARNING_SERVICE = "http://31.129.63.252:8001";
-const INTEGRATION_SERVICE = "http://31.129.63.252:8012/api/integration";
+const LEARNING_SERVICE = "http://89.248.207.102:8001";
+const INTEGRATION_SERVICE = "http://89.248.207.102:8012/api/integration";
 
 import icon1 from "../../assets/module-icons/Scale.svg";
 import icon2 from "../../assets/module-icons/Box2.svg";

@@ -43,7 +43,7 @@ import TasksPanel from "../modules/TasksPanel";
 import { useLocation, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 
-const ATTEMPTS_SERVICE = "http://31.129.63.252:8009";
+const ATTEMPTS_SERVICE = "http://89.248.207.102:8009";
 
 export default function WorkSpace({ mode }) {
   console.log(mode)
