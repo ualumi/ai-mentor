@@ -112,7 +112,7 @@ export default function Module({ competency, session, mode }) {
             {competency}
           </span>
 
-          <p className='modules-item-p'>Задач решено: n</p>
+          <p className='modules-item-p'>Модуль</p>
         </div>
 
       </div>

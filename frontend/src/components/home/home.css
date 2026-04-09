@@ -115,7 +115,8 @@ border-radius: 15px;;
     overflow: hidden;
     min-height: 100px;
     align-items: end;
-    background-image: url("../../assets/Group\ 1141\ \(1\).png"), url("../../assets/Group\ 1142.png");
+    /*background-image: url("../../assets/Group\ 1141\ \(1\).png"), url("../../assets/Group\ 1142.png");*/
+    background-image: url('../../assets/arr\ \(2\).png');
     background-repeat: no-repeat;
     background-position: -50px;
 }

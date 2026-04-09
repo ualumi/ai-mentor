@@ -7,9 +7,10 @@ import Heatmap from "./heatmap/Heatmap";
 import WeakCases from "./WeakCases";
 
 export default function Home () {
+    const user = JSON.parse(localStorage.getItem("user"));
     return (
         <section className="home">
-            <h1 className="home-label">Hi, username</h1>
+            <h1 className="home-label">Привет, {user.username}!</h1>
             {/*<p className="home-summary-block-label-link mentor-link">Позволяет работать с кодом в свободном формате, без привязки к конкретным заданиям.</p>*/}
             <MentorLink/>
             <WeakCases/>

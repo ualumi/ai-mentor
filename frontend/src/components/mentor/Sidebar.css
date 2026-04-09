@@ -118,6 +118,12 @@
     
 }
 
+.example {
+  max-width: calc(19vw - 40px - 100px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .profile-ava {
     background-color: #444547;
     border-radius: 500px;
