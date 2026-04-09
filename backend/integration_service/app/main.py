@@ -7,10 +7,10 @@ app = FastAPI(title="Integration Service")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*", "http://89.248.207.102:5173"],  
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    allow_credentials=True
 )
 
 app.include_router(auth_router, prefix="/api/integration")
