@@ -42,10 +42,93 @@ import Recommendation from "./Recommendation";
 import TasksPanel from "../modules/TasksPanel";
 import { useLocation, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
+import History from "../history/History";
+import "./workspace.css"
+import Review from "./Review";
+import ModuleTask from "../modules/module/ModuleTask";
+import { wsService } from "../../services/websocket";
+import { useAuth } from "../../context/AuthContext";
 
 const ATTEMPTS_SERVICE = "http://localhost:8009";
 
-export default function WorkSpace({ mode }) {
+export default function WorkSpace({ mode, isSidebarOpen }) {
+  /*const [reviewData, setReviewData] = useState([]);
+  const { token } = useAuth();
+
+  useEffect(() => {
+    if (!token) return; // 🔥 ЖДЁМ токен
+
+    const handler = (data) => {
+      if (!data.source?.startsWith("analytics_response")) return;
+
+      console.log("📡 ANALYTICS (GLOBAL):", data);
+
+      const anns = data.data?.annotations || data.data;
+      if (!anns || !anns.length) return;
+
+      setReviewData(anns);
+
+      localStorage.setItem("hasReview", "true");
+    };
+
+    wsService.on("analytics_response", handler);
+
+    // 🔥 ПЕРЕДАЁМ ТОКЕН
+    wsService.connect(token).catch(console.error);
+
+    return () => {
+      wsService.off("analytics_response", handler);
+    };
+  }, [token]); // 🔥 ЗАВИСИМОСТЬ ОТ TOKEN*/
+  const [reviewData, setReviewData] = useState([]);
+  const { token } = useAuth();
+
+  useEffect(() => {
+    if (!token) return;
+
+    const handler = (data) => {
+      if (!data.source?.startsWith("analytics_response")) return;
+
+      console.log("📡 ANALYTICS (GLOBAL):", data);
+
+      const analysis = data.data?.analysis;
+      if (!analysis) return;
+
+      // 🔥 ПРАВИЛЬНЫЙ МАППИНГ В МАССИВ
+      const mapped = [
+        {
+          type: "summary",
+          message: analysis.summary,
+        },
+        {
+          type: "score",
+          message: `Score: ${analysis.overall_score}/10`,
+        },
+        {
+          type: "quality",
+          message: `Code quality: ${analysis.code_quality_score}`,
+        },
+        ...(analysis.tags || []).map(tag => ({
+          type: "tag",
+          message: `Tag: ${tag}`,
+        })),
+      ];
+
+      console.log("🔥 MAPPED REVIEW:", mapped);
+
+      setReviewData(mapped);
+
+      localStorage.setItem("hasReview", "true");
+    };
+
+    wsService.on("analytics_response", handler);
+
+    wsService.connect(token).catch(console.error);
+
+    return () => {
+      wsService.off("analytics_response", handler);
+    };
+  }, [token]);
   console.log(mode)
   const location = useLocation();
   const { id } = useParams(); // 🔥 attempt_id
@@ -97,23 +180,75 @@ export default function WorkSpace({ mode }) {
   }
   console.log(attempt)
   console.log("id", id, "selected_id", selectedAttemptId)
-
+  const [activeTab, setActiveTab] = useState("code");
   return (
     <CodeProvider initialCode={attempt?.code}>
       <div className="free-mode">
 
         <div className={mode}>
-          <SandBox
-            mode={mode}
+          
+          {mode !== "" && <div className="history-wrapper"><History mode={mode}
             name={competency}
             attempt={attempt} // 🔥 прокидываем данные
             restoredState={restoredState}
             code={initialCode}
             titletask={taskTitle}
-          />
+            isSidebarOpen = {isSidebarOpen}
+            selectedAttemptId={selectedAttemptId}/></div>}
+          {/*{mode === "module" && <TasksPanel restoredState={stableRestoredState} selectedAttemptId={selectedAttemptId} />}*/}
+          <div className="code-section">
+            {mode === "module" && <div className="module-task-header">
+              <ModuleTask />
+            </div>}
 
-          {mode === "module" && <TasksPanel restoredState={stableRestoredState} selectedAttemptId={selectedAttemptId} />}
-        </div>
+            <div className="workspace-tabs">
+              <button
+                className={`workspace-tab ${activeTab === "code" ? "active" : ""}`}
+                onClick={() => setActiveTab("code")}
+              >
+                Код
+              </button>
+
+              <button
+                className={`workspace-tab ${activeTab === "review" ? "active" : ""}`}
+                onClick={() => setActiveTab("review")}
+              >
+                Ревью
+              </button>
+            </div>
+            {/*<SandBox
+              mode={mode}
+              name={competency}
+              attempt={attempt} // 🔥 прокидываем данные
+              restoredState={restoredState}
+              code={initialCode}
+              titletask={taskTitle}
+              isSidebarOpen = {isSidebarOpen}
+              selectedAttemptId={selectedAttemptId}
+            />*/}
+            {activeTab === "code" ? (
+              <SandBox
+                mode={mode}
+                name={competency}
+                attempt={attempt}
+                restoredState={restoredState}
+                code={initialCode}
+                titletask={taskTitle}
+                isSidebarOpen={isSidebarOpen}
+                selectedAttemptId={selectedAttemptId}
+              />
+            ) : (
+              <Review
+                attempt={attempt}
+                mode={mode}
+                externalAnnotations={reviewData}
+              />
+            )}
+
+            
+          </div>
+          </div>
+          
 
 
         {attempt ? (

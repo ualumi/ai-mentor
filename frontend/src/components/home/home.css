@@ -8,6 +8,16 @@
     height: 100vh;
     overflow-y: scroll;
     overflow-x: hidden;
+    margin-left: 75px;
+}
+
+.home-description {
+  display: grid;
+  grid-template-columns: 1.8fr 1fr;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  margin-top: 12px;
 }
 
 .home::-webkit-scrollbar {
@@ -19,26 +29,54 @@
     padding: 0;
     color: #ffff;
     font-family:  "Stolz regular";
-    font-size: 30px;
+    font-size: 28px;
+}
+
+.module-label {
+  margin: 0;
 }
 
 .home-summary {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
+    grid-template-columns: 1.8fr 1fr;
+    gap: 12px;
 }
 
 .home-summary .scroll-container {
-  background-color: #1E1F21;
+  /*background-color: #1E1F21;
   padding: 12px;
+  border-radius: 12px;*/
+}
+
+.home-block {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.item-home {
+  padding: 10px;
+  height: min-content;
+  display: flex;
+  background: var(--block-color);
   border-radius: 12px;
+  color: white;
+  font-size: 11.5px;
+  align-items: center;
+  
+  /*margin-top: 12px;*/
+  
+}
+
+.item-home-text {
+  margin: 0;
+  opacity: 0.5;
 }
 
 .home-summary-block {
-    border-radius: 15px;
     /*background: linear-gradient(0deg, rgba(47, 48, 50, 0.25), rgba(47, 48, 50, 0.25)), #202022;*/
     background: var(--block-color);
-border-radius: 15px;;
+    border-radius: 12px;
     padding: 20px;
     max-height: 100%;
     /*    border: 1px solid rgba(255, 255, 255, 0.08);
@@ -58,7 +96,7 @@ border-radius: 15px;;
     padding: 0;
     color: #ffff;
     font-family:  "Stolz regular";
-    font-size: 17px;
+    font-size: 14px;
 }
 
 .home-summary-block-label-link {
@@ -72,10 +110,15 @@ border-radius: 15px;;
     opacity: 1;
 }
 
+.home-activity-summary-block {
+  background-color: #1E1F21;
+}
+
 .progress-container {
   background-color: #1E1F21;
-  border-radius: 10px;
-  margin-top: 7px;
+  border-radius: 9px;
+  margin-top: 0px;
+  padding: 10px;
 }
 
 .progress-content {
@@ -99,9 +142,9 @@ border-radius: 15px;;
 .mentorblock {
     display: flex;
     justify-content: space-between;
-    border-radius: 15px;;
+    border-radius: 12px;;
     padding: 20px;
-    background-color: var(--block-color);
+    background-color: #121213; /*var(--block-color);
     /* Rectangle 556 */
 
 
@@ -109,14 +152,14 @@ border-radius: 15px;;
 
 
 
-    margin-bottom: 15px;
+    margin-bottom: 12px;
     position: relative;
     z-index: 0;
     overflow: hidden;
     min-height: 100px;
-    align-items: end;
-    /*background-image: url("../../assets/Group\ 1141\ \(1\).png"), url("../../assets/Group\ 1142.png");*/
-    background-image: url('../../assets/arr\ \(2\).png');
+    /*align-items: end;*/
+    
+    /*background-image: url('../../assets/arr\ \(2\).png');*/
     background-repeat: no-repeat;
     background-position: -50px;
 }

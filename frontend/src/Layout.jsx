@@ -152,9 +152,16 @@ export default function Layout({ isSidebarOpen, toggleSidebar }) {
   const isAuthPage = location.pathname === "/auth";
 
   let mode = "free";
+  /*if (location.pathname.startsWith("/")) {
+    mode = "";
+  }*/
   if (location.pathname.startsWith("/module")) {
     mode = "module";
   }
+  if (location.pathname.startsWith("/mentor")) {
+    mode = "free";
+  }
+  
 
   // 🔥 авто-открытие
   useEffect(() => {

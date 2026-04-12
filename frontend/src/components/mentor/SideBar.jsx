@@ -83,8 +83,16 @@ import { House, ChevronLeft, ChevronRight, Search, Activity, Layers, Sparkles } 
 import ProfileItem from "./ProfileItem";
 import MenuItem from "./menu/MenuItem";
 import { useAuth } from "../../context/AuthContext";
+import { useEffect } from "react";
 
-export default function SideBar({ mode = "free", isOpen, toggleSidebar, openAuth }) {
+
+export default function SideBar({ mode = "", isOpen, toggleSidebar, openAuth }) {
+  useEffect(() => {
+    // если режим free или module → закрываем сайдбар
+    if ((mode === "free" || mode === "module") && isOpen) {
+      toggleSidebar(false); // 👈 важно: закрываем
+    }
+  }, [mode]);
   const { token, user } = useAuth();
   const location = useLocation();
   //{ type:"input_item", text:"Поиск", icon:<Search strokeWidth={1} size={20}/> },
@@ -157,7 +165,7 @@ export default function SideBar({ mode = "free", isOpen, toggleSidebar, openAuth
 
         </div>
 
-        {isOpen && (token ? <History mode={mode}/>: '') }
+        {/*{isOpen && (token ? <History mode={mode}/>: '') }*/}
 
       </div>
 

@@ -553,7 +553,7 @@ export default function Recommendation({ mode, attempt }) {
   // BUBBLE
   if (isCollapsed) {
     return (
-      <div className="recommendation-bubble" onClick={handleBubbleClick}>
+      <div className="recommendation-bubble" onClick={handleBubbleClick} style={{display: "none"}}>
         <div className="ai-face">
           {/*<div className="eye" style={{ transform: `translate(${eyePos.x}px, ${eyePos.y}px)` }} />
           <div className="eye" style={{ transform: `translate(${eyePos.x}px, ${eyePos.y}px)` }} />*/}

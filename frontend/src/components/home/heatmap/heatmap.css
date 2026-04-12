@@ -1,9 +1,9 @@
 .heatmap {
   display: flex;
   gap: 4px;
-  background-color: #1E1F21 !important;
+  /*background-color: #1E1F21 !important;
   border-radius: 15px;
-  padding: 7px;
+  padding: 7px;*/
 }
 .heatmap-week {
   display: flex;
@@ -14,8 +14,8 @@
 .heatmap-day {
   width: 20px;
   height: 20px;
-  background-color: #FFF; /* синий */
-  border-radius: 4px;
+  background-color: #1E1F21; /* синий */
+  border-radius: 5px;
   cursor: pointer;
   transition: 0.2s;
   margin-bottom: 4px;

@@ -108,21 +108,24 @@ export default function Module({ competency, session, mode }) {
         </div>
 
         <div className='modules-description'>
-          <span className='modules-item-text'>
+          <span className='modules-item-text home-summary-block-label-text'>
             {competency}
           </span>
-
-          <p className='modules-item-p'>Модуль</p>
+          <div>
+            <p className='modules-item-p'>Модуль</p>
+            <ProgressBar />
+          </div>
+          
         </div>
 
       </div>
 
-      {/*{mode !== "history" && (
+      {/*{mode !== "history" && (*/}
         <div>
           <div className='menu-item-processflag'>In process</div>
           <ProgressBar progress={session?.progress || 0} />
         </div>
-      )}*/}
+      {/*)}*/}
     </div>
   );
 }

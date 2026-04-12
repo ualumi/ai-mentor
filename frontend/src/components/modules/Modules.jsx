@@ -185,27 +185,37 @@ export default function Modules({ mode}) { // добавили флаг ssoLogin
 
   return (
     <div className={`modules-block ${isSSO ? "modules-block-sso" : "modules-block-default"}`}>
+      
       <div className={containerClass}>
         {/*{mode ==! "modules" && <h3 className="section-caption-module">Modules</h3>}*/}
         {mode ==! "free" && <div className="home-summary-block-label">
-                            <h3 className="home-summary-block-label-text">Доступные модули</h3>
+                            <h3 className="home-label module-label">Модули</h3>
                             <NavLink to="/module" className={"home-summary-block-label-link"}>перейти</NavLink>
         </div>}
-        
-        <div className='modules-container scroll-container'>
-          {sessions && sessions.length > 0 ? (
-            sessions.map((session) => (
-              <Module
-                key={session.session_id}
-                competency={session.competency}
-                session={session}
-                mode={mode}
-              />
-            ))
-          ) : (
-            <div className='item'>Нет активных модулей</div>
-          )}
+        <ul className='module-type-list'>
+            <li className='module-type-list-item'>Recommended</li>
+            <li className='module-type-list-item'>Active</li>
+            <li className='module-type-list-item'>Finished</li>
+        </ul>
+        <div className='module-types'>
+          
+          
+          <div className='modules-container scroll-container'>
+            {sessions && sessions.length > 0 ? (
+              sessions.map((session) => (
+                <Module
+                  key={session.session_id}
+                  competency={session.competency}
+                  session={session}
+                  mode={mode}
+                />
+              ))
+            ) : (
+              <div className='item'>Нет активных модулей</div>
+            )}
+          </div>
         </div>
+        
         
       </div>
 

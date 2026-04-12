@@ -17,6 +17,7 @@ import { useEffect } from 'react';
 import Actionpanel from './Actionpanel'
 import { RunCodeButton } from "../RunCodeSutton";
 import ProgressBar from "../modules/module/ProgressBar";
+import ModuleTask from "../modules/module/ModuleTask";
 
 
 {/*export default function SandBox({mode, name}) {
@@ -96,7 +97,7 @@ import ProgressBar from "../modules/module/ProgressBar";
   );
 }*/}
 
-export default function SandBox({ mode, name, attempt, restoredState, code, titletask}) {
+export default function SandBox({ mode, name, attempt, restoredState, code, titletask, isSidebarOpen, selectedAttemptId}) {
   const [hideHints, setHideHints] = useState(false);
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [analysis, setAnalysis] = useState([]);
@@ -163,22 +164,21 @@ export default function SandBox({ mode, name, attempt, restoredState, code, titl
     <section className={s["section-sandbox"]}>
 
       {/* 🔥 HEADER */}
-      {/*{mode === "free" && <h1 className={s["section-caption"]}>Самостоятельная практика</h1>}*/}
+      {/*{mode === "free" && <h1 className={s["section-caption"]}>Самостоятельная практика</h1>}
       {mode === "free" && (
           titletask 
               ? <h1 className={s["section-caption"]}>Задача: {titletask}</h1>
-              : <h1 className={s["section-caption"]}>Самостоятельная практика</h1>
+              : <h1 className={s["section-caption"]}></h1>
       )}
 
       {mode === "module" && (
         <div className={s["progress"]}>
-          {/*<h1 className={s["section-caption-module"]}>Модуль: {name}</h1>*/}
+          
           <h1 className={s["section-caption-module"]}>
             Модуль: <span className={s["section-caption-module-name"]}>{competency || name}</span>
           </h1>
           <div className="progress-info">
-            {/*<span className="progress-item-text">Прогресс по модулю: </span>
-            {/*<ProgressBar progress={15} />*/}
+            
             <ProgressBar progress={restoredState?.attempts?.length || 0} />
           </div>
         </div>
@@ -186,8 +186,11 @@ export default function SandBox({ mode, name, attempt, restoredState, code, titl
 
       {mode === "history" && (
         <h1 className={s["section-caption"]}>История попытки</h1>
-      )}
+      )}*/}
 
+      {/*{mode === "module" && <div className="module-task-header">
+        <ModuleTask />
+      </div>}
       {/* 🔥 PANEL */}
       <div className={s["section-panel"]}>
         <div className={s["section-panel-main"]}>
@@ -199,14 +202,16 @@ export default function SandBox({ mode, name, attempt, restoredState, code, titl
 
           {/* ❌ отключаем submit в history */}
           {mode !== "history" && <SubmitCodeButton />}
-          <button
+          {/*<button
             onClick={() => setHideHints(prev => !prev)}
             className="item item-light"
           >
             {hideHints ? "Показать подсказки" : "Скрыть подсказки"}
-          </button>
+          </button>*/}
 
         </div>
+
+        
 
         {/* ❌ отключаем run в history */}
         {mode !== "history" && (
@@ -222,11 +227,8 @@ export default function SandBox({ mode, name, attempt, restoredState, code, titl
           analysis={analysis}  //для free/module
           hideHints={hideHints} 
           taskCode={code}
+          key={isSidebarOpen ? "open" : "closed"}
         />
-        {/*<CodeEditor
-          analysis={mode === "history" ? attempt?.analysis || [] : analysis}
-          readOnly={mode === "history"} // 🔥 ключевая штука
-        />*/}
 
         <Terminal
           isOpen={isTerminalOpen}

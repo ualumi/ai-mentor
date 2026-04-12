@@ -1,0 +1,42 @@
+.history-wrapper {
+    background-color: #161719;
+    width: 19vw;
+    padding: 20px;
+}
+
+.history-item-free {
+    background-color: #191A1C;
+    transition: background-color 0.3s ease;
+    outline: transparent;
+    border: transparent;
+}
+
+.history-item-free:hover, .history-item-free:focus {
+    background-color: #1E1F21;
+    outline: transparent;
+    border: transparent;
+}
+
+.module-type-list {
+    color: white;
+    font-size: 11.5px;
+    display: flex;
+    list-style-type: none;
+    opacity: 0.5;
+    padding: 0px;
+    margin: 0px;
+}
+
+.module-type-list-item {
+    margin-right: 10px;
+}
+
+.code-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding-inline: 25px;
+    padding-block: 10px;
+    background-color: #191A1C;
+}

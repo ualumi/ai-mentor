@@ -1,12 +1,12 @@
 .taskspanel {
     height: 100vh;
-    padding-inline: 20px !important;
-    height: calc(100% - 20px);
+    /*padding-inline: 20px !important;*/
     display: flex;
     flex-direction: column;
     gap: 5px;
-    background-color: #121213 ;
+    background-color: #161719 ;
     height: calc(100vh - 20px);
+    width: 19vw;
 }
 
 .history-container {
@@ -28,7 +28,6 @@
 
 .scroll-container {
     overflow-y: scroll;
-    max-height: 30vh;
     margin-bottom: 15px;
 }
 
@@ -65,16 +64,17 @@
 }
 
 .item-module {
-    background: #2F3032 !important;
+    background-color: #262729 !important;
+    /*background: #1E1F21 #1B1C1E !important;*/
     box-shadow: none !important;
     border: none;
-    padding-inline: 7px;
+    padding: 10px;
     display: flex;
     justify-content: space-between;
     color: rgba(255, 255, 255, 0.7);
     overflow: visible;
     transition: background-color 0.3s ease;
-    
+    border-radius: 10px;
 }
 
 .sidebar .item-module {
@@ -99,12 +99,19 @@
 .modules-description {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 15px;
 }
 
 .module-icon {
     background-color: #161616;
-    padding: 10px 15px;
+    padding: 15px 20px;
+    border-radius: 9px;
+    height: 100%;
+}
+
+.module-types {
+    background-color: #1E1F21;
+    padding: 12px;
     border-radius: 10px;
 }
 
@@ -150,6 +157,18 @@
     background-color: #202123;
     box-shadow: none;
     border: none;
+    white-space: initial;
+}
+
+.attempts-list {
+    overflow: hidden;
+
+  max-height: 0;
+  opacity: 0;
+
+  transition: 
+    max-height 0.3s ease,
+    opacity 0.2s ease;
 }
 
 .taskkk {

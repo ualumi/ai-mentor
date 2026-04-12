@@ -35,7 +35,7 @@ export default function Attempt({ attempt, mode }) {
 
   return (
     <button
-      className="item"
+      className="item history-item-free"
       onClick={handleClick}
     >
       <span className='menu-item-text'>

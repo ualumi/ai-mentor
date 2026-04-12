@@ -41,7 +41,7 @@ export default function Heatmap({ token, days = 30 }) {
 import { useUserActivity } from '../../../hooks/useUserActivity';
 import "./heatmap.css";
 
-export default function Heatmap({ token, days = 30 }) {
+export default function Heatmap({ token, days = 60 }) {
   const { data, isLoading, error } = useUserActivity(token, days);
 
   // 🔥 всегда есть данные
@@ -65,7 +65,7 @@ export default function Heatmap({ token, days = 30 }) {
 
   return (
     <div className="heatmap">
-      <h3 className="section-caption-module-recommended">Последняя активность</h3>
+      {/*<h3 className="section-caption-module-recommended">Последняя активность</h3>*/}
       <div className='heatmap-itself'>
         {/* 🔥 статус поверх, но НЕ блокирует карту */}
         {isLoading && <p className="heatmap-status">Загрузка...</p>}
@@ -79,8 +79,8 @@ export default function Heatmap({ token, days = 30 }) {
                 className="heatmap-day"
                 style={{
                   opacity: day.count
-                    ? Math.min(day.count / 5, 1)
-                    : 0.1 // 🔥 чтобы пустая карта была видна
+                    ? Math.min(day.count / 7, 1)
+                    : 1 // 🔥 чтобы пустая карта была видна
                 }}
                 title={`${day.date}: ${day.count || 0} попыток`}
               />
