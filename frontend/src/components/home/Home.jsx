@@ -36,12 +36,32 @@ export default function Home () {
                     </div>
                     
                     <div className="home-block">
-                        <div className="home-summary-block ">
-                            <div className="home-activity-summary-block progress-container">
-                                <p className="home-label module-label">11</p>
+                        <div className="home-block-education">
+                            <div className="home-summary-block home-summary-module-block ">
+                                {/*<div className="home-activity-summary-block progress-container">*/}
+                                    <p className="home-label module-label">11</p>
+                                    <div className="home-summary-block-label-div">
+                                        <p className={"home-summary-block-label-link"}>пройдено</p>
+                                        <p className={"home-summary-block-label-link"}>модулей</p>
+                                    </div>
+                                    
+                                {/*</div>*/}
+                                
                             </div>
-                            
+
+                            <div className="home-summary-block home-summary-module-block ">
+                                {/*<div className="home-activity-summary-block progress-container">*/}
+                                    <p className="home-label module-label">11</p>
+                                    <div className="home-summary-block-label-div">
+                                        <p className={"home-summary-block-label-link"}>пройдено</p>
+                                        <p className={"home-summary-block-label-link"}>модулей</p>
+                                    </div>
+                                    
+                                {/*</div>*/}
+                                
+                            </div>
                         </div>
+                        
                         <div className="home-summary-block">
                             <div className="home-summary-block-label">
                                 <h3 className="home-summary-block-label-text">Последняя активность</h3>
@@ -52,7 +72,7 @@ export default function Home () {
                         </div>
                         <div className="home-summary-block">
                             <div className="home-summary-block-label">
-                                <h3 className="home-summary-block-label-text">Прогресс на платформе</h3>
+                                <h3 className="home-summary-block-label-text">Навыки</h3>
                                 <NavLink to="/module" className={"home-summary-block-label-link"}>перейти</NavLink>
                             </div>
                             <Progress labels={["Навык 1", "Навык 2", "Навык 3", "Навык 4"]} values={[20, 40, 30, 80]}></Progress>

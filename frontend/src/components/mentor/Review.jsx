@@ -52,9 +52,9 @@ export default function Review({ mode, attempt, externalAnnotations }) {
   // 🔹 HISTORY режим (как recommendations)
   // -----------------------------
   useEffect(() => {
-    if (mode === "history" && attempt?.analysis) {
+    if (attempt?.analysis) {
       const recs = attempt.analysis.recommendations || [];
-
+        console.log("ATTEMPT ANALYSIS", attempt.analysis)
       const mapped = recs.map((r, i) => ({
         message: r,
         id: i,

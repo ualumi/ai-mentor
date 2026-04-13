@@ -120,12 +120,12 @@ export default function Module({ competency, session, mode }) {
 
       </div>
 
-      {/*{mode !== "history" && (*/}
+      {mode !== "free" && (
         <div>
           <div className='menu-item-processflag'>In process</div>
           <ProgressBar progress={session?.progress || 0} />
         </div>
-      {/*)}*/}
+      )}
     </div>
   );
 }

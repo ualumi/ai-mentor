@@ -114,6 +114,16 @@
   background-color: #1E1F21;
 }
 
+.home-summary-module-block {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.home-summary-module-block .home-summary-block-label-link {
+  margin: 0;
+}
+
 .progress-container {
   background-color: #1E1F21;
   border-radius: 9px;
@@ -158,10 +168,21 @@
     overflow: hidden;
     min-height: 100px;
     /*align-items: end;*/
-    
+    background-image: url('../../assets/arr2.png');
     /*background-image: url('../../assets/arr\ \(2\).png');*/
     background-repeat: no-repeat;
-    background-position: -50px;
+    background-position: 0px;
+}
+
+.home-summary-block-label-div {
+  display: flex;
+  flex-direction: column;
+}
+
+.home-block-education {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr 1fr;
 }
 
 /*.mentorblock::after {

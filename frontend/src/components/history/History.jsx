@@ -7,6 +7,8 @@ import { Plus} from 'lucide-react';
 import s from "../mentor/FreeMode.module.css"
 import ProgressBar from "../modules/module/ProgressBar";
 import TasksPanel from "../modules/TasksPanel";
+import Module from "../modules/module/Module";
+import ModuleTask from "../modules/module/ModuleTask";
 
 export default function History({mode, name, attempt, restoredState, code, titletask, isSidebarOpen,selectedAttemptId}) {
   const [selectedAttempt, setSelectedAttempt] = useState(null);
@@ -46,6 +48,12 @@ export default function History({mode, name, attempt, restoredState, code, title
             {/*<span className="progress-item-text">Прогресс по модулю: </span>
             {/*<ProgressBar progress={15} />*/}
             <ProgressBar progress={restoredState?.attempts?.length || 0} />
+            <Module
+              //key={session.session_id}
+              competency={name}
+              //session={session}
+              mode={"free"}
+            />
           </div>
         </div>
       )}
@@ -64,6 +72,11 @@ export default function History({mode, name, attempt, restoredState, code, title
               onClick={handleClick}
             ><Plus strokeWidth={1} />new</button>
         <p className="history-label">HISTORY</p></div>}
+        {mode === "module" &&<ModuleTask
+          mode={"view"}
+          onExitView={() => navigate("/")}
+        />}
+        {/*{mode === "module" && <ModuleTask mode={"view"}></ModuleTask>}*/}
         {mode === "module" && <TasksPanel restoredState={restoredState}/>}
         {/*{mode === "module" && <Modules mode="history"/>}*/}
         {mode === "free" && 

@@ -52,34 +52,7 @@ import { useAuth } from "../../context/AuthContext";
 const ATTEMPTS_SERVICE = "http://localhost:8009";
 
 export default function WorkSpace({ mode, isSidebarOpen }) {
-  /*const [reviewData, setReviewData] = useState([]);
-  const { token } = useAuth();
-
-  useEffect(() => {
-    if (!token) return; // 🔥 ЖДЁМ токен
-
-    const handler = (data) => {
-      if (!data.source?.startsWith("analytics_response")) return;
-
-      console.log("📡 ANALYTICS (GLOBAL):", data);
-
-      const anns = data.data?.annotations || data.data;
-      if (!anns || !anns.length) return;
-
-      setReviewData(anns);
-
-      localStorage.setItem("hasReview", "true");
-    };
-
-    wsService.on("analytics_response", handler);
-
-    // 🔥 ПЕРЕДАЁМ ТОКЕН
-    wsService.connect(token).catch(console.error);
-
-    return () => {
-      wsService.off("analytics_response", handler);
-    };
-  }, [token]); // 🔥 ЗАВИСИМОСТЬ ОТ TOKEN*/
+  
   const [reviewData, setReviewData] = useState([]);
   const { token } = useAuth();
 
@@ -110,7 +83,7 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
         },
         ...(analysis.tags || []).map(tag => ({
           type: "tag",
-          message: `Tag: ${tag}`,
+          message: `Tag: ${tag.name || tag.label || tag}`, 
         })),
       ];
 
@@ -130,6 +103,9 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
     };
   }, [token]);
   console.log(mode)
+
+  const hasReview = reviewData.length > 0;
+
   const location = useLocation();
   const { id } = useParams(); // 🔥 attempt_id
 
@@ -152,7 +128,7 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
     }
   }, [restoredState]);
 
-  console.log("restoredState", mode)
+  console.log("restoredState",restoredState, mode)
   //const competency = location.state?.competency;
 
   // 🔥 Загружаем attempt ТОЛЬКО если есть id
@@ -198,19 +174,32 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
           {/*{mode === "module" && <TasksPanel restoredState={stableRestoredState} selectedAttemptId={selectedAttemptId} />}*/}
           <div className="code-section">
             {mode === "module" && <div className="module-task-header">
-              <ModuleTask />
+              {attempt?.condition ? (
+                <ModuleTask conditionHistory={attempt.condition} />
+              ) : (
+                <ModuleTask />
+              )}
             </div>}
 
             <div className="workspace-tabs">
               <button
-                className={`workspace-tab ${activeTab === "code" ? "active" : ""}`}
+                className={`workspace-tab ${activeTab === "code" ? "workspace-tab-active" : ""}`}
                 onClick={() => setActiveTab("code")}
               >
                 Код
               </button>
 
-              <button
+              {/*<button
                 className={`workspace-tab ${activeTab === "review" ? "active" : ""}`}
+                onClick={() => setActiveTab("review")}
+              >
+                Ревью
+              </button>*/}
+              <button
+                className={`workspace-tab 
+                  ${activeTab === "review" ? "workspace-tab-active" : ""} 
+                  ${hasReview && activeTab !== "review" ? "has-notification" : ""}
+                `}
                 onClick={() => setActiveTab("review")}
               >
                 Ревью

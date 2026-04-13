@@ -74,7 +74,7 @@ export default function ProgressChart() {
   );
 }*/}
 
-import {
+{/*import {
   Chart as ChartJS,
   BarElement,
   CategoryScale,
@@ -175,7 +175,7 @@ export default function ProgressChart() {
   );
 }*/}
 
-export default function ProgressChart() {
+{/*export default function ProgressChart() {
   const { data, isLoading, error } = useProgress();
 
   if (isLoading) return <div className='item'>Loading...</div>;
@@ -245,82 +245,88 @@ export default function ProgressChart() {
       <Bar data={chartData} options={options} />
     </div>
   );
-}
+}*/}
 
-
-{/*import {
+import {
   Chart as ChartJS,
-  BarElement,
   CategoryScale,
   LinearScale,
+  BarElement,
   Tooltip,
   Legend,
 } from "chart.js";
-import { Bar } from "react-chartjs-2";
-import { useProgress } from "../../hooks/useProgress";
 
 ChartJS.register(
-  BarElement,
   CategoryScale,
-  LinearScale,
+  LinearScale,   // 🔥 ЭТО И ЕСТЬ "linear"
+  BarElement,
   Tooltip,
   Legend
 );
 
-export default function ProgressChart() {
+import { Bar } from "react-chartjs-2";
+import { useProgress } from "../../hooks/useProgress";
+
+export default function Progress() {
   const { data, isLoading, error } = useProgress();
 
-  // -------------------------
-  // Loading / Error
-  // -------------------------
   if (isLoading) return <div className='item'>Loading...</div>;
   if (error) return <div className='item'>Здесь будет Ваш прогресс на платформе</div>;
 
-  // -------------------------
-  // Transform data
-  // -------------------------
   const progress = data?.progress || {};
 
   const labels = Object.keys(progress);
   const values = Object.values(progress).map((item) => item.ema);
 
-  // -------------------------
-  // Chart config
-  // -------------------------
   const chartData = {
     labels,
     datasets: [
       {
-        label: "Освоение компетенций",
         data: values,
         backgroundColor: "#3B68FF",
-
-        // 🔥 СКРУГЛЕНИЕ
         borderRadius: 8,
         borderSkipped: false,
-        //barThickness: 12, // чтобы скруглялось с обеих сторон
-        categoryPercentage: 0.6
+
+        // 🔥 фиксируем ширину столбцов
+        barThickness: 10,
+        maxBarThickness: 10,
       },
     ],
   };
 
   const options = {
     responsive: true,
-    indexAxis: "y", // 🔥 ГОРИЗОНТАЛЬНЫЙ ГРАФИК
+    indexAxis: "y",
 
     plugins: {
-      legend: {
-        display: false,
+      legend: { display: false },
+    },
+
+    layout: {
+      padding: {
+        left: 0,
       },
     },
 
     scales: {
       x: {
+        display: false,
         beginAtZero: true,
         max: 1,
       },
+
       y: {
-        display: true, // теперь это ось категорий
+        display: true,
+        position: "right", // 🔥 ось справа
+
+        grid: {
+          display: false,
+        },
+
+        ticks: {
+          display: true, // 🔥 показываем подписи
+          padding: 8,
+        },
       },
     },
   };
@@ -330,4 +336,4 @@ export default function ProgressChart() {
       <Bar data={chartData} options={options} />
     </div>
   );
-}*/}
+}

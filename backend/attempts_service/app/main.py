@@ -83,6 +83,7 @@ async def get_attempt_detail(attempt_id: str, db=Depends(get_session)):
         "timestamp": attempt.timestamp,
         "learning_session_id": attempt.learning_session_id,
         "mode": attempt.mode,
+        "condition": attempt.condition,
     }
 
 @app.get("/attempts/{user_id}")
