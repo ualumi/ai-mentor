@@ -10,7 +10,7 @@ import TasksPanel from "../modules/TasksPanel";
 import Module from "../modules/module/Module";
 import ModuleTask from "../modules/module/ModuleTask";
 
-export default function History({mode, name, attempt, restoredState, code, titletask, isSidebarOpen,selectedAttemptId}) {
+export default function History({mode, name, attempt, restoredState, code, titletask, isSidebarOpen,selectedAttemptId, conditionHistory}) {
   const [selectedAttempt, setSelectedAttempt] = useState(null);
   const handleSelectAttempt = (attemptId) => {
     setSelectedAttempt(attemptId);
@@ -39,23 +39,29 @@ export default function History({mode, name, attempt, restoredState, code, title
       )}
 
       {mode === "module" && (
-        <div className={s["progress"]}>
-          {/*<h1 className={s["section-caption-module"]}>Модуль: {name}</h1>*/}
-          <h1 className={s["section-caption-module"]}>
-            Модуль: <span className={s["section-caption-module-name"]}>{name}</span>
-          </h1>
-          <div className="progress-info">
-            {/*<span className="progress-item-text">Прогресс по модулю: </span>
-            {/*<ProgressBar progress={15} />*/}
-            <ProgressBar progress={restoredState?.attempts?.length || 0} />
-            <Module
-              //key={session.session_id}
-              competency={name}
-              //session={session}
-              mode={"free"}
-            />
-          </div>
+        <div>
+            <button onClick={() => navigate('/module')}>
+              Все модули
+            </button>
+            <div className={s["progress"]}>
+              {/*<h1 className={s["section-caption-module"]}>Модуль: {name}</h1>*/}
+              <h1 className={s["section-caption-module"]}>
+                Модуль: <span className={s["section-caption-module-name"]}>{name}</span>
+              </h1>
+              <div className="progress-info">
+                {/*<span className="progress-item-text">Прогресс по модулю: </span>
+                {/*<ProgressBar progress={15} />*/}
+                <ProgressBar progress={restoredState?.attempts?.length || 0} />
+                <Module
+                  //key={session.session_id}
+                  competency={name}
+                  //session={session}
+                  mode={"free"}
+                />
+              </div>
+            </div>
         </div>
+        
       )}
 
       {mode === "history" && (
@@ -66,20 +72,22 @@ export default function History({mode, name, attempt, restoredState, code, title
       
 
       {/*{mode === "module" && <p className="history-label">LAST MODULES</p>}*/}
-      {mode === "free" && <div>
+      {(mode === "free" || mode === "history") && <div>
         <button
               className="item new-attempt"
               onClick={handleClick}
             ><Plus strokeWidth={1} />new</button>
         <p className="history-label">HISTORY</p></div>}
-        {mode === "module" &&<ModuleTask
+        {mode === "module" &&
+        <ModuleTask
           mode={"view"}
           onExitView={() => navigate("/")}
+          conditionHistory={conditionHistory}
         />}
         {/*{mode === "module" && <ModuleTask mode={"view"}></ModuleTask>}*/}
         {mode === "module" && <TasksPanel restoredState={restoredState}/>}
         {/*{mode === "module" && <Modules mode="history"/>}*/}
-        {mode === "free" && 
+        {(mode === "free" || mode === "history") && 
           <div className="menu-list history-list history-scroll">
             {/*<button
               className="item new-attempt"

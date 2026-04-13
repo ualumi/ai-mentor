@@ -92,3 +92,12 @@
     transform: scale(1);
   }
 }
+
+.rewiew {
+    display: flex;
+    flex: 1;
+    background-color: #161719;
+    border-radius: 12px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}

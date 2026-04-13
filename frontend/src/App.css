@@ -36,6 +36,8 @@
 
 .history {
     display: flex;
+    flex: 1;
+    height: 99vh;
 }
 
 

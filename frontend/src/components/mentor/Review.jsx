@@ -10,37 +10,6 @@ export default function Review({ mode, attempt, externalAnnotations }) {
 
   const activeRef = useRef(true);
 
-  // -----------------------------
-  // 🔹 WebSocket (LIVE)
-  // -----------------------------
-  {/*useEffect(() => {
-    if (mode === "history") return;
-
-    const handler = (data) => {
-      console.log("📡 CODE ANNOTATION:", data);
-
-      if (!data.source?.startsWith("analytics_response")) return;
-
-      const anns = data.data?.annotations || data.data;
-
-      if (!anns || !anns.length) return;
-
-      setAnnotations(anns);
-
-      // 🔥 сохраняем флаг
-      localStorage.setItem("hasReview", "true");
-
-      setIsCollapsed(false);
-      setIsHighlighted(true);
-      setTimeout(() => setIsHighlighted(false), 2000);
-    };
-
-    wsService.on("analytics_response", handler);
-
-    return () => {
-      wsService.off("analytics_response", handler);
-    };
-  }, [mode]);*/}
 
     useEffect(() => {
     if (externalAnnotations.length) {
@@ -72,7 +41,7 @@ export default function Review({ mode, attempt, externalAnnotations }) {
 
   return (
     <div
-      className={`item menu-item menu-item-input item-light
+      className={`rewiew
       ${annotations.length ? "" : ""}
       ${isHighlighted ? "" : ""}`}
     >
@@ -93,7 +62,12 @@ export default function Review({ mode, attempt, externalAnnotations }) {
               </div>
             </>
           ) : (
-            <p>Нет ревью</p>
+            <div>
+
+              <p>Здесь будет ревью по вашему коду!</p>
+              <p>Чтобы получить ревью, обратитесь к ментору</p>
+            </div>
+            
           )}
         </div>
       </div>
