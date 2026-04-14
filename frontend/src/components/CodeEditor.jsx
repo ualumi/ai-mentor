@@ -315,7 +315,7 @@ export default function CodeEditor({
       inherit: true,
       rules: [],
       colors: {
-        "editor.background": "#1E1F21"
+        "editor.background": "#202123"
       },
     });
 

@@ -806,8 +806,6 @@ export default function Recommendation({ mode, attempt }) {
 
         {showBubbleMessage && (
           <div className="bubble-message">
-            Привет, я AI-ментор 👋  
-            Готов помочь тебе!
           </div>
         )}
       </div>

@@ -126,10 +126,10 @@ export default function TaskProgress({
 
   return (
     <div className="task-progress">
-      <div className="task-progress-header">
+      {/*<div className="task-progress-header">
         <span>Progress</span>
         <span>{safeScore} / 10</span>
-      </div>
+      </div>*/}
 
       <div className="task-progress-bar">
         <div

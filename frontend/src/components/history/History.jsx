@@ -363,20 +363,24 @@ export default function History({mode, name, attempt, restoredState, code, title
 
       {/* 🔥 ОБНОВЛЯЕМЫЙ CONDITION */}
       {mode === "module" && condition && sessionId && (
-        <div
-          className="item item-light module-task-item-history"
-          onClick={() =>
-            navigate(`/module/${sessionId}`, {
-              state: {
-                competency: name,
-                restoredState
-              }
-            })
-          }
-          style={{ cursor: "pointer" }}
-        >
-          <p>{condition.description}</p>
+        <div>
+          <p class="history-label tasks-label">Текущая задача</p>
+          <div
+            className="item item-light module-task-item-history"
+            onClick={() =>
+              navigate(`/module/${sessionId}`, {
+                state: {
+                  competency: name,
+                  restoredState
+                }
+              })
+            }
+            style={{ cursor: "pointer" }}
+          >
+            <p>{condition.description}</p>
+          </div>
         </div>
+        
       )}
 
       {mode === "module" && <TasksPanel restoredState={restoredState}/>}

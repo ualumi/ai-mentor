@@ -90,12 +90,12 @@ export default function SubmitCodeButton({
       {executeMutation.isPending ? (
         <>
           <Loader size={18} className="spin" />
-          <span>Выполняется...</span>
+          <span></span>
         </>
       ) : (
         <>
           <Lightbulb strokeWidth={1} />
-          <span>{children}</span>
+          {/*<span>{children}</span>*/}
         </>
       )}
     </button>

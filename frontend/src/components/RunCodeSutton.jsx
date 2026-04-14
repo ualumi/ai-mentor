@@ -38,12 +38,12 @@ export function RunCodeButton({
       {executeMutation.isPending ? (
         <>
           <Loader size={18} className="spin" />
-          <span>Выполняется...</span>
+          {/*<span>Выполняется...</span>*/}
         </>
       ) : (
         <>
           <Play strokeWidth={1} />
-          <span>{children}</span>
+          {/*<span>{children}</span>*/}
         </>
       )}
     </button>

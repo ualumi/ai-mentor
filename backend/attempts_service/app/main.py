@@ -235,10 +235,15 @@ async def get_attempts_total(token: str, db=Depends(get_session)):
         raise HTTPException(status_code=401, detail="Invalid token")
 
     # 📊 1. Общее количество попыток
-    total_attempts_result = await db.execute(
-        select(func.count()).where(Attempt.user_id == user_id)
+    #total_attempts_result = await db.execute(
+    #    select(func.count()).where(Attempt.user_id == user_id)
+    #)
+
+    res = await db.execute(
+    select(AttemptAlias).where(AttemptAlias.user_id == user_id)
     )
-    total_attempts = total_attempts_result.scalar() or 0
+    total_attempts =  len(res.scalars().all())
+    #total_attempts = total_attempts_result.scalar() or 0
 
     # 📊 2. Количество уникальных learning_session_id (исключаем NULL)
     total_sessions_result = await db.execute(
@@ -247,7 +252,7 @@ async def get_attempts_total(token: str, db=Depends(get_session)):
         .where(Attempt.learning_session_id.isnot(None))
     )
     total_sessions = total_sessions_result.scalar() or 0
-
+    print("total_attempts", total_attempts, "total_learning_sessions", total_sessions)
     return {
         "total_attempts": total_attempts,
         "total_learning_sessions": total_sessions

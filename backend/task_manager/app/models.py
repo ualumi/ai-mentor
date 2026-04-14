@@ -6,3 +6,4 @@ class FrontendMessage(BaseModel):
     mode: Optional[str] = None  # free | module
     event: Optional[str] = None  # run_code | submit_code
     code: Optional[str] = None
+    learning_session_id: Optional[str] = None
