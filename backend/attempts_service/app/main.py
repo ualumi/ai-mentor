@@ -220,6 +220,39 @@ async def get_user_activity(
     print(full_data)
     return full_data
 
+from sqlalchemy import func, distinct
+
+@app.get("/attempts/total")
+async def get_attempts_total(token: str, db=Depends(get_session)):
+
+    # 🔐 Декодируем токен
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = str(payload["sub"])
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    # 📊 1. Общее количество попыток
+    total_attempts_result = await db.execute(
+        select(func.count()).where(Attempt.user_id == user_id)
+    )
+    total_attempts = total_attempts_result.scalar() or 0
+
+    # 📊 2. Количество уникальных learning_session_id (исключаем NULL)
+    total_sessions_result = await db.execute(
+        select(func.count(distinct(Attempt.learning_session_id)))
+        .where(Attempt.user_id == user_id)
+        .where(Attempt.learning_session_id.isnot(None))
+    )
+    total_sessions = total_sessions_result.scalar() or 0
+
+    return {
+        "total_attempts": total_attempts,
+        "total_learning_sessions": total_sessions
+    }
+
 '''@app.get("/episodes/{session_id}")
 async def get_episodes(session_id: str, db=Depends(get_session)):
     res = await db.execute(

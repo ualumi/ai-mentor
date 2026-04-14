@@ -246,6 +246,12 @@
   min-height: 60vh;
 }
 
+
 .free .editor-container {
   min-height: 60vh;
+}
+
+.module .editor-wrapper, 
+.module .editor-container {
+  min-height: 40vh;
 }

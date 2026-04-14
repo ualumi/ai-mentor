@@ -6,6 +6,7 @@ import MentorLink from "./MentorLink";
 import Heatmap from "./heatmap/Heatmap";
 import WeakCases from "./WeakCases";
 import {Search} from "lucide-react";
+import AttemptsSummary from "./AttemptsSummary";
 
 export default function Home () {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -36,31 +37,30 @@ export default function Home () {
                     </div>
                     
                     <div className="home-block">
-                        <div className="home-block-education">
+                        {/*<div className="home-block-education">
                             <div className="home-summary-block home-summary-module-block ">
-                                {/*<div className="home-activity-summary-block progress-container">*/}
+
                                     <p className="home-label module-label">11</p>
                                     <div className="home-summary-block-label-div">
                                         <p className={"home-summary-block-label-link"}>пройдено</p>
                                         <p className={"home-summary-block-label-link"}>модулей</p>
                                     </div>
                                     
-                                {/*</div>*/}
                                 
                             </div>
 
                             <div className="home-summary-block home-summary-module-block ">
-                                {/*<div className="home-activity-summary-block progress-container">*/}
+
                                     <p className="home-label module-label">11</p>
                                     <div className="home-summary-block-label-div">
                                         <p className={"home-summary-block-label-link"}>пройдено</p>
                                         <p className={"home-summary-block-label-link"}>модулей</p>
                                     </div>
                                     
-                                {/*</div>*/}
                                 
                             </div>
-                        </div>
+                        </div>*/}
+                        <AttemptsSummary />
                         
                         <div className="home-summary-block">
                             <div className="home-summary-block-label">

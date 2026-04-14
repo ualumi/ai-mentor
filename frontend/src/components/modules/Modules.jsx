@@ -605,14 +605,14 @@ export default function Modules({ mode }) {
 
               {(importedSkills?.status === "imported" || finalLocalRecommended.length > 0) && (
                 <>
-                  <div className="home-summary-block-label">
+                  {/*<div className="home-summary-block-label">
                     <h3 className="home-summary-block-label-text">
                       Рекомендованные модули
                     </h3>
                     <NavLink to="/module" className={"home-summary-block-label-link"}>
                       перейти
                     </NavLink>
-                  </div>
+                  </div>*/}
 
                   <div className='modules-container scroll-container'>
 

@@ -436,6 +436,7 @@ input:focus::placeholder {
     font-size: var(--font-size-p);
     padding-inline: 11px;
     padding-block: 9px;
+    white-space: initial;
     /*overflow: visible;
    white-space: initial;*/
 }

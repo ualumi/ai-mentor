@@ -441,14 +441,10 @@ export default function ModuleTask({
       }}
       style={{ cursor: isViewMode ? "pointer" : "default" }}
     >
-      <TaskProgress
-        attempt={attempt}
-        externalAnnotations={externalAnnotations}
-        resetSignal={resetProgressFlag}
-      />
+      
 
       {!condition && (
-        <div className="result-empty">
+        <div className="task-condition taskkk">
           <p>Ожидание задания...</p>
           <p>Статус: {connectionState}</p>
         </div>
@@ -456,10 +452,19 @@ export default function ModuleTask({
 
       {condition && (
         <div className="task-condition taskkk">
+          
 
           <div className="item item-light module-task-item">
-            <p>{condition.description}</p>
+            <p>{condition.description}
+            </p>
+            
           </div>
+          
+          <TaskProgress
+              attempt={attempt}
+              externalAnnotations={externalAnnotations}
+              resetSignal={resetProgressFlag}
+          />
 
           {!isViewMode && (
             <div className="buttons-module">

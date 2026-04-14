@@ -250,6 +250,8 @@ import Review from "./Review";
 import ModuleTask from "../modules/module/ModuleTask";
 import { wsService } from "../../services/websocket";
 import { useAuth } from "../../context/AuthContext";
+import CheckTaskButton from "../modules/module/CheckTaskButton";
+import NextStepButton from "../modules/module/NextStepButton";
 
 const ATTEMPTS_SERVICE = "http://localhost:8009";
 
@@ -539,6 +541,10 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
           attempt={attempt}
         />
 
+        {/*{mode === "module" && (<div className="buttons-module">
+                      {!conditionHistory && <CheckTaskButton />}
+                      <NextStepButton onNext={handleNextStep} />
+        </div>)}*/}
       </div>
     </CodeProvider>
   );

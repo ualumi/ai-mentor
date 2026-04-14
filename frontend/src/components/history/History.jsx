@@ -319,18 +319,21 @@ export default function History({mode, name, attempt, restoredState, code, title
       {mode === "free" && (
           titletask 
               ? <h1 className={s["section-caption"]}>Задача: {titletask}</h1>
-              : <h1 className={s["section-caption"]}></h1>
+              : <h1 style={{display: "none"}}></h1>
       )}
 
       {mode === "module" && (
         <div>
-            <button onClick={() => navigate('/module')}>
-              Все модули
+            <button className="item tab-history-item" onClick={() => navigate('/module')}>
+              <p className="home-summary-block-label-link">Все модули</p>
             </button>
             <div className={s["progress"]}>
 
-              <h1 className={s["section-caption-module"]}>
+              {/*<h1 className={s["section-caption-module"]}>
                 Модуль: <span className={s["section-caption-module-name"]}>{moduleName}</span>
+              </h1>*/}
+              <h1 className={s["section-caption-module"]}>
+                current module
               </h1>
               <div className="progress-info">
 
@@ -361,7 +364,7 @@ export default function History({mode, name, attempt, restoredState, code, title
       {/* 🔥 ОБНОВЛЯЕМЫЙ CONDITION */}
       {mode === "module" && condition && sessionId && (
         <div
-          className="item item-light module-task-item"
+          className="item item-light module-task-item-history"
           onClick={() =>
             navigate(`/module/${sessionId}`, {
               state: {
@@ -372,7 +375,7 @@ export default function History({mode, name, attempt, restoredState, code, title
           }
           style={{ cursor: "pointer" }}
         >
-          {condition.description}
+          <p>{condition.description}</p>
         </div>
       )}
 

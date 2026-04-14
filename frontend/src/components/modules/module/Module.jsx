@@ -82,9 +82,9 @@ export default function Module({ competency, session, mode }) {
         }
       });
 
-      /*setTimeout(() => {
+      setTimeout(() => {
         window.location.reload();
-      }, 0);*/
+      }, 0);
 
     } catch (err) {
       console.error("Start module error:", err);
@@ -113,7 +113,7 @@ export default function Module({ competency, session, mode }) {
             {competency}
           </span>
           <div>
-            <p className='modules-item-p'>Модуль</p>
+            <p className='modules-item-p'>Пройдено:</p>
             <ProgressBar />
           </div>
           
