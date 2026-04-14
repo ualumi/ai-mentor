@@ -40,7 +40,7 @@ class WebSocketService {
         throw new Error("No auth token provided");
       }
 
-      const url = `ws://89.248.207.102:8004/ws?token=${this.token}`;
+      const url = `ws://92.255.67.163:8004/ws?token=${this.token}`;
       this.url = url;
 
     // 🔒 Если уже открыт — ничего не делаем

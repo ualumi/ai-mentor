@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-const ATTEMPTS_SERVICE = "http://localhost:8009";
+const ATTEMPTS_SERVICE = "http://92.255.67.163:8009";
 
 export default function HistoryTaskViewer({ attemptId, fallbackCondition }) {
   const { id } = useParams();

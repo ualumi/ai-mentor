@@ -253,7 +253,7 @@ import { useAuth } from "../../context/AuthContext";
 import CheckTaskButton from "../modules/module/CheckTaskButton";
 import NextStepButton from "../modules/module/NextStepButton";
 
-const ATTEMPTS_SERVICE = "http://localhost:8009";
+const ATTEMPTS_SERVICE = "http://92.255.67.163:8009";
 
 export default function WorkSpace({ mode, isSidebarOpen }) {
   const { token } = useAuth();
