@@ -307,38 +307,7 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
     enabled: !!attemptIdToLoad,
   });
 
-  // -----------------------------
-  // 🔹 WS REVIEW (СТАБИЛЬНЫЙ)
-  // -----------------------------
-  {/*useEffect(() => {
-    if (!token) return;
-
-    const handler = (data) => {
-      if (!data.source?.startsWith("analytics_response")) return;
-
-      const analysis = data.data?.analysis;
-      if (!analysis) return;
-
-      const mapped = [
-        { type: "summary", message: analysis.summary },
-        { type: "score", message: `Score: ${analysis.overall_score}/10` },
-        { type: "quality", message: `Code quality: ${analysis.code_quality_score}` },
-        ...(analysis.tags || []).map(tag => ({
-          type: "tag",
-          message: tag.name || tag.label || tag,
-        })),
-      ];
-
-      setReviewData(mapped);
-    };
-
-    wsService.on("analytics_response", handler);
-    wsService.connect(token).catch(console.error);
-
-    return () => {
-      wsService.off("analytics_response", handler);
-    };
-  }, [token]);*/}
+  
   useEffect(() => {
     if (!token) return;
 
@@ -477,10 +446,11 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
   // 🔹 DERIVED DATA
   // -----------------------------
   const conditionHistory = attempt?.condition ?? null;
-
+  console.log (conditionHistory)
   // -----------------------------
   // 🔹 UI
   // -----------------------------
+  console.log(mode)
   return (
     <CodeProvider initialCode={attempt?.code || initialCode}>
       <div className="free-mode">
@@ -510,7 +480,8 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
             {/* MODULE HEADER */}
             {mode === "module" && (
               <div className="module-task-header">
-                <ModuleTask conditionHistory={conditionHistory} />
+                <ModuleTask  key={id} conditionHistory={conditionHistory} attempt={attempt}
+                externalAnnotations={reviewData} />
               </div>
             )}
 
@@ -539,6 +510,7 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
             {/* CONTENT */}
             {activeTab === "code" ? (
               <SandBox
+                key={id}
                 mode={mode}
                 name={competency}
                 attempt={attempt}
@@ -550,6 +522,7 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
               />
             ) : (
               <Review
+                key={id}
                 attempt={attempt}
                 mode={mode}
                 externalAnnotations={reviewData}
@@ -561,6 +534,7 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
 
         {/* RECOMMENDATION */}
         <Recommendation
+          key={id}
           mode={attempt ? "history" : mode}
           attempt={attempt}
         />

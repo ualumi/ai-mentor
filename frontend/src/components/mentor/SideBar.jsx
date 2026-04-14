@@ -96,13 +96,14 @@ export default function SideBar({ mode = "", isOpen, toggleSidebar, openAuth }) 
   const { token, user } = useAuth();
   const location = useLocation();
   //{ type:"input_item", text:"Поиск", icon:<Search strokeWidth={1} size={20}/> },
+  //{ type:"button_item", text:"Прогресс", icon:<Activity strokeWidth={1} size={20}/>, link:"/progress" }
   const items = [
     
     { type:"button_item", text:"Главная", icon:<House strokeWidth={1} size={20}/>, link:"/" },
     
     { type:"button_item", text:"Практика", link:"/mentor", icon: <Sparkles strokeWidth={1} size={20}/> },
     { type:"button_item", text:"Модули", link:"/module", icon: <Layers strokeWidth={1} size={20}/> },
-    { type:"button_item", text:"Прогресс", icon:<Activity strokeWidth={1} size={20}/>, link:"/progress" }
+    
   ];
 
   // 🔥 вычисляем активный индекс из URL

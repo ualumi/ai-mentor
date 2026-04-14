@@ -250,13 +250,13 @@ export default function CodeEditor({
   // -----------------------------
   // 🔥 РЕАКЦИЯ НА САЙДБАР
   // -----------------------------
-  useEffect(() => {
+  /*useEffect(() => {
     const timeout = setTimeout(() => {
       resizeEditor();
     }, 80); // 🔥 важно: ждём перестроение DOM
 
     return () => clearTimeout(timeout);
-  }, [isSidebarOpen]);
+  }, [isSidebarOpen]);*/
 
   // -----------------------------
   // 🔹 HISTORY
@@ -342,7 +342,11 @@ export default function CodeEditor({
             readOnly: mode === "history"
           }}
           onMount={handleMount}
-          onChange={(value) => setCode(value || "")}
+          //onChange={(value) => setCode(value || "")}
+          onChange={(value) => {
+            if (mode === "history") return; // 🔥 блокируем изменения
+            setCode(value || "");
+          }}
         />
       </div>
     </div>

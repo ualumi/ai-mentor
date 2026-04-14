@@ -101,3 +101,201 @@
     margin-top: 10px;
     margin-bottom: 20px;
 }
+
+/* =========================
+   REVIEW CONTAINER
+========================= */
+
+.review {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  padding: 16px;
+  border-radius: 14px;
+
+  background: #1e1f21;
+  color: #eaeaea;
+
+  font-family: Inter, system-ui, sans-serif;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.review .menu-caption {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+
+  color: #b8b8b8;
+
+  margin-bottom: 6px;
+}
+
+/* =========================
+   BLOCK GRID
+========================= */
+
+.review-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* =========================
+   BASE BLOCK
+========================= */
+
+.review-block {
+  padding: 12px 14px;
+  border-radius: 12px;
+
+  background: #26272b;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+
+  transition: all 0.2s ease;
+}
+
+.review-block:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* =========================
+   TEXT INSIDE BLOCK
+========================= */
+
+.review-block p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #e6e6e6;
+}
+
+/* =========================
+   SCORE BLOCK (important)
+========================= */
+
+.review-score {
+  background: linear-gradient(135deg, #2a2f3a, #1f222a);
+  border-left: 4px solid #4ade80;
+}
+
+.review-score p {
+  font-size: 18px;
+  font-weight: 700;
+  color: #4ade80;
+}
+
+/* =========================
+   QUALITY BLOCK
+========================= */
+
+.review-quality {
+  border-left: 4px solid #60a5fa;
+}
+
+/* =========================
+   SUMMARY BLOCK
+========================= */
+
+.review-summary {
+  border-left: 4px solid #a78bfa;
+}
+
+.review-summary p {
+  font-size: 14px;
+  color: #f1f1f1;
+}
+
+/* =========================
+   WARNING BLOCKS
+========================= */
+
+.review-weaknesses {
+  border-left: 4px solid #f87171;
+  background: rgba(248, 113, 113, 0.05);
+}
+
+.review-weaknesses li {
+  color: #fca5a5;
+}
+
+/* =========================
+   STRENGTH BLOCKS
+========================= */
+
+.review-strengths {
+  border-left: 4px solid #34d399;
+  background: rgba(52, 211, 153, 0.05);
+}
+
+.review-strengths li {
+  color: #86efac;
+}
+
+/* =========================
+   RECOMMENDATIONS
+========================= */
+
+.review-recommendations {
+  border-left: 4px solid #fbbf24;
+  background: rgba(251, 191, 36, 0.05);
+}
+
+.review-recommendations li {
+  color: #fde68a;
+}
+
+/* =========================
+   LISTS
+========================= */
+
+.review-block ul {
+  margin: 8px 0 0 18px;
+  padding: 0;
+}
+
+.review-block li {
+  font-size: 13px;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+/* =========================
+   TAGS (optional)
+========================= */
+
+.review-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.review-tag {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 999px;
+
+  background: #31343a;
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* =========================
+   DETAILED ANALYSIS
+========================= */
+
+.review-detailed {
+  border-left: 4px solid #94a3b8;
+  background: #22252b;
+}
+
+.review-detailed p {
+  white-space: pre-line;
+  color: #d1d5db;
+  font-size: 12.5px;
+  line-height: 1.6;
+}

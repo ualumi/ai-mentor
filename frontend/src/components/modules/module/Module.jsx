@@ -82,9 +82,9 @@ export default function Module({ competency, session, mode }) {
         }
       });
 
-      setTimeout(() => {
+      /*setTimeout(() => {
         window.location.reload();
-      }, 0);
+      }, 0);*/
 
     } catch (err) {
       console.error("Start module error:", err);
@@ -104,6 +104,7 @@ export default function Module({ competency, session, mode }) {
             src={icon3}
             alt="module icon"
             className="module-icon-img"
+            
           />
         </div>
 
@@ -120,12 +121,12 @@ export default function Module({ competency, session, mode }) {
 
       </div>
 
-      {mode !== "free" && (
+      {/*{mode !== "free" && (
         <div>
           <div className='menu-item-processflag'>In process</div>
           <ProgressBar progress={session?.progress || 0} />
         </div>
-      )}
+      )}*/}
     </div>
   );
 }

@@ -23,7 +23,7 @@ export default function Attempt({ attempt, mode }) {
 
   const handleClick = () => {
     if (mode === "module") {
-      navigate(".", {
+      navigate(`./${attempt.attempt_id}`, {
         state: {
           selectedAttemptId: attempt.attempt_id
         }

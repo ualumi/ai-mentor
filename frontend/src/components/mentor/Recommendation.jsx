@@ -400,7 +400,9 @@ export default function Recommendation({ mode, attempt }) {
 }
 */}
 
-import { MessageCircleCode, BookMarked, ChevronDown } from 'lucide-react';
+
+
+{/*import { MessageCircleCode, BookMarked, ChevronDown } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { wsService } from '../../services/websocket';
 import "../../App.css";
@@ -408,6 +410,8 @@ import StartModuleButton from "../modules/StartModuleButton";
 import Module from '../modules/module/Module';
 
 export default function Recommendation({ mode, attempt }) {
+
+  
 
   const [activeTab, setActiveTab] = useState("mentor");
   const [recommendations, setRecommendations] = useState([]);
@@ -445,24 +449,7 @@ export default function Recommendation({ mode, attempt }) {
 
     const handler = (data) => {
       console.log("📡 WS EVENT RECEIVED:", data);
-      /*if (data.source?.startsWith("user_progress")) {
-        if (data.data?.score) setScore(data.data.score);
 
-        if (data.data?.recommendations) {
-          const unique = [...new Set(data.data.recommendations.map(r => r.competency))];
-          setRecommendations(prev => {
-            const newOnes = unique.filter(r => !prev.includes(r));
-            return newOnes.length ? [...prev, ...newOnes] : prev;
-          });
-        
-
-          if (activeTabRef.current !== "recommendation") setHasNewRecommendation(true);
-
-          setIsCollapsed(false);
-          setIsHighlighted(true);
-          setTimeout(() => setIsHighlighted(false), 2000);
-        }
-      }*/
 
       if (data.source?.startsWith("user_progress")) {
         if (data.data?.score) setScore(data.data.score);
@@ -491,10 +478,6 @@ export default function Recommendation({ mode, attempt }) {
         const hint = data.data?.hint;
         if (!hint) return;
 
-        /*setMentorReplies(prev => {
-          if (prev.some(m => m.text === hint)) return prev;
-          return [...prev, { text: hint, time: new Date().toLocaleTimeString() }];
-        });*/
         if (!hint || hint.trim() === "") return;
 
         setMentorReplies(prev => [
@@ -550,13 +533,27 @@ export default function Recommendation({ mode, attempt }) {
     }
   };
 
+
+  useEffect(() => {
+    if (!recommendations || !recommendations.length) return;
+
+    try {
+      const existing = JSON.parse(localStorage.getItem("recommended_modules") || "[]");
+
+      // 🔥 объединяем старые + новые и убираем дубли
+      const merged = Array.from(new Set([...existing, ...recommendations]));
+
+      localStorage.setItem("recommended_modules", JSON.stringify(merged));
+    } catch (e) {
+      console.error("Ошибка сохранения рекомендаций:", e);
+    }
+  }, [recommendations]);
+
   // BUBBLE
   if (isCollapsed) {
     return (
-      <div className="recommendation-bubble" onClick={handleBubbleClick} > {/*style={{display: "none"}}*/}
+      <div className="recommendation-bubble" onClick={handleBubbleClick} > 
         <div className="ai-face">
-          {/*<div className="eye" style={{ transform: `translate(${eyePos.x}px, ${eyePos.y}px)` }} />
-          <div className="eye" style={{ transform: `translate(${eyePos.x}px, ${eyePos.y}px)` }} />*/}
         </div>
 
         {showBubbleMessage && (
@@ -594,7 +591,6 @@ export default function Recommendation({ mode, attempt }) {
               <div className='menu-list history-list recommendation-list'>
                 {recommendations.map((r, i) => <div key={i}><Module competency={r} /></div>)}
               </div>
-              {/*<StartModuleButton competency={recommendations[0]} />*/}
             </>
           ) : <p>Нет рекомендаций</p>}
         </div>
@@ -617,7 +613,7 @@ export default function Recommendation({ mode, attempt }) {
         </div>
       </div>
 
-      {/* TABS */}
+
       <div className="recomentation-tabs">
         <div
           className={`mentor-tab ${activeTab === "mentor" ? "mentor-tab-active" : ""}`}
@@ -628,21 +624,23 @@ export default function Recommendation({ mode, attempt }) {
           {hasNewMentorReply && <span className="new-dot"></span>}
         </div>
 
-        <div
-          className={`mentor-tab ${activeTab === "recommendation" ? "mentor-tab-active" : ""}`}
-          onClick={() => { setActiveTab("recommendation"); setHasNewRecommendation(false); }}
-        >
-          <BookMarked strokeWidth={1} />
-          <span>Recommendations</span>
-          {hasNewRecommendation && <span className="new-dot"></span>}
-        </div>
+
+        {mode !== "history" && (
+          <div
+            className={`mentor-tab ${activeTab === "recommendation" ? "mentor-tab-active" : ""}`}
+            onClick={() => { setActiveTab("recommendation"); setHasNewRecommendation(false); }}
+          >
+            <BookMarked strokeWidth={1} />
+            <span>Recommendations</span>
+            {hasNewRecommendation && <span className="new-dot"></span>}
+          </div>
+        )}
       </div>
     </div>
   );
-}
+}*/}
 
-//last norm but max debth useeffect
-{/*import { MessageCircleCode, BookMarked, ChevronDown } from 'lucide-react';
+import { MessageCircleCode, BookMarked, ChevronDown } from 'lucide-react';
 import { useEffect, useState, useRef } from 'react';
 import { wsService } from '../../services/websocket';
 import "../../App.css";
@@ -652,7 +650,6 @@ import Module from '../modules/module/Module';
 export default function Recommendation({ mode, attempt }) {
 
   const [activeTab, setActiveTab] = useState("mentor");
-
   const [recommendations, setRecommendations] = useState([]);
   const [mentorReplies, setMentorReplies] = useState([]);
   const [score, setScore] = useState(null);
@@ -666,91 +663,72 @@ export default function Recommendation({ mode, attempt }) {
   const [showBubbleMessage, setShowBubbleMessage] = useState(false);
   const [eyePos, setEyePos] = useState({ x: 0, y: 0 });
 
-  // 🔥 фикс: всегда актуальный activeTab (без пересоздания handler)
   const activeTabRef = useRef(activeTab);
+
+  // 🔥 NEW: флаг WS-источника рекомендаций
+  const wsRecommendationRef = useRef(false);
+
   useEffect(() => {
     activeTabRef.current = activeTab;
   }, [activeTab]);
 
-  // -----------------------------
   // 👁️ ГЛАЗА
-  // -----------------------------
   useEffect(() => {
     const handleMouseMove = (e) => {
       const x = (e.clientX / window.innerWidth - 0.5) * 10;
       const y = (e.clientY / window.innerHeight - 0.5) * 10;
       setEyePos({ x, y });
     };
-
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
-  // -----------------------------
-  // 🔹 WebSocket (СТАБИЛЬНЫЙ handler)
-  // -----------------------------
+  // WebSocket handler
   useEffect(() => {
     if (mode === "history") return;
 
     const handler = (data) => {
+      console.log("📡 WS EVENT RECEIVED:", data);
 
-      // -----------------
-      // 📘 RECOMMENDATIONS + SCORE
-      // -----------------
       if (data.source?.startsWith("user_progress")) {
+        if (data.data?.score) setScore(data.data.score);
 
-        if (data.data?.score) {
-          setScore(data.data.score);
-        }
+        if (data.data?.recommendations && data.data.recommendations.length > 0) {
 
-        if (data.data?.recommendations) {
-          const unique = [
-            ...new Set(data.data.recommendations.map(r => r.competency))
-          ];
+          wsRecommendationRef.current = true; // 🔥 MARK WS SOURCE
+
+          const unique = [...new Set(data.data.recommendations.map(r => r.competency))];
 
           setRecommendations(prev => {
             const newOnes = unique.filter(r => !prev.includes(r));
-            if (!newOnes.length) return prev;
-            return [...prev, ...newOnes];
+            return newOnes.length ? [...prev, ...newOnes] : prev;
           });
 
-          if (activeTabRef.current !== "recommendation") {
-            setHasNewRecommendation(true);
-          }
-
-          setIsCollapsed(false);
-          setIsHighlighted(true);
-          setTimeout(() => setIsHighlighted(false), 2000);
+        } else {
+          setRecommendations(["пока нет рекомендаций"]);
         }
+
+        if (activeTabRef.current !== "recommendation") setHasNewRecommendation(true);
+
+        setIsCollapsed(false);
+        setIsHighlighted(true);
+        setTimeout(() => setIsHighlighted(false), 2000);
       }
 
-      // -----------------
-      // 🤖 MENTOR
-      // -----------------
       if (data.source?.startsWith("mentor_response")) {
+        console.log("MENTOR", data);
 
         const hint = data.data?.hint;
-        if (!hint) return;
+        if (!hint || hint.trim() === "") return;
 
-        setMentorReplies(prev => {
-          if (prev.some(m => m.text === hint)) return prev;
+        setMentorReplies(prev => [
+          ...prev,
+          { text: hint, time: new Date().toLocaleTimeString() }
+        ]);
 
-          return [
-            ...prev,
-            {
-              time: new Date().toLocaleTimeString(),
-              text: hint
-            }
-          ];
-        });
-        
-
-        // 🔥 критично: раскрываем при первом ответе
         setIsCollapsed(false);
 
-        if (activeTabRef.current !== "mentor") {
-          setHasNewMentorReply(true);
-        }
+        if (activeTabRef.current !== "mentor") setHasNewMentorReply(true);
       }
     };
 
@@ -761,73 +739,34 @@ export default function Recommendation({ mode, attempt }) {
       wsService.off("user_progress", handler);
       wsService.off("mentor_response", handler);
     };
+  }, [mode]);
 
-  }, [mode]); // ❗ УБРАЛ activeTab
-
-  // -----------------------------
-  // 🔹 History режим
-  // -----------------------------
-  //useEffect(() => {
-  //  if (mode === "history" && attempt?.analysis) {
-  //
-  //    setRecommendations(attempt.analysis.recommendations || []);
-
-
-  //    setMentorReplies(() => {
-        // 1. если есть hints (старый формат)
-  //      if (attempt.analysis?.hints?.length) {
-  //        return attempt.analysis.hints.map(h => ({
-  //          text: h,
-  //          time: new Date(attempt.timestamp).toLocaleTimeString()
-  //        }));
-  //      }
-
-        // 2. если есть mentor_reply (новый формат)
-  //      if (attempt.mentor_reply) {
-  //        return [{
-  //          text: attempt.mentor_reply,
-  //          time: new Date(attempt.timestamp).toLocaleTimeString()
-  //        }];
-  //      }
-
-  //      return [];
-  //    });
-
-  //    setScore({ score: attempt.total_score });
-
-  //    setIsCollapsed(false);
-  //  }
-  //}, [mode, attempt]);
-
+  // History mode
   useEffect(() => {
-    //if (mode === "history" && attempt) {
-      if (!attempt?.analysis) return;
-      // рекомендации
-      setRecommendations(attempt.analysis?.recommendations || []);
+    if (mode === "history" && attempt?.analysis) {
+      setRecommendations(attempt.analysis.recommendations || []);
 
-      // ответ ментора
-      if (attempt.mentor_reply) {
-        setMentorReplies([
-          {
-            text: attempt.mentor_reply,
-            time: new Date(attempt.timestamp).toLocaleTimeString()
-          }
-        ]);
+      let mentorData = [];
+
+      if (attempt.analysis?.hints?.length) {
+        mentorData = attempt.analysis.hints.map(h => ({
+          text: h,
+          time: new Date(attempt.timestamp).toLocaleTimeString()
+        }));
+      } else if (attempt.mentor_reply) {
+        mentorData = [{
+          text: attempt.mentor_reply,
+          time: new Date(attempt.timestamp).toLocaleTimeString()
+        }];
       }
 
-      // score
-      if (attempt.analysis?.correctness) {
-        setScore({
-          score: attempt.analysis.correctness.score
-        });
-      }
+      setMentorReplies(mentorData);
 
+      setScore(attempt.total_score ? { score: attempt.total_score } : null);
       setIsCollapsed(false);
     }
-  //}, [mode, attempt]
-  );
+  }, [mode, attempt]);
 
-  // -----------------------------
   const toggleCollapse = () => {
     setIsCollapsed(prev => !prev);
     setShowBubbleMessage(false);
@@ -841,16 +780,29 @@ export default function Recommendation({ mode, attempt }) {
     }
   };
 
-  // -----------------------------
-  // 🔘 BUBBLE
-  // -----------------------------
+  // 🔥 SAVE ONLY WS RECOMMENDATIONS
+  useEffect(() => {
+    if (!wsRecommendationRef.current) return;
+    if (!recommendations || !recommendations.length) return;
+
+    try {
+      const existing = JSON.parse(localStorage.getItem("recommended_modules") || "[]");
+
+      const merged = Array.from(new Set([...existing, ...recommendations]));
+
+      localStorage.setItem("recommended_modules", JSON.stringify(merged));
+
+      wsRecommendationRef.current = false; // reset flag
+    } catch (e) {
+      console.error("Ошибка сохранения рекомендаций:", e);
+    }
+  }, [recommendations]);
+
+  // BUBBLE
   if (isCollapsed) {
     return (
       <div className="recommendation-bubble" onClick={handleBubbleClick}>
-        <div className="ai-face">
-          <div className="eye" style={{ transform: `translate(${eyePos.x}px, ${eyePos.y}px)` }} />
-          <div className="eye" style={{ transform: `translate(${eyePos.x}px, ${eyePos.y}px)` }} />
-        </div>
+        <div className="ai-face"></div>
 
         {showBubbleMessage && (
           <div className="bubble-message">
@@ -862,16 +814,12 @@ export default function Recommendation({ mode, attempt }) {
     );
   }
 
-  // -----------------------------
-  // 🧩 UI
-  // -----------------------------
   return (
     <div
       className={`item menu-item menu-item-input item-light
       ${recommendations.length ? "recomendation-item-active" : "recomendation-item"}
       ${isHighlighted ? "recommendation-highlight" : ""}`}
     >
-
       {(recommendations.length || mentorReplies.length) && (
         <button className="recommendation-collapse" onClick={toggleCollapse}>
           <ChevronDown strokeWidth={1} />
@@ -879,18 +827,13 @@ export default function Recommendation({ mode, attempt }) {
       )}
 
       <div className="recomendation-content">
-
-
         <div
           className="reco-content"
           style={{ display: activeTab === "recommendation" ? "flex" : "none" }}
         >
           {recommendations.length ? (
             <>
-              <div className="menu-caption mentor-caption">
-                Module recommendation
-              </div>
-
+              <div className="menu-caption mentor-caption">Module recommendation</div>
               <div className='menu-list history-list recommendation-list'>
                 {recommendations.map((r, i) => (
                   <div key={i}>
@@ -898,22 +841,15 @@ export default function Recommendation({ mode, attempt }) {
                   </div>
                 ))}
               </div>
-
-              <StartModuleButton competency={recommendations[0]} />
             </>
-          ) : (
-            <p>Нет рекомендаций</p>
-          )}
+          ) : <p>Нет рекомендаций</p>}
         </div>
-
 
         <div
           className="reco-content"
           style={{ display: activeTab === "mentor" ? "flex" : "none" }}
         >
-          <div className="menu-caption mentor-caption">
-            AI mentor
-          </div>
+          <div className="menu-caption mentor-caption">AI mentor</div>
           <div className='recommendation-list'>
             {score && (
               <div className="menu-item mentor-item item-light mentor-score">
@@ -921,18 +857,15 @@ export default function Recommendation({ mode, attempt }) {
               </div>
             )}
             <div className="menu-item mentor-item item-light">
-              {mentorReplies.length > 0 
-                ? mentorReplies[mentorReplies.length - 1].text 
+              {mentorReplies.length > 0
+                ? mentorReplies[mentorReplies.length - 1].text
                 : null}
             </div>
           </div>
         </div>
-
       </div>
 
-
       <div className="recomentation-tabs">
-
         <div
           className={`mentor-tab ${activeTab === "mentor" ? "mentor-tab-active" : ""}`}
           onClick={() => {
@@ -945,19 +878,20 @@ export default function Recommendation({ mode, attempt }) {
           {hasNewMentorReply && <span className="new-dot"></span>}
         </div>
 
-        <div
-          className={`mentor-tab ${activeTab === "recommendation" ? "mentor-tab-active" : ""}`}
-          onClick={() => {
-            setActiveTab("recommendation");
-            setHasNewRecommendation(false);
-          }}
-        >
-          <BookMarked strokeWidth={1} />
-          <span>Recommendations</span>
-          {hasNewRecommendation && <span className="new-dot"></span>}
-        </div>
-
+        {mode !== "history" && (
+          <div
+            className={`mentor-tab ${activeTab === "recommendation" ? "mentor-tab-active" : ""}`}
+            onClick={() => {
+              setActiveTab("recommendation");
+              setHasNewRecommendation(false);
+            }}
+          >
+            <BookMarked strokeWidth={1} />
+            <span>Recommendations</span>
+            {hasNewRecommendation && <span className="new-dot"></span>}
+          </div>
+        )}
       </div>
     </div>
   );
-}*/}
+}

@@ -338,6 +338,19 @@ export default function Layout({ isSidebarOpen, toggleSidebar }) {
         />
 
         <Route
+          path="/module/:id/:attempt"
+          element={
+            token ? (
+              <ProtectedRoute>
+                <WorkSpace mode="module" isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}/>
+              </ProtectedRoute>
+            ) : (
+              <DefaultPage openAuth={() => setIsAuthOpen(true)} />
+            )
+          }
+        />
+
+        <Route
           path="/mentor/attempt/:id"
           element={
             token ? (
