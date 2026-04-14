@@ -77,7 +77,7 @@ async def test_free_mode():
 
 asyncio.run(test_free_mode())
 
-'''r = requests.post(
+r = requests.post(
     f"{LEARNING_SERVICE}/learning/start",
     headers={"Authorization": f"Bearer {token}"},
     json={"competency": "Clustering"},
@@ -114,9 +114,9 @@ assert any(s.get("session_id") == session_id for s in sessions), \
 assert all(s.get("status") == "active" for s in sessions), \
     "❌ Non-active session returned when filtering by status=active!"
 
-print("✅ /learning/my returned correct active sessions!")'''
+print("✅ /learning/my returned correct active sessions!")
 
-"""MAX_STEPS = 3
+MAX_STEPS = 1
 
 
 async def wait_for_condition(ws):
@@ -155,13 +155,13 @@ async def read_responses(ws, timeout=2):
             response = await asyncio.wait_for(ws.recv(), timeout=timeout)
             print("⬅️", response)
         except asyncio.TimeoutError:
-            break"""
+            break
 
 
 
 
 
-"""async def test_module_mode():
+async def test_module_mode():
 
     async with websockets.connect(
         f"ws://localhost:8004/ws?token={token}"
@@ -196,7 +196,7 @@ async def read_responses(ws, timeout=2):
                 "type": "next_step"
             }))
 
-            condition = await wait_for_condition(websocket)
+            #condition = await wait_for_condition(websocket)
 
         print("🏁 тест завершён")
 
@@ -217,7 +217,7 @@ assert r_state.status_code == 200, f"/state failed: {r_state.status_code}, {r_st
 
 state = r_state.json()
 
-print("📦 STATE:", json.dumps(state, indent=2))"""
+print("📦 STATE:", json.dumps(state, indent=2))
 
 '''# -------------------------------
 # 2️⃣ Тест эндпоинта истории попыток

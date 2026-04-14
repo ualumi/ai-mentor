@@ -104,20 +104,24 @@ export default function Module({ competency, session, mode }) {
             src={icon3}
             alt="module icon"
             className="module-icon-img"
+            
           />
         </div>
 
         <div className='modules-description'>
-          <span className='modules-item-text'>
+          <span className='modules-item-text home-summary-block-label-text'>
             {competency}
           </span>
-
-          <p className='modules-item-p'>Модуль</p>
+          <div>
+            <p className='modules-item-p'>Пройдено:</p>
+            <ProgressBar />
+          </div>
+          
         </div>
 
       </div>
 
-      {/*{mode !== "history" && (
+      {/*{mode !== "free" && (
         <div>
           <div className='menu-item-processflag'>In process</div>
           <ProgressBar progress={session?.progress || 0} />

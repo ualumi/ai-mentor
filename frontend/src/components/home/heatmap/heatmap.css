@@ -1,25 +1,54 @@
 .heatmap {
   display: flex;
   gap: 4px;
-  background-color: #1E1F21 !important;
+  /*background-color: #1E1F21 !important;
   border-radius: 15px;
-  padding: 7px;
+  padding: 7px;*/
+  overflow: hidden;
+  flex: 1;
+  width: 100%;
 }
+
+.heatmap-itself {
+  display: grid;
+  grid-auto-flow: column;      /* 🔥 колонки = недели */
+  grid-auto-columns: 1fr;
+  gap: 4px;
+}
+
+/*.heatmap-week {
+  display: flex;
+
+  gap: 6px;
+  flex: 1;
+  width: 100%;
+}*/
+
 .heatmap-week {
   display: flex;
-  /*flex-direction: column;*/
-  gap: 4px;
+  flex-direction: column; /* 🔥 ВОТ ЭТО ВЕРНУТЬ */
   flex: 1;
+  width: 100%;
 }
-.heatmap-day {
+
+
+/*.heatmap-day {
   width: 20px;
   height: 20px;
-  background-color: #FFF; /* синий */
-  border-radius: 4px;
+  background-color: #1E1F21; 
+  border-radius: 5px;
   cursor: pointer;
   transition: 0.2s;
   margin-bottom: 4px;
+}*/
+
+.heatmap-day {
+  width: 100%;
+  aspect-ratio: 1 / 1; /* 🔥 всегда квадрат */
+  border-radius: 4px;
+  margin-bottom: 4px;
 }
+
 .heatmap-day:hover {
   transform: scale(1.2);
 }

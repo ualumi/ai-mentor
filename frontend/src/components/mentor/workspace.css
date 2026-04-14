@@ -1,0 +1,337 @@
+.history-wrapper {
+    background-color: #161719;
+    width: 19vw;
+    padding: 20px;
+}
+
+.history-item-free {
+    background-color: #191A1C;
+    transition: background-color 0.3s ease;
+    outline: transparent;
+    border: transparent;
+}
+
+.history-item-free:hover, .history-item-free:focus {
+    background-color: #1E1F21;
+    outline: transparent;
+    border: transparent;
+}
+
+.module-type-list {
+    
+    font-size: 11.5px;
+    display: flex;
+    list-style-type: none;
+    
+    padding: 0px;
+    margin: 0px;
+}
+
+.module-type-list-item-active {
+  opacity: 1 !important;
+}
+
+.module-type-list-item {
+    margin-right: 10px;
+    cursor: pointer;
+    color: white;
+    opacity: 0.5;
+}
+
+.code-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding-inline: 25px;
+    padding-block: 10px;
+    background-color: #191A1C;
+}
+
+.workspace-tabs {
+    width: 100%;
+    display: flex;
+    height: min-content;
+}
+
+.workspace-tab {
+  position: relative;
+  background-color: #262729; /*#1E1F21;*/
+  color: white;
+  opacity: 0.5;
+  font-size: 11.5px;
+  font-family: "Stolz regular";
+    height: min-content;
+    display: flex;
+    flex: 1;
+}
+
+.workspace-tab-active {
+    opacity: 1;
+}
+
+.workspace-tab.has-notification::after {
+  content: "";
+  position: absolute;
+  top: 6px;
+  right: 6px;
+
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #3B68FF;
+  opacity: 0;
+  transform: scale(0.5);
+  animation: fadeInDot 0.3s ease forwards;
+}
+
+@keyframes fadeInDot {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.review {
+    display: flex;
+    flex: 1;
+    background-color: #161719;
+    border-radius: 12px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+    height: 90vh;
+    overflow-y: scroll;
+    flex-direction: column;
+    padding: 10px;
+}
+
+.review::-webkit-scrollbar {
+    display: none;
+}
+
+/* =========================
+   REVIEW CONTAINER
+========================= */
+
+/*.review {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  padding: 16px;
+  border-radius: 14px;
+
+  background: #1e1f21;
+  color: #eaeaea;
+
+  font-family: Inter, system-ui, sans-serif;
+}*/
+
+/* =========================
+   HEADER
+========================= */
+
+.review .menu-caption {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+
+  color: #b8b8b8;
+
+  margin-bottom: 6px;
+}
+
+/* =========================
+   BLOCK GRID
+========================= */
+
+.review-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+/* =========================
+   BASE BLOCK
+========================= */
+
+.review-block {
+  padding: 10px;
+  border-radius: 10px;
+
+  /*background: #26272b;*/
+  background-color: #202123; /*#2F3032 ;*/
+  /*border: 1px solid rgba(255, 255, 255, 0.05);*/
+
+  transition: all 0.2s ease;
+}
+
+.review-block:hover {
+  /*transform: translateY(-1px);*/
+  /*border-color: rgba(255, 255, 255, 0.12);*/
+}
+
+/* =========================
+   TEXT INSIDE BLOCK
+========================= */
+
+.review-block p {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #ffff;
+}
+
+/* =========================
+   SCORE BLOCK (important)
+========================= */
+
+.review-score {
+  /*background: linear-gradient(135deg, #2a2f3a, #1f222a);*/
+  border-left: 4px solid #4ade80;
+}
+
+.review-score p {
+  font-size: 11.5px;
+  font-weight: 700;
+  /*color: #4ade80;*/
+}
+
+/* =========================
+   QUALITY BLOCK
+========================= */
+
+.review-quality {
+  border-left: 4px solid #60a5fa;
+}
+
+/* =========================
+   SUMMARY BLOCK
+========================= */
+
+.review-summary {
+  border-left: 4px solid #a78bfa;
+}
+
+.review-summary p {
+  font-size: 11.5px;
+  color: #f1f1f1;
+}
+
+/* =========================
+   WARNING BLOCKS
+========================= */
+
+.review-weaknesses {
+  border-left: 4px solid #f87171;
+  /*background: rgba(248, 113, 113, 0.05);*/
+}
+
+.review-weaknesses li {
+  /*color: #fca5a5;*/
+  color: white;
+}
+
+/* =========================
+   STRENGTH BLOCKS
+========================= */
+
+.review-strengths {
+  border-left: 4px solid #34d399;
+  /*background: rgba(52, 211, 153, 0.05);*/
+}
+
+.review-strengths li {
+    color: white;
+  /*color: #86efac;*/
+}
+
+/* =========================
+   RECOMMENDATIONS
+========================= */
+
+.review-recommendations {
+  border-left: 4px solid #fbbf24;
+  /*background: rgba(251, 191, 36, 0.05);*/
+}
+
+.review-recommendations li {
+  /*color: #fde68a;*/
+  color: white;
+}
+
+/* =========================
+   LISTS
+========================= */
+
+.review-block ul {
+  margin: 8px 0 0 18px;
+  padding: 0;
+}
+
+.review-block li {
+  font-size: 11.5px;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+/* =========================
+   TAGS (optional)
+========================= */
+
+.review-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.review-tag {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 999px;
+
+  background: #31343a;
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* =========================
+   DETAILED ANALYSIS
+========================= */
+
+.review-detailed {
+  border-left: 4px solid #94a3b8;
+  background: #22252b;
+}
+
+.review-detailed p {
+  white-space: pre-line;
+  color: #d1d5db;
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.item:hover .home-summary-block-label-link {
+    opacity: 1;
+}
+
+.item:hover, .item:focus {
+    
+}
+
+.tab-history-item .home-summary-block-label-link {
+    margin: 0;
+}
+
+.review-block-title {
+    color: #fff;
+    font-family: "Stolz regular";
+    width: 100%;
+    font-size: 11.5px;
+}
+
+.review-block {
+    font-family: "Stolz light";
+    width: 100%;
+    font-size: 11.5px;
+}

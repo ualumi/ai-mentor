@@ -48,7 +48,7 @@ async def listen_user_channels(user_id: str):
     await pubsub.psubscribe(
         f"sandbox_response:{user_id}",
         f"mentor_response:{user_id}",
-        f"code_annotations:{user_id}",
+        f"analytics_response:{user_id}",
         f"user_progress:{user_id}",
     )
 

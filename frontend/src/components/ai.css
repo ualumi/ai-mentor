@@ -1,4 +1,4 @@
-@font-face {
+/*@font-face {
     font-family: "Stolz regular";
     src: url(../assets/stolzl_regular.otf);
 }
@@ -26,7 +26,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  pointer-events: none; /* чтобы не мешать курсору */
+  pointer-events: none; 
 }
 
 .ai-inline-header {
@@ -60,27 +60,7 @@
   }
 }
 
-/*.editor-wrapper {
-  position: relative;
-  display: flex;
-}
 
-.ai-overlay {
-  position: absolute;
-  right: -420px; 
-  top: 0;
-  width: 400px;
-  pointer-events: none;
-}
-
-.ai-external-card {
-  position: absolute;
-  width: 380px;
-  padding: 10px 14px;
-  border-radius: 8px;
-  font-size: 13px;
-  animation: fadeIn 0.4s ease forwards;
-}*/
 
 
 
@@ -97,9 +77,7 @@
   pointer-events: none;
 }
 
-/* ================== */
-/* Карточка */
-/* ================== */
+
 
 .ai-inline-card {
   background: #1e1e1e;
@@ -119,9 +97,7 @@
   opacity: 0.8;
 }
 
-/* ================== */
-/* Цвета карточек */
-/* ================== */
+
 
 .ai-inline-card.strength {
   border-left: 4px solid #00ff88;
@@ -135,9 +111,7 @@
   border-left: 4px solid #ffc107;
 }
 
-/* ================== */
-/* Подсветка строки */
-/* ================== */
+
 
 .line-highlight-strength {
   background: rgba(0, 255, 136, 0.08);
@@ -151,9 +125,7 @@
   background: rgba(255, 193, 7, 0.08);
 }
 
-/* ================== */
-/* Цветные точки */
-/* ================== */
+
 
 .glyph-strength {
   background: #00ff88;
@@ -179,7 +151,7 @@
   margin-left: 6px;
 }
 
-/* ================== */
+
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-50%) scale(0.95); }
@@ -222,7 +194,7 @@
 
 .ai-line-yellow {
   background: rgba(104, 139, 255, 0.15); /*rgba(59, 104, 255, 0.15);*/
-}
+
 
 .ai-line-red {
   background: rgba(244, 67, 54, 0.15);
@@ -248,17 +220,38 @@
   margin: 0;
   transition: all 0.2s ease;
   font-family:"Stolz regular"
-  /*padding: 8px 12px;
-  margin: 4px 0;
-  font-size: 14px;
-  border-radius: 6px;
-  background: #1e1e2e;
-  border-left: 4px solid #4fc1ff;
-  color: #e0e0e0;
-  transition: all 0.2s ease;
-  font-family:"Stolz light" ;*/
+
 }
 
 .ai-zone:hover {
   background: #252538;
+}*/
+
+.editor-wrapper {
+  flex: 1;
+  min-height: 300px;
+  min-width: 0;
+  display: flex;
+  margin-top: 10px;
+}
+
+.editor-container {
+  flex: 1;
+  min-height: 300px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.free .editor-wrapper {
+  min-height: 60vh;
+}
+
+
+.free .editor-container {
+  min-height: 60vh;
+}
+
+.module .editor-wrapper, 
+.module .editor-container {
+  min-height: 40vh;
 }

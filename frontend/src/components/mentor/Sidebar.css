@@ -31,23 +31,24 @@
 
 .new-attempt {
   border-radius: var(--border-radius);
-  background: #161719;
+  background: #1E1F21;
   padding-block: 7px;
   height: 35px;
+  width: 100%;
 }
 
-.menu-highlight::after {
+/*.menu-highlight::after {
   content: "";
-  position: absolute;     /* 🔥 ключевой момент */
+  position: absolute;    
   top: 6px;
-  right: 0;               /* 🔥 прижимаем вправо */
+  right: 0;              
   width: 5px;
   height: 70%;
   background: #3B68FF;
   border-radius: 0 var(--border-radius) var(--border-radius) 0;
   filter: blur(2px); 
 
-}
+}*/
 
 .history-scroll {
   max-height: 35vh;
@@ -60,10 +61,13 @@
 
 .sidebar-open {
   width: 19vw;
+  position: absolute;
+  z-index: 1;
 }
 
 .sidebar-closed {
   width: 35px;
+  position: absolute;
 }
 
 .sidebar {
@@ -75,6 +79,7 @@
     transition: width 0.25s ease;
     background-color:#121213 ;
     height: calc(100vh - 20px);
+    border-radius: 12px 12px 12px 12px;
     
 }
 
@@ -116,6 +121,12 @@
     padding-block-end: 6px;
     color: var(--text-color);
     
+}
+
+.example {
+  max-width: calc(19vw - 40px - 100px);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .profile-ava {

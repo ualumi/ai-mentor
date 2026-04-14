@@ -53,9 +53,9 @@ export default function StartModuleButton({ competency }) {
       });
       console.log(competency)
       // перезагрузка ПОСЛЕ перехода
-      setTimeout(() => {
-        window.location.reload();
-      }, 0);
+      //setTimeout(() => {
+      //  window.location.reload();
+      //}, 0);
 
     } catch (err) {
       console.error("Start module error:", err);

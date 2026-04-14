@@ -152,9 +152,16 @@ export default function Layout({ isSidebarOpen, toggleSidebar }) {
   const isAuthPage = location.pathname === "/auth";
 
   let mode = "free";
+  /*if (location.pathname.startsWith("/")) {
+    mode = "";
+  }*/
   if (location.pathname.startsWith("/module")) {
     mode = "module";
   }
+  if (location.pathname.startsWith("/mentor")) {
+    mode = "free";
+  }
+  
 
   // 🔥 авто-открытие
   useEffect(() => {
@@ -319,6 +326,19 @@ export default function Layout({ isSidebarOpen, toggleSidebar }) {
 
         <Route
           path="/module/:id"
+          element={
+            token ? (
+              <ProtectedRoute>
+                <WorkSpace mode="module" isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}/>
+              </ProtectedRoute>
+            ) : (
+              <DefaultPage openAuth={() => setIsAuthOpen(true)} />
+            )
+          }
+        />
+
+        <Route
+          path="/module/:id/:attempt"
           element={
             token ? (
               <ProtectedRoute>

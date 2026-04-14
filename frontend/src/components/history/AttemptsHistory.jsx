@@ -42,14 +42,7 @@ export default function AttemptsHistory({ onSelectAttempt }) {
     <div className="menu-list history-list">
       {history.map((attempt) => (
         <Attempt attempt={attempt} />
-        /*<button
-          key={attempt.attempt_id}
-          className="item"
 
-          onClick={() => navigate(`/attempt/${attempt.attempt_id}`)}
-        >
-          <span className='menu-item-text'>{attempt.first_line}...</span>
-        </button>*/
       ))}
     </div>
   );

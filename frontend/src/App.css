@@ -24,16 +24,20 @@
     height: 100vh;
     width: 100vw;
     background-color: #121213;
+    
 }
 
 .body {
     display: flex;
     overflow: hidden;
     background-color: #121213;
+    
 }
 
 .history {
     display: flex;
+    flex: 1;
+    height: 99vh;
 }
 
 
@@ -300,21 +304,27 @@
     width: 100%;
     display: flex;*/
     flex: 1;
-    height: 100vh;
+    display: flex;
+    /*height: 100vh;*/
     width: 100%;
     transition: grid-template-columns 0.3s ease;
-    
+    margin-left: 75px;
+
 }
 
 .free-mode .free {
     display: flex;
     width: 100%;
+    flex: 1;
+    height: 100vh;
 }
 
 .free-mode .module {
-    display: grid;
-    grid-template-columns:  1fr 0.3fr ;
+    display: flex;
+    /*grid-template-columns:  1fr 0.3fr ;*/
     width: 100%;
+    flex: 1;
+    height: 100vh;
 }
 
 /* Когда сайдбар открыт 
@@ -338,12 +348,15 @@
 
 
 .editor {
+    display: flex;
+    /*flex: 1;*/
     background: #1B1C1E;
-    /*border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: inset 0px -10px 40px -20px rgba(255, 255, 255, 0.08);*/
-    border-radius: var(--border-radius);
+    flex-direction: column;
+    min-width: 0;   /* 🔥 ОБЯЗАТЕЛЬНО */
+    max-height: 100%; 
+    /*border-radius: var(--border-radius);
     padding: 7px;
-    height: max-content;
+    height: max-content;*/
 }
 
 .toggle-button {
@@ -362,7 +375,7 @@
     justify-content: space-between;
     transition: width 0.25s 
 ease;
-    background-color: #1E1F21;
+    background-color: #161719;
     box-shadow: none !important;
     color: #fff;
 }
@@ -478,10 +491,10 @@ input:focus::placeholder {
 
 .progress-bar-container {
   width: 100%;
-  background: transparent;
+  background: #1B1C1E;
   border-radius: 6px;
   overflow: hidden;
-  border: 1px solid var(--line-color);
+  /*border: 1px solid var(--line-color);*/
 }
 
 .progress-bar-fill {

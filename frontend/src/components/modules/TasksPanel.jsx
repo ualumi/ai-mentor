@@ -82,6 +82,7 @@ import { useMemo, useState, useEffect } from "react";
 import Attempt from "../history/Attempt";
 import { getLearningState } from "../../api/learningService";
 import { useAuth } from "../../context/AuthContext";
+import { ChevronDown } from "lucide-react";
 
 export default function TasksPanel({ restoredState }) {
   const { token } = useAuth();
@@ -161,9 +162,9 @@ export default function TasksPanel({ restoredState }) {
 
   return (
     <div className="taskspanel">
-      <div className="sidebar-label">
+      {/*<div className="sidebar-label">
         <h2 className="menu-caption">Текущая задача</h2>
-      </div>
+      </div>*/}
 
       {isAttemptView && (
         <button className="item back-button" onClick={handleBackToModule}>
@@ -171,7 +172,7 @@ export default function TasksPanel({ restoredState }) {
         </button>
       )}
 
-      {!isAttemptView && <ModuleTask restoredState={localRestoredState} />}
+      {/*{!isAttemptView && <ModuleTask restoredState={localRestoredState} />}*/}
 
       <div className="module-session">
         {!attempts.length && (
@@ -183,7 +184,7 @@ export default function TasksPanel({ restoredState }) {
         <div className="modiles-reversed">
           {Object.entries(conditionsToRender).map(([condition, conditionAttempts]) => (
             <div key={condition} className="condition-block">
-              <div
+              {/*<div
                 className={`item item-light module-task-item-history ${
                   condition === activeCondition ? "active-condition" : ""
                 }`}
@@ -194,10 +195,46 @@ export default function TasksPanel({ restoredState }) {
                 style={{ cursor: "pointer" }}
               >
                 <p>{condition}</p>
+              </div>*/}
+
+              <div
+                className={`item item-light module-task-item-history ${
+                  condition === activeCondition ? "active-condition" : ""
+                }`}
+                style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+              >
+                {/* 🔥 ИКОНКА */}
+                <ChevronDown
+                  size={18}
+                  style={{
+                    cursor: "pointer",
+                    transform: openCondition === condition ? "rotate(180deg)" : "rotate(0deg)",
+                    transition: "0.2s",
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation(); // ❗ важно
+                    if (isAttemptView) return;
+
+                    setOpenCondition(prev =>
+                      prev === condition ? null : condition
+                    );
+                  }}
+                />
+                <p>{condition}</p>
+
+                
               </div>
 
-              {(isAttemptView || openCondition === condition) && (
-                <div className="attempts-list">
+              {/*{(isAttemptView || openCondition === condition) && (
+                <div className="attempts-list">*/}
+                <div
+                  className="attempts-list"
+                  style={{
+                    maxHeight: (isAttemptView || openCondition === condition) ? "500px" : "0px",
+                    opacity: (isAttemptView || openCondition === condition) ? 1 : 0,
+                  }}
+                >
+
                   {conditionAttempts?.map(attempt => {
                     const isActive = attempt.attempt_id === selectedAttemptId;
                     return (
@@ -211,7 +248,7 @@ export default function TasksPanel({ restoredState }) {
                     );
                   })}
                 </div>
-              )}
+              {/*)}*/}
             </div>
           ))}
         </div>

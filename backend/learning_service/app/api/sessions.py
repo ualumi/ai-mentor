@@ -56,6 +56,7 @@ async def get_session_state(
         "session": session,
         "attempts": attempts,
         "progress": json.loads(progress) if progress else {},
+        "current_condition": json.loads(session.get("current_condition", "null")),
     }
 
 
