@@ -89,11 +89,13 @@ export default function AttemptsSummary() {
                 }
             );
 
+            console.log(res)
+
             setData({
                 total_attempts: res.data?.total_attempts ?? 0,
                 total_learning_sessions: res.data?.total_learning_sessions ?? 0
             });
-
+            
         } catch (e) {
             console.error("Ошибка загрузки attempts total", e);
 

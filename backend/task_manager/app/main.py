@@ -188,6 +188,15 @@ async def websocket_endpoint(websocket: WebSocket):
 
             state = USER_STATE[user_id]
             print("Для данной попытки mode", state["mode"])
+
+            if data.type == "set_session":
+                USER_STATE[user_id]["learning_session_id"] = data.learning_session_id
+                USER_STATE[user_id]["module_ready"] = True
+                # ❗ сбрасываем condition
+                #state["condition"] = None
+                #state["module_ready"] = False
+                print("🔥 Session switched:", data.learning_session_id)
+                continue
             # -----------------
             # Проверка module режима
             # -----------------
@@ -197,7 +206,8 @@ async def websocket_endpoint(websocket: WebSocket):
                     "error": "Waiting for task condition"
                 })
                 continue
-
+            
+            
             # -----------------
             # Получение кода
             # -----------------
@@ -211,7 +221,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 }
 
                 if state["mode"] == "module":
-
+                    print("🔥 USING SESSION:", state["learning_session_id"])
                     base_payload.update({
                         "learning_session_id": state["learning_session_id"],
                         "condition": state["condition"],

@@ -68,7 +68,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("user");
     localStorage.removeItem("isSSO");
     localStorage.removeItem("recommended_modules");
-
+    localStorage.clear();
     setToken(null);
     setUser(null);
     setIsSSO(false);

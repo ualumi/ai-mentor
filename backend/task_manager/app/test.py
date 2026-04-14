@@ -206,6 +206,75 @@ async def test_module_mode():
 #asyncio.run(test_module_mode())
 session_id = asyncio.run(test_module_mode())
 
+async def test_switch_sessions(first_session_id):
+
+    print("\n🔄 START SESSION SWITCH TEST")
+
+    async with websockets.connect(
+        f"ws://localhost:8004/ws?token={token}"
+    ) as websocket:
+
+        # 1️⃣ включаем module режим
+        await websocket.send(json.dumps({
+            "type": "set_mode",
+            "mode": "module"
+        }))
+
+        # -----------------------------
+        # 2️⃣ создаём ВТОРУЮ сессию
+        # -----------------------------
+        r = requests.post(
+            f"{LEARNING_SERVICE}/learning/start",
+            headers={"Authorization": f"Bearer {token}"},
+            json={"competency": "Clust"},
+        )
+
+        assert r.status_code == 200
+        session2 = r.json()["session"]
+        session2_id = session2["session_id"]
+
+        print(f"🆕 session2_id = {session2_id}")
+
+        # -----------------------------
+        # 3️⃣ ждём condition для второй сессии
+        # -----------------------------
+        condition = await wait_for_condition(websocket)
+
+        print("✅ Condition for session 2 received")
+
+        # -----------------------------
+        # 4️⃣ отправляем решение во ВТОРУЮ сессию
+        # -----------------------------
+        print("\n🚀 Sending code to SESSION 2")
+        await send_code(websocket)
+        await read_responses(websocket)
+
+        # -----------------------------
+        # 5️⃣ ПЕРЕКЛЮЧАЕМСЯ на первую сессию
+        # -----------------------------
+        print(f"\n🔁 Switching BACK to session1 = {first_session_id}")
+
+        await websocket.send(json.dumps({
+            "type": "set_session",
+            "learning_session_id": first_session_id
+        }))
+
+        # 🔥 важно: ждём новую condition
+        condition = await wait_for_condition(websocket)
+
+        print("✅ Condition for session 1 received AFTER SWITCH")
+
+        # -----------------------------
+        # 6️⃣ отправляем код уже в ПЕРВУЮ сессию
+        # -----------------------------
+        print("\n🚀 Sending code to SESSION 1")
+        await send_code(websocket)
+        await read_responses(websocket)
+
+        print("\n🏁 SESSION SWITCH TEST FINISHED")
+
+asyncio.run(test_switch_sessions(session_id))
+
 print("\n🔍 Проверка /state")
 
 r_state = requests.get(

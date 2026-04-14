@@ -290,6 +290,20 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
     }
   }, [restoredStateFromRoute]);
 
+  console.log(setStableRestoredState, stableRestoredState)
+
+  useEffect(() => {
+    if (stableRestoredState?.session?.session_id) {
+      wsService.send({
+        type: "set_session",
+        learning_session_id: stableRestoredState.session.session_id
+      });
+    }
+    console.log("session_switched")
+    //console.log("learning_session_id", stableRestoredState.session.session_id)
+  }, [stableRestoredState]);
+  
+
   // -----------------------------
   // 🔹 ATTEMPT LOAD
   // -----------------------------
@@ -463,6 +477,7 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
           {mode && (
             <div className="history-wrapper">
               <History
+                key={id}
                 mode={mode}
                 name={competency}
                 attempt={attempt}
@@ -541,10 +556,6 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
           attempt={attempt}
         />
 
-        {/*{mode === "module" && (<div className="buttons-module">
-                      {!conditionHistory && <CheckTaskButton />}
-                      <NextStepButton onNext={handleNextStep} />
-        </div>)}*/}
       </div>
     </CodeProvider>
   );

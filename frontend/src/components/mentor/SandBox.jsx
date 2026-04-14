@@ -208,15 +208,16 @@ export default function SandBox({ mode, name, attempt, restoredState, code, titl
           >
             {hideHints ? "Показать подсказки" : "Скрыть подсказки"}
           </button>*/}
+          {mode !== "history" && (
+            <RunCodeButton className="item-light" />
+          )}
 
         </div>
 
         
 
         {/* ❌ отключаем run в history */}
-        {mode !== "history" && (
-          <RunCodeButton className="item-light" />
-        )}
+        
       </div>
 
       {/* 🔥 EDITOR */}

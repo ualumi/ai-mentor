@@ -51,7 +51,7 @@
 }*/
 
 .history-scroll {
-  max-height: 35vh;
+  max-height: 60vh;
   overflow-y: scroll;
 }
 
@@ -78,7 +78,7 @@
     justify-content: space-between;
     transition: width 0.25s ease;
     background-color:#121213 ;
-    height: calc(100vh - 20px);
+    height: calc(100vh);
     border-radius: 12px 12px 12px 12px;
     
 }

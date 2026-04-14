@@ -10,6 +10,21 @@
 
 @import './assets/variables.css';
 
+* {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+}
+
+*::-webkit-scrollbar {
+    display: none; /* Chrome/Safari/Opera */
+}
+
+/* Для элементов с overflow: auto/scroll */
+.scrollable {
+    overflow-y: auto;
+    /* Скроллбар скрыт, но прокрутка работает */
+}
+
 #root {
     font-family: "Stolz light";
     --backround-color: #121213;
@@ -19,7 +34,7 @@
     --line-color:rgba(255, 255, 255, 0.1);
     --side-color: rgba(255, 255, 255, 0.5);
     --font-size-p: 11.5px;
-    --border-radius: 13px;
+    --border-radius: 12px;
     --block-color: #191A1C;
     height: 100vh;
     width: 100vw;
@@ -156,6 +171,7 @@
 .submitcodebutton {
     background-color: #1E1F21 !important;
     color: #fff;
+    height: min-content;
 }
 
 .item-light {
@@ -349,11 +365,12 @@
 
 .editor {
     display: flex;
-    /*flex: 1;*/
-    background: #1B1C1E;
+    flex: 1;
+    background: #202123;
+    border-radius: 12px;
     flex-direction: column;
     min-width: 0;   /* 🔥 ОБЯЗАТЕЛЬНО */
-    max-height: 100%; 
+    max-height: calc(100%); 
     /*border-radius: var(--border-radius);
     padding: 7px;
     height: max-content;*/

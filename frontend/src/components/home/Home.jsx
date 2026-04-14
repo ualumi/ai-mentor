@@ -15,11 +15,11 @@ export default function Home () {
             <div className="home-description">
                 <h1 className="home-summary-block-label-text">Привет, {user.username}!</h1>
                 {/*<p className="home-summary-block-label-link mentor-link">Позволяет работать с кодом в свободном формате, без привязки к конкретным заданиям.</p>*/}
-                <div className="item-home">
+                {/*<div className="item-home">
                     <Search strokeWidth={1} size={18} />
                     <p className="item-home-text">Search..</p>
 
-                </div>
+                </div>*/}
             </div>
             
             <div className="home-summary">
