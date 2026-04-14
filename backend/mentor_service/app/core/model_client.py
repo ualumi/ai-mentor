@@ -57,7 +57,6 @@ async def load_model() -> None:
             max_seq_length=MAX_SEQ_LENGTH,
             dtype=torch.float16,
             load_in_4bit=LOAD_IN_4BIT,
-            local_files_only= True,
         )
 
         FastLanguageModel.for_inference(loaded_model)
