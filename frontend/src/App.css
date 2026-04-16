@@ -398,6 +398,11 @@
     height: min-content;
     color: var(--text-color);
     background-color: transparent;
+    border: 1px transparent;
+}
+
+.toggle-button:hover, .toggle-button:focus {
+    border: 1px transparent;
 }
 
 .terminal {
