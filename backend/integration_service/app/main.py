@@ -7,7 +7,7 @@ app = FastAPI(title="Integration Service")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*", "http://92.255.67.163:5173"],  
+    allow_origins=["*", "http://94.26.225.13:5173"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

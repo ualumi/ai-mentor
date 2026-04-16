@@ -1,4 +1,4 @@
-const LEARNING_SERVICE = "http://92.255.67.163:8001";
+const LEARNING_SERVICE = "http://94.26.225.13:8001";
 
 export const startLearningSession = async (competency, token) => {
   const res = await fetch(

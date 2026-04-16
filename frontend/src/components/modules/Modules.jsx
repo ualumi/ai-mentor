@@ -434,8 +434,8 @@ import "../../App.css";
 import "./module.css";
 import { useState, useEffect } from "react";
 
-const LEARNING_SERVICE = "http://92.255.67.163:8001";
-const INTEGRATION_SERVICE = "http://92.255.67.163:8012/api/integration";
+const LEARNING_SERVICE = "http://94.26.225.13:8001";
+const INTEGRATION_SERVICE = "http://94.26.225.13:8012/api/integration";
 
 import icon1 from "../../assets/module-icons/Scale.svg";
 import icon2 from "../../assets/module-icons/Box2.svg";
