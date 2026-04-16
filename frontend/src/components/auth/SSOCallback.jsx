@@ -23,7 +23,7 @@ export function SSOCallback() {
           body: JSON.stringify({ token }),
         });*/
         const res = await fetch(
-            `http://92.255.67.163:8012/api/integration/sso?token=${token}`
+            `http://localhost:8012/api/integration/sso?token=${token}`
         );
         if (!res.ok) throw new Error("SSO login failed");
 
