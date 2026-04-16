@@ -198,7 +198,7 @@ def extract_skills(progress_data):
                 skills[title] = 0.0
 
         # Квизы
-        for quiz in user.get("quizzes", []):
+        '''for quiz in user.get("quizzes", []):
             lecture_id = quiz.get("lecture_id")
             best_score = quiz.get("best_score", 0)
             max_score = quiz.get("max_score", 1)
@@ -211,7 +211,7 @@ def extract_skills(progress_data):
             score = exam.get("score", 0)
             max_score = exam.get("max_score", 1)
             score_ratio = score / max_score
-            skills[f"exam_{exam_id}"] = score_ratio
+            skills[f"exam_{exam_id}"] = score_ratio'''
 
     return skills
 

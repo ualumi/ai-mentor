@@ -97,6 +97,7 @@
     color: #ffff;
     font-family:  "Stolz regular";
     font-size: 14px;
+    white-space: initial;
 }
 
 .home-summary-block-label-link {
@@ -329,7 +330,7 @@ animation: shimmer 6s linear infinite;
     background: #2F3032 !important;
     box-shadow: none !important;
     border: none;
-    padding: 7px;
+    padding: 10px;
     border-radius: 10px;
     color: rgba(255, 255, 255, 0.7);
     overflow: visible;
@@ -350,6 +351,10 @@ animation: shimmer 6s linear infinite;
     font-size: 13px;
     color: #ffff;
     opacity: 1;
+}
+
+.weak-case-code {
+  margin-bottom: 0px;
 }
 
 .weak-cases-list {
