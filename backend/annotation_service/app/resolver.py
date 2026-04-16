@@ -455,11 +455,11 @@ import ast
 import numpy as np
 from dataclasses import dataclass
 from typing import List, Dict, Any
-from sentence_transformers import SentenceTransformer
+#from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
 
-MODEL = SentenceTransformer("all-MiniLM-L6-v2")
+#MODEL = SentenceTransformer("all-MiniLM-L6-v2")
 
 
 @dataclass
@@ -501,7 +501,7 @@ class PythonResolver:
 
     def _embed_spans(self):
         texts = [span["text"] for span in self.spans]
-        return MODEL.encode(texts)
+        #return MODEL.encode(texts)
 
     def _collect_comments(self, analysis: Dict[str, Any]):
 

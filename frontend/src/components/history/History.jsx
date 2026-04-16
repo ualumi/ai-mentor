@@ -333,11 +333,11 @@ export default function History({mode, name, attempt, restoredState, code, title
                 Модуль: <span className={s["section-caption-module-name"]}>{moduleName}</span>
               </h1>*/}
               <h1 className={s["section-caption-module"]}>
-                current module
+                Модуль
               </h1>
               <div className="progress-info">
 
-                <ProgressBar progress={restoredState?.attempts?.length || 0} />
+                {/*<ProgressBar progress={restoredState?.attempts?.length || 0} />*/}
                 <Module
                   competency={moduleName}
                   mode={"free"}

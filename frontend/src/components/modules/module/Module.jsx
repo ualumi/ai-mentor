@@ -112,7 +112,7 @@ export default function Module({ competency, session, mode }) {
           <span className='modules-item-text home-summary-block-label-text'>
             {competency}
           </span>
-          <div>
+          <div className="jol">
             <p className='modules-item-p'>Пройдено:</p>
             <ProgressBar />
           </div>

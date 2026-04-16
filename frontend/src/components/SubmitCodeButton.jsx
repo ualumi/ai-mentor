@@ -53,7 +53,7 @@ export default function SubmitCodeButton({
 
 import { useExecuteCode } from '../hooks/useCodeExecution';
 import { useCode } from './CodeContext';
-import { Loader, Lightbulb } from 'lucide-react';
+import { Loader, Sparkles  } from 'lucide-react';
 import "../App.css"
 
 export default function SubmitCodeButton({ 
@@ -94,7 +94,7 @@ export default function SubmitCodeButton({
         </>
       ) : (
         <>
-          <Lightbulb strokeWidth={1} />
+          <Sparkles strokeWidth={1}/>
           {/*<span>{children}</span>*/}
         </>
       )}

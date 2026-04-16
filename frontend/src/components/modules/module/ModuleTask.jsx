@@ -460,11 +460,11 @@ export default function ModuleTask({
             
           </div>
           
-          <TaskProgress
+          {/*<TaskProgress
               attempt={attempt}
               externalAnnotations={externalAnnotations}
               resetSignal={resetProgressFlag}
-          />
+          />*/}
 
           {!isViewMode && (
             <div className="buttons-module">

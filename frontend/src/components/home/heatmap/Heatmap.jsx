@@ -182,6 +182,10 @@ export default function Heatmap({ token, weeksCount = 15 }) {
     weeks.push(safeData.slice(i * 7, i * 7 + 7));
   }
 
+  const lastActiveDate = [...safeData]
+    .reverse()
+    .find(day => day.count > 0)?.date;
+
   return (
     <div className="heatmap">
       <div className="heatmap-itself">
@@ -196,7 +200,7 @@ export default function Heatmap({ token, weeksCount = 15 }) {
                 key={day.date}
                 className="heatmap-day"
                 style={{
-                  backgroundColor: day.count > 0 ? "#3B68FF" : "#1E1F21"
+                  backgroundColor: day.date === lastActiveDate ? "#3B68FF" : "#1E1F21"
                 }}
                 title={`${day.date}: ${day.count || 0} попыток`}
               />
