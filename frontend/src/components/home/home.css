@@ -167,12 +167,18 @@
     position: relative;
     z-index: 0;
     overflow: hidden;
-    min-height: 100px;
+    /*min-height: 100px;
     /*align-items: end;*/
     /*background-image: url('../../assets/arr2.png');
     /*background-image: url('../../assets/arr\ \(2\).png');*/
     background-repeat: no-repeat;
     background-position: 0px;
+}
+
+.mentorblock-info {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
 }
 
 .home-summary-block-label-div {

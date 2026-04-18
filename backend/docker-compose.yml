@@ -188,6 +188,19 @@ services:
     networks:
       - mentor-net
 
+  frontend:
+    build:
+      context: ../frontend
+    container_name: frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ../frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    networks:
+      - mentor-net
 
 
 

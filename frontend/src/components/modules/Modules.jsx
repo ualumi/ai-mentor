@@ -444,7 +444,7 @@ import icon3 from "../../assets/module-icons/Layers.svg";
 import ProgressBar from "./module/ProgressBar";
 import Module from "./module/Module";
 import { useAuth } from "../../context/AuthContext";
-import { NavLink } from "react-router-dom";
+import { data, NavLink } from "react-router-dom";
 
 const icons = [icon1, icon2, icon3];
 
@@ -490,10 +490,10 @@ export default function Modules({ mode }) {
       });
       if (!res.ok) throw new Error("Failed to fetch sessions");
       return res.json();
-      
+      console.log("RES" ,res.json())
     },
   });
-
+  console.log("DATA", sessions)
 
   // ---------------------------
   // SSO recommended
