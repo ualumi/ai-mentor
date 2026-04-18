@@ -311,7 +311,9 @@ export default function History({mode, name, attempt, restoredState, code, title
 
   const moduleName =
   restoredState?.session?.competency || name;
-
+  const progress = restoredState?.progress;
+  console.log("progress", progress)
+  console.log(restoredState)
   return (
     <div className="">
       {/* 🔥 HEADER */}
@@ -341,6 +343,7 @@ export default function History({mode, name, attempt, restoredState, code, title
                 <Module
                   competency={moduleName}
                   mode={"free"}
+                  progress={progress}
                 />
               </div>
             </div>

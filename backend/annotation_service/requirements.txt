@@ -3,5 +3,5 @@ uvicorn
 redis
 pydantic
 pydantic-settings
-sentence-transformers
-scikit-learn
+#sentence-transformers
+#scikit-learn

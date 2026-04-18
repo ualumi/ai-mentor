@@ -32,8 +32,8 @@ export const useStartModule = () => {
       return {
         sessionId: startData.sessionId,
         session: startData.session,
-        state: null,
-        isExisting: false
+        state,
+        isExisting: true
       };
     }
   });

@@ -114,10 +114,10 @@ async def get_weak_cases(email: str):
     external_user_id = identity["external_user_id"]'''
 
     # 🔹 либо реальный вызов:
-    progress = await client.get_user_progress(email)
+    #progress = await client.get_user_progress(email)
 
     # 🔹 пока мок:
-    #progress = mock_external_progress()
+    progress = mock_external_progress()
 
     weak_cases = extract_weak_cases(progress)
 

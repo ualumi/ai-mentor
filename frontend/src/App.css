@@ -316,6 +316,10 @@
     bottom: 0;
 }
 
+.recomendation-item-active .item-module {
+    background-color: #2F3032 !important;
+}
+
 .mentor-tab {
     display: flex;
     flex-direction: column;
@@ -497,6 +501,10 @@ input:focus::placeholder {
     flex: 1;
 }
 
+.recomendation-item-active .progress-bar-fill {
+    background: #1B1C1E !important;
+}
+
 .reco-content {
     display: flex;
     flex-direction: column;
@@ -538,9 +546,9 @@ input:focus::placeholder {
 }
 
 .progress-bar-fill {
-    /*background: linear-gradient(90deg, #3B68FF 0%, #6F90FF 100%);;*/
-    background-color: #1E1F21;
-    width: 100%;
+    background: linear-gradient(90deg, #3B68FF 0%, #6F90FF 100%);;
+    /*background-color: #1E1F21;
+    width: 100%;*/
   height: 100%;
   transition: width 0.3s ease;
 }
