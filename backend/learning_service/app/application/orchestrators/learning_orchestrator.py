@@ -16,17 +16,17 @@ async def complete_session(session_id):
             "status": "completed"
         }
     )
-
     session = await redis_client.hgetall(key)
-
+    user_id = session["user_id"]
     active_key = f"learning:active:{session['user_id']}:{session['competency']}"
     await redis_client.delete(active_key)
 
     await EventBus.publish(
-        "learning.events",
+        "scaffolding.next_step",
         {
             "event": "session_completed",
-            "session_id": session_id
+            "learning_session_id": session_id,
+            "user_id": user_id,
         }
     )
 
@@ -124,15 +124,22 @@ async def handle_progress_event(event):
         return
 
     competency = session["competency"]
-    skill = progress.get(competency)
-
+    #skill = progress.get(competency)
+    if progress:
+        # Берем первый ключ из словаря
+        #first_tag = next(iter(progress.keys()))
+        #first_tag_data = progress[first_tag]
+        skill = progress.get('mastery')  # True или False
+    else:
+        skill = False
     '''if not skill:
         return'''
 
     '''if skill["mastery"]:
         await complete_session(target_session_id)'''
-    if competency == "hola":
+    if skill == True:
         await complete_session(target_session_id)
+        print("MODULE FINISHED")
     else:
         await generate_next_task(session)
         print("query for generation sent")

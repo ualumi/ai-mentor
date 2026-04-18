@@ -82,9 +82,9 @@ export default function Module({ competency, session, mode, progress }) {
         }
       });
 
-      /*setTimeout(() => {
+      setTimeout(() => {
         window.location.reload();
-      }, 0);*/
+      }, 0);
 
     } catch (err) {
       console.error("Start module error:", err);

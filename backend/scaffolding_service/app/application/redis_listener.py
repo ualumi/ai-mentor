@@ -162,6 +162,29 @@ async def redis_listener():
 
             print(f"⏳ task prepared for session {learning_session_id}, waiting next_step")
 
+
+        # ---------------------------
+        # EVENT: session_completed
+        # ---------------------------
+        elif payload.get("event") == "session_completed":
+
+            learning_session_id = payload["learning_session_id"]
+            user_id = payload["user_id"]
+            #competency = payload["competency"]
+            
+
+            condition = (
+                "Завершен Модуль!"
+            )
+
+            # сохраняем до next_step
+            pending_tasks[learning_session_id] = {
+                "user_id": user_id,
+                "condition": condition
+            }
+
+            print(f"⏳ task prepared for session {learning_session_id}, waiting next_step")
+
         # ---------------------------
         # EVENT: next_step
         # ---------------------------

@@ -48,8 +48,12 @@ async def listen_progress_events():
         data = json.loads(msg["data"])
 
         user_id = data.get("user_id")
-        progress = data.get("progress", {})
-        
+        progress_raw = data.get("progress", {})
+        if progress_raw and isinstance(progress_raw, dict):
+            # Берем первый ключ из словаря
+            first_tag = next(iter(progress_raw.keys()))
+            progress = progress_raw[first_tag]
+        print('PROGRESS',progress)
         # 🔥 1. сохраняем (merge, а не перезапись)
         existing_raw = await redis_client.get(f"user_progress:{user_id}")
         existing = json.loads(existing_raw) if existing_raw else {}
