@@ -155,7 +155,10 @@
     justify-content: space-between;
     border-radius: 12px;;
     padding: 20px;
-    background-color: #121213; /*var(--block-color);
+    background-color: #121213;
+    align-items: center;
+    /*var(--block-color);
+    
     /* Rectangle 556 */
 
 

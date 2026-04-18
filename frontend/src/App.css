@@ -496,6 +496,10 @@ input:focus::placeholder {
     flex: 1;
 }
 
+.recomendation-item-active .progress-bar-fill {
+    background: #1B1C1E !important;
+}
+
 .reco-content {
     display: flex;
     flex-direction: column;

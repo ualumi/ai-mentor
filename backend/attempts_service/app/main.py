@@ -222,7 +222,7 @@ async def get_user_activity(
 
 from sqlalchemy import func, distinct
 
-@app.get("/attempts/total")
+'''@app.get("/attempts/total")
 async def get_attempts_total(token: str, db=Depends(get_session)):
 
     # 🔐 Декодируем токен
@@ -256,20 +256,54 @@ async def get_attempts_total(token: str, db=Depends(get_session)):
     return {
         "total_attempts": total_attempts,
         "total_learning_sessions": total_sessions
+    }'''
+
+from fastapi import Depends, HTTPException
+from sqlalchemy import select, func, distinct
+from sqlalchemy.ext.asyncio import AsyncSession
+import jwt
+
+@app.get("/attempts/total")
+async def get_attempts_total(token: str, db: AsyncSession = Depends(get_session)):
+
+    # 🔐 Декодируем токен
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = str(payload.get("sub")).strip()
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+    if not user_id:
+        raise HTTPException(status_code=400, detail="Invalid user_id in token")
+
+    # 🐞 DEBUG (можешь потом убрать)
+    print("USER_ID FROM TOKEN:", user_id)
+
+    # 📊 1. Общее количество попыток (БЫСТРО и правильно)
+    total_attempts_result = await db.execute(
+        select(func.count()).where(Attempt.user_id == user_id)
+    )
+    total_attempts = total_attempts_result.scalar() or 0
+
+    # 📊 2. Количество уникальных learning_session_id
+    total_sessions_result = await db.execute(
+        select(func.count(distinct(Attempt.learning_session_id)))
+        .where(Attempt.user_id == user_id)
+        .where(Attempt.learning_session_id.isnot(None))
+    )
+    total_sessions = total_sessions_result.scalar() or 0
+
+    # 🐞 ДОП. DEBUG (если вдруг снова будет 0)
+    if total_attempts == 0:
+        all_attempts_result = await db.execute(select(Attempt))
+        all_attempts = all_attempts_result.scalars().all()
+
+        print("ВСЕ ATTEMPTS В БД:", len(all_attempts))
+        print("ПЕРВЫЕ USER_ID В БД:", [a.user_id for a in all_attempts[:5]])
+
+    return {
+        "total_attempts": total_attempts,
+        "total_learning_sessions": total_sessions
     }
-
-'''@app.get("/episodes/{session_id}")
-async def get_episodes(session_id: str, db=Depends(get_session)):
-    res = await db.execute(
-        select(Episode).where(Episode.session_id == session_id)
-    )
-    return res.scalars().all()
-    
-
-@app.get("/attempt/{attempt_id}")
-async def get_attempt(attempt_id: str, db=Depends(get_session)):
-    res = await db.execute(
-        select(Attempt).where(Attempt.attempt_id == attempt_id)
-    )
-    return res.scalars().first()
-'''
