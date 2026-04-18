@@ -21,7 +21,7 @@ def generate_condition(competency: str, attempts: list):
     cse= random.randint(1, 100)
     if not tasks:
         return {
-            "description": f"Пример задачи"
+            "description": f"Пример задачи {competency} с параметром {cse}"
         }
 
     return {

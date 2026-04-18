@@ -147,8 +147,8 @@ async def import_progress(email: str):
     external_user_id = identity["external_user_id"]'''
     
     # 🔹 вместо реального запроса подставляем мок
-    progress = await client.get_user_progress(email)
-    #progress = mock_external_progress()  # <-- вот здесь подменяем
+    #progress = await client.get_user_progress(email)
+    progress = mock_external_progress()  # <-- вот здесь подменяем
 
     # 🔥 извлекаем навыки (упрощенная логика)
     skills = extract_skills(progress)

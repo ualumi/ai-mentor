@@ -490,8 +490,10 @@ export default function Modules({ mode }) {
       });
       if (!res.ok) throw new Error("Failed to fetch sessions");
       return res.json();
+      
     },
   });
+
 
   // ---------------------------
   // SSO recommended
@@ -656,6 +658,7 @@ export default function Modules({ mode }) {
                     competency={session.competency}
                     session={session}
                     mode={mode}
+                    progress={session.progress} // если Module поддерживает прогресс
                   />
                 ))
               ) : (

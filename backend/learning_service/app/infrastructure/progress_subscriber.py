@@ -35,7 +35,7 @@ async def listen_progress_events():
         user_id = int(channel.split(":")[1])'''
         
 
-        data = json.loads(msg["data"])
+        '''data = json.loads(msg["data"])
 
         event = {
             "user_id": data.get("user_id"),
@@ -44,4 +44,27 @@ async def listen_progress_events():
         }
 
         # 🔥 отдельная async обработка пользователя
+        asyncio.create_task(handle_progress_event(event))'''
+        data = json.loads(msg["data"])
+
+        user_id = data.get("user_id")
+        progress = data.get("progress", {})
+
+        # 🔥 1. сохраняем (merge, а не перезапись)
+        existing_raw = await redis_client.get(f"user_progress:{user_id}")
+        existing = json.loads(existing_raw) if existing_raw else {}
+
+        existing.update(progress)
+
+        await redis_client.set(
+            f"user_progress:{user_id}",
+            json.dumps(existing)
+        )
+
+        # 🔥 2. отправляем в orchestrator
+        event = {
+            "user_id": user_id,
+            "progress": progress,
+        }
+
         asyncio.create_task(handle_progress_event(event))

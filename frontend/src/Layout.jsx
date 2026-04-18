@@ -1,121 +1,4 @@
-/*import { useLocation } from "react-router-dom";
-import {Route, BrowserRouter, Routes} from "react-router-dom"
-import AuthForm from "./components/auth/AuthForm";
-import SideBar from "./components/mentor/SideBar";
-import Modules from "./components/modules/Modules";
-import WorkSpace from "./components/mentor/WorkSpace";
-import Home from "./components/home/Home";
-import Progress from "./components/home/Progress";
-import ProtectedRoute from "./ProtectedRoute";
-import { wsService } from "./services/websocket";
-import { useEffect } from 'react';
-import { SSOCallback } from "./components/auth/SSOCallback";
 
-export default function Layout({ isSidebarOpen, toggleSidebar }) {
-  const location = useLocation();
-
-  const isAuthPage = location.pathname === "/auth";
-
-  let mode = "free";
-  if (location.pathname.startsWith("/module")) {
-    mode = "module";
-  }
-
-  useEffect(() => {
-    const setMode = async () => {
-      try {
-        await wsService.connect(); // гарантируем подключение
-
-        await wsService.send({
-          type: "set_mode",
-          mode
-        });
-
-        console.log("📡 mode set:", mode);
-
-      } catch (e) {
-        console.error("WS mode error:", e);
-      }
-    };
-
-    setMode();
-  }, [mode]);
-
-  return (
-    <>
-      {!isAuthPage && (
-        <SideBar
-          mode={mode}
-          isOpen={isSidebarOpen}
-          toggleSidebar={toggleSidebar}
-        />
-      )}
-
-      <Routes>
-
-        <Route path="/auth" element={<AuthForm />} />
-        <Route path="/sso-callback" element={<SSOCallback />} />
-        <Route
-          path="/mentor"
-          element={
-            <ProtectedRoute>
-              <WorkSpace mode="free" isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}/>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/module"
-          element={
-            <ProtectedRoute>
-              <Modules mode="modules"/>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/module/:id"
-          element={
-            <ProtectedRoute>
-              <WorkSpace mode="module" isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}/>
-            </ProtectedRoute>
-          }
-        />
-
-
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
-
-        
-        <Route
-          path="/mentor/attempt/:id"
-          element={
-            <ProtectedRoute>
-              <WorkSpace mode="history" />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/progress"
-          element={
-            <ProtectedRoute>
-              <Progress />
-            </ProtectedRoute>
-          }
-        />
-        
-
-      </Routes>
-    </>
-  );
-}*/
 
 import { useLocation } from "react-router-dom";
 import {Route, BrowserRouter, Routes} from "react-router-dom"
@@ -152,9 +35,7 @@ export default function Layout({ isSidebarOpen, toggleSidebar }) {
   const isAuthPage = location.pathname === "/auth";
 
   let mode = "free";
-  /*if (location.pathname.startsWith("/")) {
-    mode = "";
-  }*/
+  
   if (location.pathname.startsWith("/module")) {
     mode = "module";
   }
@@ -183,91 +64,9 @@ export default function Layout({ isSidebarOpen, toggleSidebar }) {
     setMode();
   }, [mode]);
 
-  {/*return (
-    <>
-
-        <SideBar
-          mode={mode}
-          isOpen={isSidebarOpen}
-          toggleSidebar={toggleSidebar}
-          openAuth={() => setIsAuthOpen(true)} 
-        />
-
-
-      <Routes>
-        <Route path="/auth" element={<AuthForm />} />
-        <Route path="/sso-callback" element={<SSOCallback />} />
-
-
-        <Route
-          path="/mentor"
-          element={
-            <ProtectedRoute>
-              <WorkSpace mode="free" isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}/>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/module"
-          element={
-            <ProtectedRoute>
-              <Modules mode="modules"/>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/module/:id"
-          element={
-            <ProtectedRoute>
-              <WorkSpace mode="module" isOpen={isSidebarOpen} toggleSidebar={toggleSidebar}/>
-            </ProtectedRoute>
-          }
-        />
-
-
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
-
-        
-        <Route
-          path="/mentor/attempt/:id"
-          element={
-            <ProtectedRoute>
-              <WorkSpace mode="history" />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/progress"
-          element={
-            <ProtectedRoute>
-              <Progress />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-
-
-      <AuthForm
-        isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
-      />
-    </>
-  );
-}*/}
-
   return (
     <>
-      {/* Sidebar только для залогиненных */}
+
       {token && (
         <SideBar
           mode={mode}
@@ -278,11 +77,11 @@ export default function Layout({ isSidebarOpen, toggleSidebar }) {
       )}
 
       <Routes>
-        {/* ✅ ВСЕГДА доступны */}
+
         <Route path="/auth" element={<AuthForm />} />
         <Route path="/sso-callback" element={<SSOCallback />} />
 
-        {/* ✅ Главная */}
+
         <Route
           path="/"
           element={
@@ -296,7 +95,7 @@ export default function Layout({ isSidebarOpen, toggleSidebar }) {
           }
         />
 
-        {/* ❌ Только для авторизованных */}
+
         <Route
           path="/mentor"
           element={
@@ -316,7 +115,7 @@ export default function Layout({ isSidebarOpen, toggleSidebar }) {
             token ? (
               <ProtectedRoute>
                 <ModulesPage />
-                {/*<Modules mode="modules"/>*/}
+
               </ProtectedRoute>
             ) : (
               <DefaultPage openAuth={() => setIsAuthOpen(true)} />
@@ -377,7 +176,7 @@ export default function Layout({ isSidebarOpen, toggleSidebar }) {
         />
       </Routes>
 
-      {/* 🔥 МОДАЛКА */}
+
       <AuthForm
         isOpen={isAuthOpen}
         onClose={() => setIsAuthOpen(false)}

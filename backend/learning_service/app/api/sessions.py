@@ -46,16 +46,19 @@ async def get_session_state(
     attempts = await get_session_attempts(session["user_id"], session_id)
 
     # 🔹 прогресс (можно хранить в redis или дергать progress_service)
-    progress = await redis_client.get(f"user_progress:{session['user_id']}")
+    #progress = await redis_client.get(f"user_progress:{session['user_id']}")
+    progress_raw = await redis_client.get(f"user_progress:{session['user_id']}")
+    progress = json.loads(progress_raw) if progress_raw else {}
+
     print({
         "session": session,
         "attempts": attempts,
-        "progress": json.loads(progress) if progress else {},
+        "progress": progress.get(session["competency"], {})
     })
     return {
         "session": session,
         "attempts": attempts,
-        "progress": json.loads(progress) if progress else {},
+        "progress": progress.get(session["competency"], {}),
         "current_condition": json.loads(session.get("current_condition", "null")),
     }
 
@@ -86,6 +89,17 @@ async def get_active_session(
     return await get_session(session_id)
 
 
+'''@router.get("/my")
+async def get_my_sessions(
+    status: str | None = None,
+    user=Depends(get_current_user)
+):
+    user_id = int(user["sub"])
+
+    sessions = await get_user_sessions(user_id, status)
+
+    return sessions'''
+
 @router.get("/my")
 async def get_my_sessions(
     status: str | None = None,
@@ -95,4 +109,18 @@ async def get_my_sessions(
 
     sessions = await get_user_sessions(user_id, status)
 
-    return sessions
+    # 🔥 достаем progress
+    progress_raw = await redis_client.get(f"user_progress:{user_id}")
+    progress = json.loads(progress_raw) if progress_raw else {}
+
+    enriched = []
+
+    for s in sessions:
+        competency = s.get("competency")
+
+        enriched.append({
+            **s,
+            "progress": progress.get(competency, {})
+        })
+
+    return enriched

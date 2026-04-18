@@ -427,7 +427,7 @@ export default function ModuleTask({
   // 🔹 next step
   const handleNextStep = () => {
     wsService.send({ type: "next_step" });
-
+    console.log("next_srep_sended")
     setResetProgressFlag(prev => prev + 1);
   };
 

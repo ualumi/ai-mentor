@@ -33,7 +33,7 @@ import icon3 from "../../../assets/module-icons/Layers.svg";
 import ProgressBar from "./ProgressBar";
 import { useStartModule } from "../../../hooks/useStartModule";
 
-export default function Module({ competency, session, mode }) {
+export default function Module({ competency, session, mode, progress }) {
 
   const navigate = useNavigate();
   const { mutateAsync, isPending } = useStartModule();
@@ -114,7 +114,7 @@ export default function Module({ competency, session, mode }) {
           </span>
           <div className="jol">
             <p className='modules-item-p'>Пройдено:</p>
-            <ProgressBar />
+            <ProgressBar progress={progress}/>
           </div>
           
         </div>
