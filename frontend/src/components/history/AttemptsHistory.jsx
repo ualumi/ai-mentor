@@ -4,7 +4,7 @@ import "../../App.css"
 import { useNavigate } from "react-router-dom";
 import Attempt from './Attempt';
 
-const ATTEMPTS_SERVICE = "http://localhost:8009";
+const ATTEMPTS_SERVICE = "/api/attempts/";
 
 export default function AttemptsHistory({ onSelectAttempt }) {
   const token = localStorage.getItem("token");
@@ -12,7 +12,7 @@ export default function AttemptsHistory({ onSelectAttempt }) {
   const { data: history, isLoading, error } = useQuery({
     queryKey: ['attemptsHistory'],
     queryFn: async () => {
-      const res = await fetch(`${ATTEMPTS_SERVICE}/attempts/${token}/history`, {
+      const res = await fetch(`${ATTEMPTS_SERVICE}attempts/${token}/history`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -107,7 +107,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const INTEGRATION_SERVICE = "http://localhost:8012/api/integration";
+const INTEGRATION_SERVICE = "/api/integration/api/integration";
 
 export default function WeakCases() {
   const { token, isSSO } = useAuth();

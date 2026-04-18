@@ -191,8 +191,8 @@ import "./auth.css";
 import "../../App.css"
 import { generateTestSSOToken } from "../../utils/sso";
 
-const API_BASE = "http://localhost:8002";
-
+//const API_BASE = "http://localhost:8002";
+const API_BASE = "/api/users";
 // AuthForm.jsx
 export default function AuthForm({ isOpen, onClose }) {
   const handleSSOTestRedirect = async () => {
@@ -220,7 +220,7 @@ export default function AuthForm({ isOpen, onClose }) {
         });
 
         if (!registerResponse.ok) {
-          throw new Error("SSO registration failed");
+          throw new Error("registration failed");
         }
       }
 
@@ -232,7 +232,7 @@ export default function AuthForm({ isOpen, onClose }) {
       });
 
       if (!loginResponse.ok) {
-        throw new Error("SSO login failed");
+        throw new Error("login failed");
       }
 
       const data = await loginResponse.json();
