@@ -399,8 +399,8 @@ export default function ModuleTask({
   // 🔥 WS только если НЕТ restoredState и history
   useEffect(() => {
     const hasRestored = !!getRestoredCondition();
-
-    if (conditionHistory || hasRestored) return;
+    if (conditionHistory && !hasRestored) return;
+    //if (conditionHistory || hasRestored) return;
     if (isViewMode) return;
 
     const handler = (data) => {

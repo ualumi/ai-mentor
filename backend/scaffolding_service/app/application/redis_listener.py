@@ -170,10 +170,27 @@ async def redis_listener():
             learning_session_id = payload["learning_session_id"]
             user_id = payload["user_id"]
 
-            task = pending_tasks.get(learning_session_id)
+            '''task = pending_tasks.get(learning_session_id)
 
             if not task:
-                continue
+                continue'''
+            
+            task = pending_tasks.get(learning_session_id)
+
+            # 🔥 если нет pending — генерим на лету
+            if not task:
+                print(f"⚠️ No pending task, generating on demand for {learning_session_id}")
+
+                competency = payload.get("competency")  # может не быть!
+                attempts = payload.get("attempts", [])
+
+                # ❗ лучше достать из Redis или передать в событии
+                condition = generate_condition(competency, attempts)
+
+                task = {
+                    "user_id": user_id,
+                    "condition": condition
+                }
 
             stream_key = f"task_condition:{user_id}"
 
@@ -186,6 +203,6 @@ async def redis_listener():
                 }
             )
 
-            del pending_tasks[learning_session_id]
+            #del pending_tasks[learning_session_id]
 
             print(f"🚀 task sent after next_step for session {learning_session_id}")

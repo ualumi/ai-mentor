@@ -49,7 +49,7 @@ async def listen_progress_events():
 
         user_id = data.get("user_id")
         progress = data.get("progress", {})
-
+        
         # 🔥 1. сохраняем (merge, а не перезапись)
         existing_raw = await redis_client.get(f"user_progress:{user_id}")
         existing = json.loads(existing_raw) if existing_raw else {}
@@ -65,6 +65,7 @@ async def listen_progress_events():
         event = {
             "user_id": user_id,
             "progress": progress,
+            "learning_session_id": data.get("learning_session_id"),
         }
 
         asyncio.create_task(handle_progress_event(event))

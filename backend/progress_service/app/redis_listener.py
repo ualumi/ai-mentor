@@ -91,7 +91,7 @@ async def redis_listener(pubsub):
         except Exception:
             print("EXCEPTION WORKED")
             continue
-
+        learning_session_id = payload.get("learning_session_id")
         user_id = payload.get("user_id")
         raw_analysis = payload.get("analysis")
         score = payload.get('analysis', {}).get('correctness')
@@ -134,6 +134,7 @@ async def redis_listener(pubsub):
             f"user_progress:{user_id}",
             json.dumps({
                 "user_id": user_id,
+                "learning_session_id": learning_session_id,
                 "progress": user_progress,
                 "recommendations": USER_RECOMMENDATIONS[user_id],
                 "score": score

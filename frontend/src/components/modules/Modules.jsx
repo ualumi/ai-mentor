@@ -624,9 +624,9 @@ export default function Modules({ mode }) {
                         <Module
                           key={`sso-${idx}`}
                           competency={skillName}
-                          progress={progress}
-                          mode={mode}
-                          isRecommended={true}
+                          progress={0}
+                          mode={'module'}
+                          //isRecommended={true}
                         />
                       ))
                     }
