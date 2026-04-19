@@ -10,7 +10,7 @@ export function SSOCallback() {
   useEffect(() => {
     const token = searchParams.get("token");
     if (!token) {
-      alert("No SSO token found");
+      alert("No token found");
       navigate("/auth");
       return;
     }
@@ -23,7 +23,7 @@ export function SSOCallback() {
           body: JSON.stringify({ token }),
         });*/
         const res = await fetch(
-            `http://94.26.225.13:8012/api/integration/sso?token=${token}`
+            `/api/integration/api/integration/sso?token=${token}`
         );
         if (!res.ok) throw new Error("SSO login failed");
 

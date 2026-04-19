@@ -1,8 +1,8 @@
-const LEARNING_SERVICE = "http://94.26.225.13:8001";
+const LEARNING_SERVICE = "api/learning/";
 
 export const startLearningSession = async (competency, token) => {
   const res = await fetch(
-    `${LEARNING_SERVICE}/learning/start`,
+    `${LEARNING_SERVICE}start`,
     {
       method: "POST",
       headers: {
@@ -28,7 +28,7 @@ export const startLearningSession = async (competency, token) => {
 
 export const getLearningState = async (sessionId, token) => {
   const res = await fetch(
-    `${LEARNING_SERVICE}/learning/session/${sessionId}/state`,
+    `${LEARNING_SERVICE}session/${sessionId}/state`,
     {
       headers: {
         Authorization: `Bearer ${token}`

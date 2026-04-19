@@ -16,7 +16,7 @@ import { useAuth } from "../../context/AuthContext";
 import CheckTaskButton from "../modules/module/CheckTaskButton";
 import NextStepButton from "../modules/module/NextStepButton";
 
-const ATTEMPTS_SERVICE = "http://94.26.225.13:8009";
+const ATTEMPTS_SERVICE = "/api/attempts/";
 
 export default function WorkSpace({ mode, isSidebarOpen }) {
   const { token } = useAuth();
@@ -87,7 +87,7 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
   } = useQuery({
     queryKey: ["attempt", attemptIdToLoad],
     queryFn: async () => {
-      const res = await fetch(`${ATTEMPTS_SERVICE}/attempt/${attemptIdToLoad}`);
+      const res = await fetch(`${ATTEMPTS_SERVICE}attempt/${attemptIdToLoad}`);
       if (!res.ok) throw new Error("Failed to fetch attempt");
       return res.json();
     },

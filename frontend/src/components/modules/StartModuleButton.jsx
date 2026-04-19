@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
-const LEARNING_SERVICE = "http://94.26.225.13:8001";
+const LEARNING_SERVICE = "/api/learning/";
 
 export default function StartModuleButton({ competency }) {
 
@@ -13,7 +13,7 @@ export default function StartModuleButton({ competency }) {
     try {
 
       const response = await fetch(
-        `${LEARNING_SERVICE}/learning/start`,
+        `${LEARNING_SERVICE}start`,
         {
           method: "POST",
           headers: {

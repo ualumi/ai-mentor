@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-const ATTEMPTS_SERVICE = "http://94.26.225.13:8009";
+const ATTEMPTS_SERVICE = "/api/attempts/";
 
 export default function HistoryTaskViewer({ attemptId, fallbackCondition }) {
   const { id } = useParams();
@@ -17,7 +17,7 @@ export default function HistoryTaskViewer({ attemptId, fallbackCondition }) {
   const { data, isLoading, error } = useQuery({
     queryKey: ["attempt", finalId],
     queryFn: async () => {
-      const res = await fetch(`${ATTEMPTS_SERVICE}/attempt/${finalId}`);
+      const res = await fetch(`${ATTEMPTS_SERVICE}attempt/${finalId}`);
       if (!res.ok) throw new Error("Failed to fetch attempt");
       return res.json();
     },
