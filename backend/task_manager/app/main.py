@@ -127,7 +127,7 @@ async def websocket_endpoint(websocket: WebSocket, user_id: str):'''
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
-    #await websocket.accept()
+    await websocket.accept()
 
     # 1️⃣ Получаем токен из query параметров
     token = websocket.query_params.get("token")
