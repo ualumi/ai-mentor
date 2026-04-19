@@ -50,10 +50,10 @@ client = ExternalClient()
 async def import_progress(email: str):
 
     
-    #progress = await client.get_user_progress(email)
+    progress = await client.get_user_progress(email)
 
     # мок
-    progress = mock_external_progress()  
+    #progress = mock_external_progress()  
 
     skills = extract_skills(progress)
 
