@@ -108,12 +108,12 @@ def mock_external_progress():
 async def get_weak_cases(email: str):
 
     # реальный вызов:
-    progress = await client.get_user_progress(email)
+    #progress = await client.get_user_progress(email)
 
     # мок:
     progress = mock_external_progress()
 
-    #weak_cases = extract_weak_cases(progress)
+    weak_cases = extract_weak_cases(progress)
 
     return {
         "status": "ok",
