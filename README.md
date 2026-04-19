@@ -10,6 +10,8 @@
 ### frontend
    ```bash
    cd frontend
+   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+   sudo apt install nodejs
    npm i
    npm run dev
    ```
