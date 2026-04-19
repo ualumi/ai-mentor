@@ -1,67 +1,7 @@
-'''from app.application.services.external_client import ExternalClient
-from app.infrastructure.event_bus import EventBus
-from app.infrastructure.db import get_external_identity, get_external_identity_by_internal
-
-client = ExternalClient()
-
-async def import_progress(user_id: int):
-
-    identity = await get_external_identity_by_internal(user_id)
-
-    if not identity:
-        return {"status": "no_external_account"}
-
-    external_user_id = identity["external_user_id"]
-    
-    progress = await client.get_user_progress(external_user_id)
-
-    # 🔥 извлекаем навыки (упрощенная логика)
-    skills = extract_skills(progress)
-
-    await EventBus.publish(
-        "integration.events",
-        {
-            "event": "external_progress_imported",
-            "user_id": user_id,
-            "skills": skills
-        }
-    )
-
-    return {
-        "status": "imported",
-        "skills": skills
-    }'''
-
 from app.application.services.external_client import ExternalClient 
 from app.infrastructure.event_bus import EventBus
 from app.infrastructure.db import get_external_identity_by_internal
 
-# 🔹 временный мок
-'''def mock_external_progress():
-    return [
-        {
-            "user": {
-                "id": 42,
-                "email": "user@example.com",
-                "username": "student42"
-            },
-            "cases": [
-                {
-                    "case_id": 7,
-                    "title": "Сумма двух чисел",
-                    "description": "Даны два числа, выведите их сумму.",
-                    "attempts_count": 2,
-                    "submissions": [
-                        {"submission_id": 101, "language": "python", "code": "print(1+2)", "verdict": "wrong_answer"},
-                        {"submission_id": 102, "language": "python", "code": "print(2+2)", "verdict": "accepted"}
-                    ]
-                }
-            ],
-            "lectures": [],
-            "quizzes": [],
-            "exams": []
-        }
-    ]'''
 
 def mock_external_progress():
     return [
@@ -107,50 +47,14 @@ def mock_external_progress():
 
 client = ExternalClient()
 
-'''async def import_progress(user_id: int):
-
-    identity = await get_external_identity_by_internal(user_id)
-
-    if not identity:
-        return {"status": "no_external_account"}
-
-    external_user_id = identity["external_user_id"]
-    
-    # 🔹 вместо реального запроса подставляем мок
-    progress = await client.get_user_progress(external_user_id)
-    #progress = mock_external_progress()  # <-- вот здесь подменяем
-
-    # 🔥 извлекаем навыки (упрощенная логика)
-    skills = extract_skills(progress)
-
-    await EventBus.publish(
-        "integration.events",
-        {
-            "event": "external_progress_imported",
-            "user_id": user_id,
-            "skills": skills
-        }
-    )
-
-    return {
-        "status": "imported",
-        "skills": skills
-    }'''
-
 async def import_progress(email: str):
 
-    '''identity = await get_external_identity_by_internal(user_id)
-
-    if not identity:
-        return {"status": "no_external_account"}
-
-    external_user_id = identity["external_user_id"]'''
     
-    # 🔹 вместо реального запроса подставляем мок
     #progress = await client.get_user_progress(email)
-    progress = mock_external_progress()  # <-- вот здесь подменяем
 
-    # 🔥 извлекаем навыки (упрощенная логика)
+    # мок
+    progress = mock_external_progress()  
+
     skills = extract_skills(progress)
 
     await EventBus.publish(
@@ -173,18 +77,6 @@ def extract_skills(progress_data):
 
     for user in progress_data:
         # Задачи
-        '''for case in user.get("cases", []):
-            title = case.get("title", "unknown")
-            success = any(sub.get("verdict") == "accepted" for sub in case.get("submissions", []))
-            attempts = case.get("attempts_count", 0)
-
-            # Логика слабости: если есть правильное решение → 1.0, если нет → по числу попыток
-            if success:
-                skills[title] = 1.0
-            elif attempts > 0:
-                skills[title] = max(0.3, 1.0 - 0.2 * attempts)
-            else:
-                skills[title] = 0.0'''
 
         # Лекции
         for lecture in user.get("lectures", []):
@@ -214,24 +106,3 @@ def extract_skills(progress_data):
             skills[f"exam_{exam_id}"] = score_ratio'''
 
     return skills
-
-'''def extract_skills(progress_data):
-    """
-    Очень простая логика:
-    - если задача решена → +1 к навыку
-    """
-
-    skills = {}
-
-    for user in progress_data:
-        for case in user.get("cases", []):
-            title = case.get("title", "unknown")
-
-            success = any(
-                sub.get("verdict") == "accepted"
-                for sub in case.get("submissions", [])
-            )
-
-            skills[title] = 1.0 if success else 0.3
-
-    return skills'''

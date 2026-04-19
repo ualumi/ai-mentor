@@ -60,7 +60,7 @@ export default function Home () {
                                 
                             </div>
                         </div>*/}
-                        <AttemptsSummary />
+                        {/*<AttemptsSummary />*/}
                         
                         
                         <div className="home-summary-block">
