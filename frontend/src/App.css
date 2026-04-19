@@ -402,6 +402,16 @@
     height: min-content;
     color: var(--text-color);
     background-color: transparent;
+    padding: 5px;
+    opacity: 0.5;
+    border: 1px transparent;
+    outline: 1px transparent;
+}
+
+.toggle-button:hover, .toggle-button:focus {
+    opacity: 1;
+    border: 1px transparent;
+    outline: 1px transparent;
 }
 
 .terminal {
