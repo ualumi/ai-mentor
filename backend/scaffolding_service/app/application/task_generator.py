@@ -35,13 +35,15 @@ def generate_condition(competency: str, attempts: list):
         "difficulty": "easy",
         "topic_tags": {competency:0.3, competency:0.3, competency:0.4},
     }
-
+    print(payload)
     result = generate_bugfix_task(
         model=model,
         tokenizer=tokenizer,
         system_prompt=SYSTEM_PROMPT,
         payload=payload,
     )
+
+    print(result)
 
     data = json.loads(result)
     title = data["title"]
