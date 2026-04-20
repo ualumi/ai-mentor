@@ -185,6 +185,8 @@ services:
     build:
       context: ./integration_service
     container_name: integration_service
+    env_file:
+      - ./integration_service/.env
     ports:
       - "8012:8012"
     environment:
@@ -194,6 +196,8 @@ services:
       - redis
     networks:
       - mentor-net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   nginx:
     image: nginx:alpine
