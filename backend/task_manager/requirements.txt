@@ -8,3 +8,4 @@ uuid
 python-jose==3.3.0
 python-multipart>=0.0.7
 PyJWT>=2.8.0
+httpx

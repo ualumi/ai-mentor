@@ -25,6 +25,7 @@ from .redis_client import redis_client
 from .models import FrontendMessage
 from jose import jwt, JWTError
 import os
+import httpx
 
 import logging
 
@@ -70,7 +71,6 @@ async def listen_user_channels(user_id: str):
         logger.info(f"source: {channel}, value: {data}")
 
 
-
 async def listen_task_condition(user_id: str):
     stream_key = f"task_condition:{user_id}"
 
@@ -105,7 +105,7 @@ async def listen_task_condition(user_id: str):
                     "condition": condition,
                     "module_ready": True
                 })
-
+                print("condition for user", user_id, ":", condition)
                 # отправляем через websocket
                 await manager.send_to_user(user_id, {
                     "type": "task_condition",
@@ -115,7 +115,6 @@ async def listen_task_condition(user_id: str):
                 # отмечаем последнее сообщение
                 last_id = message_id
 #получает одно тупое сообщение и валится
-
 
 
 # -----------------------------
@@ -189,57 +188,74 @@ async def websocket_endpoint(websocket: WebSocket):
             state = USER_STATE[user_id]
             print("Для данной попытки mode", state["mode"])
 
-            if data.type == "set_session":
+            '''if data.type == "set_session":
                 USER_STATE[user_id]["learning_session_id"] = data.learning_session_id
                 USER_STATE[user_id]["module_ready"] = True
                 # ❗ сбрасываем condition
                 state["condition"] = None
                 #state["module_ready"] = False
                 print("🔥 Session switched:", data.learning_session_id)
-                continue
+                continue'''
             
-            '''if data.type == "set_session":
+            if data.type == "set_session":
                 USER_STATE[user_id]["learning_session_id"] = data.learning_session_id
                 USER_STATE[user_id]["module_ready"] = True
+
+                # ❗ сбрасываем condition
+                state["condition"] = None
 
                 print("🔥 Session switched:", data.learning_session_id)
 
                 # -----------------------------
-                # 🔥 FIX: сразу отправляем condition если он уже есть
+                # 🔥 НОВОЕ: получаем состояние с learning_service
                 # -----------------------------
+                try:
+                    async with httpx.AsyncClient() as client:
+                        res = await client.get(
+                            f"http://learning_service:8001/learning/session/{data.learning_session_id}/state",
+                            headers={
+                                "Authorization": f"Bearer {token}"
+                            }
+                        )
 
-                state = USER_STATE[user_id]
+                        res.raise_for_status()
 
-                # 1. если condition уже в state
-                if state.get("condition"):
-                    await manager.send_to_user(user_id, {
-                        "type": "task_condition",
-                        "condition": state["condition"]
-                    })
-                    continue
+                        payload = res.json()
 
-                # 2. если есть отложенные задачи (очень важно для SSO)
-                pending = PENDING_TASKS.get(user_id, [])
+                        raw_condition = payload.get("session", {}).get("current_condition")
 
-                for task in pending:
-                    if task["learning_session_id"] == data.learning_session_id:
-                        state["condition"] = task["condition"]
-                        state["module_ready"] = True
+                        condition = None
 
+                        if raw_condition:
+                            # 🔥 важно: current_condition — это строка JSON
+                            if isinstance(raw_condition, str):
+                                try:
+                                    condition = json.loads(raw_condition)
+                                except Exception:
+                                    condition = {"description": raw_condition}
+                            else:
+                                condition = raw_condition
+
+                        # -----------------------------
+                        # 🔥 сохраняем в state
+                        # -----------------------------
+                        state["condition"] = condition
+
+                        # -----------------------------
+                        # 🔥 отправляем на фронт
+                        # -----------------------------
                         await manager.send_to_user(user_id, {
                             "type": "task_condition",
-                            "condition": task["condition"]
+                            "condition": condition
                         })
+                        print(condition)
 
-                        # очищаем очередь
-                        PENDING_TASKS[user_id] = [
-                            t for t in pending
-                            if t["learning_session_id"] != data.learning_session_id
-                        ]
+                except Exception as e:
+                    print("❌ Failed to fetch session state:", e)
 
-                        break
-
-                continue'''
+                continue
+                        
+            
             # -----------------
             # Проверка module режима
             # -----------------
