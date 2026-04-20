@@ -229,7 +229,9 @@ export default function SandBox({ mode, name, attempt, restoredState, code, titl
           hideHints={hideHints} 
           taskCode={code}
           key={isSidebarOpen ? "open" : "closed"}
+          restoredState={restoredState}
         />
+
 
         <Terminal
           isOpen={isTerminalOpen}

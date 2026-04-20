@@ -253,5 +253,5 @@
 
 .module .editor-wrapper, 
 .module .editor-container {
-  min-height: 40vh;
+  /*min-height: 40vh;*/
 }
