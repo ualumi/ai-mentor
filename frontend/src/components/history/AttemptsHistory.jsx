@@ -78,7 +78,7 @@ export default function AttemptsHistory({ onSelectAttempt }) {
   const { data: history, isLoading, error } = useQuery({
     queryKey: ['attemptsHistory'],
     queryFn: async () => {
-      const res = await fetch(`${ATTEMPTS_SERVICE}${token}/history`, {
+      const res = await fetch(`${ATTEMPTS_SERVICE}attempts/${token}/history`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
