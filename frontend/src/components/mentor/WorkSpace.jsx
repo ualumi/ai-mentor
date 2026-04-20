@@ -233,7 +233,7 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
   // 🔹 DERIVED DATA
   // -----------------------------
   const conditionHistory = attempt?.condition ?? null;
-  console.log (conditionHistory)
+  console.log ("conditionHistory" , conditionHistory)
   // -----------------------------
   // 🔹 UI
   // -----------------------------
@@ -307,6 +307,7 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
                 titletask={taskTitle}
                 isSidebarOpen={isSidebarOpen}
                 selectedAttemptId={selectedAttemptId}
+                conditionHistory={conditionHistory}
               />
             ) : (
               <Review

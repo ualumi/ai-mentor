@@ -1,195 +1,6 @@
 
 
-
 {/*import { useCode } from './CodeContext';
-import { useState, useRef, useEffect } from "react";
-import Editor, { useMonaco } from "@monaco-editor/react";
-import "./ai.css";
-
-const defaultCode = `def factorial(n):
-if n == 0:
-return 1
-return n * factorial(n - 1)
-result = factorial(5)
-print(result)`;
-
-export default function CodeEditor({ analysis = [], mode, attempt, hideHints = false, taskCode}) {
-  const { code, setCode } = useCode();
-
-  const editorRef = useRef(null);
-  const containerRef = useRef(null);
-  const zonesRef = useRef(new Map());
-  const decorationsRef = useRef([]);
-
-  const monaco = useMonaco();
-
-  const [localAnalysis, setLocalAnalysis] = useState([]);
-
-  // -----------------------------
-  // 🔹 Resize
-  // -----------------------------
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const observer = new ResizeObserver(() => {
-      editorRef.current?.layout();
-    });
-
-    observer.observe(containerRef.current);
-    return () => observer.disconnect();
-  }, []);
-
-  // -----------------------------
-  // 🔹 HISTORY (attempt)
-  // -----------------------------
-  useEffect(() => {
-    if (mode !== "history") return;
-    if (!attempt?.analysis) return;
-
-    const recommendations = attempt.analysis.recommendations || [];
-
-    const mapped = recommendations.map((msg, i) => ({
-      line: i + 1,
-      type: 'recommendation',
-      message: msg,
-      confidence: 1
-    }));
-
-    console.log("📜 HISTORY RECOMMENDATIONS", mapped);
-
-    setLocalAnalysis(mapped);
-
-  }, [mode, attempt?.analysis]); // 🔥 важно!
-
-  // -----------------------------
-  // 🔹 LIVE (WebSocket)
-  // -----------------------------
-  useEffect(() => {
-    if (mode === "history") return;
-
-    if (Array.isArray(analysis)) {
-      setLocalAnalysis(analysis);
-    }
-
-  }, [analysis, mode]);
-
-  // -----------------------------
-  // 🔹 Editor mount
-  // -----------------------------
-  const handleMount = (editor) => {
-    editorRef.current = editor;
-  };
-
-  // -----------------------------
-  // 🔹 Render analysis
-  // -----------------------------
-  
-  useEffect(() => {
-    if (!editorRef.current || !monaco) return;
-
-    const editor = editorRef.current;
-
-    // 🔥 ВСЕГДА очищаем сначала
-    editor.changeViewZones((accessor) => {
-      zonesRef.current.forEach(({ zoneId }) => accessor.removeZone(zoneId));
-      zonesRef.current.clear();
-    });
-
-    decorationsRef.current = editor.deltaDecorations(
-      decorationsRef.current,
-      []
-    );
-
-    // ❗ если скрыто — просто выходим
-    if (hideHints) return;
-
-    const filtered = localAnalysis.filter(a => a.confidence > 0.4);
-
-    // 🔥 добавляем зоны заново
-    editor.changeViewZones((accessor) => {
-      filtered.forEach((item) => {
-        const domNode = document.createElement("div");
-
-        domNode.style.padding = "4px 8px";
-        domNode.style.fontSize = "12px";
-        domNode.style.background = "rgba(255,255,255,0.04)";
-        domNode.style.borderLeft = `3px solid #3B68FF`;
-        domNode.style.color = "#3B68FF";
-        domNode.className = "ai-zone";
-        domNode.textContent = `AI: ${item.message}`;
-
-        const zoneId = accessor.addZone({
-          afterLineNumber: item.line,
-          heightInLines: 2,
-          domNode,
-        });
-
-        zonesRef.current.set(item.line, { zoneId });
-      });
-    });
-
-    // 🔥 добавляем decorations заново (без старых ID)
-    decorationsRef.current = editor.deltaDecorations(
-      [],
-      filtered.map((item) => ({
-        range: new monaco.Range(item.line, 1, item.line, 1),
-        options: {
-          isWholeLine: true,
-          className: "ai-line-yellow",
-          linesDecorationsClassName: "ai-gutter-yellow"
-        }
-      }))
-    );
-
-  }, [localAnalysis, monaco, hideHints]);
-
-  // -----------------------------
-  // 🔹 Theme
-  // -----------------------------
-  useEffect(() => {
-    if (!monaco) return;
-
-    monaco.editor.defineTheme("custom-dark", {
-      base: "vs-dark",
-      inherit: true,
-      rules: [],
-      colors: {
-        "editor.background": "#1B1C1E"
-      },
-    });
-
-    monaco.editor.setTheme("custom-dark");
-
-  }, [monaco]);
-
-  // -----------------------------
-  return (
-    <div ref={containerRef} style={{ height: "57.5vh", width: "100%", marginTop: "10px" }}>
-      <Editor
-        height="100%"
-        language="python"
-        theme="custom-dark"
-        value={code}
-        options={{
-          minimap: { enabled: false },
-          fontSize: 12,
-          lineHeight: 20,
-          readOnly: mode === "history"
-        }}
-        onMount={(editor) => {
-          handleMount(editor);
-          //if (!code) setCode(defaultCode);
-          if (!code) {
-              setCode(taskCode ? taskCode : defaultCode);
-          }
-        }}
-        onChange={(value) => setCode(value || "")}
-      />
-    </div>
-  );
-}*/}
-
-import { useCode } from './CodeContext';
 import { useState, useRef, useEffect } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
 import "./ai.css";
@@ -247,16 +58,7 @@ export default function CodeEditor({
     return () => observer.disconnect();
   }, []);
 
-  // -----------------------------
-  // 🔥 РЕАКЦИЯ НА САЙДБАР
-  // -----------------------------
-  /*useEffect(() => {
-    const timeout = setTimeout(() => {
-      resizeEditor();
-    }, 80); // 🔥 важно: ждём перестроение DOM
 
-    return () => clearTimeout(timeout);
-  }, [isSidebarOpen]);*/
 
   // -----------------------------
   // 🔹 HISTORY
@@ -351,11 +153,12 @@ export default function CodeEditor({
       </div>
     </div>
   );
-}
+}*/}
 
-{/*import { useCode } from './CodeContext';
+import { useCode } from './CodeContext';
 import { useState, useRef, useEffect } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
+import { wsService } from "../services/websocket"; // ✅ ДОБАВИЛИ
 import "./ai.css";
 
 const defaultCode = `def factorial(n):
@@ -365,7 +168,15 @@ return n * factorial(n - 1)
 result = factorial(5)
 print(result)`;
 
-export default function CodeEditor({ analysis = [], mode, attempt, hideHints = false, taskCode }) {
+export default function CodeEditor({
+  analysis = [],
+  mode,
+  attempt,
+  hideHints = false,
+  taskCode,
+  isSidebarOpen,
+  restoredState // ✅ оставили только его
+}) {
   const { code, setCode } = useCode();
 
   const editorRef = useRef(null);
@@ -376,23 +187,116 @@ export default function CodeEditor({ analysis = [], mode, attempt, hideHints = f
   const [localAnalysis, setLocalAnalysis] = useState([]);
 
   // -----------------------------
-  // 🔹 Resize (фикс)
+  // 🔥 CONDITION (как в ModuleTask)
   // -----------------------------
+  const getRestoredCondition = () => {
+    if (!restoredState) return null;
+
+    const raw = restoredState.current_condition;
+    if (!raw) return null;
+
+    if (typeof raw === "string") {
+      try {
+        return JSON.parse(raw);
+      } catch {
+        return raw;
+      }
+    }
+
+    return raw;
+  };
+
+  const normalizeCondition = (raw) => {
+    if (!raw) return null;
+
+    if (Array.isArray(raw)) {
+      return raw[0];
+    }
+
+    return raw;
+  };
+
+  const [condition, setCondition] = useState(() =>
+    normalizeCondition(getRestoredCondition())
+  );
+
+  // -----------------------------
+  // 🔥 WS (как в ModuleTask)
+  // -----------------------------
+  useEffect(() => {
+    if (mode === "history") return;
+
+    const handler = (data) => {
+      if (!data?.condition) return;
+      setCondition(normalizeCondition(data.condition));
+    };
+
+    wsService.on("task_condition", handler);
+
+    return () => {
+      wsService.off("task_condition", handler);
+    };
+  }, [mode]);
+
+  // -----------------------------
+  // 🔥 обновление из restoredState
+  // -----------------------------
+  useEffect(() => {
+    const restored = normalizeCondition(getRestoredCondition());
+    if (restored) {
+      setCondition(restored);
+    }
+  }, [restoredState]);
+
+  // -----------------------------
+  // 🔥 ДОСТАЁМ broken_code
+  // -----------------------------
+  const getInitialCodeFromCondition = () => {
+    if (mode !== "module") return null;
+    if (!condition) return null;
+
+    if (
+      condition.description &&
+      typeof condition.description === "object"
+    ) {
+      return condition.description.broken_code || null;
+    }
+
+    if (condition.broken_code) {
+      return condition.broken_code;
+    }
+
+    return null;
+  };
+
+  // -----------------------------
+  // 🔥 ЖЁСТКИЙ resize
+  // -----------------------------
+  const resizeEditor = () => {
+    if (!editorRef.current || !containerRef.current) return;
+
+    const rect = containerRef.current.getBoundingClientRect();
+
+    editorRef.current.layout({
+      width: rect.width,
+      height: rect.height
+    });
+  };
+
   useEffect(() => {
     if (!containerRef.current) return;
 
     const observer = new ResizeObserver(() => {
-      if (editorRef.current) {
-        editorRef.current.layout();
-      }
+      resizeEditor();
     });
 
     observer.observe(containerRef.current);
+
     return () => observer.disconnect();
   }, []);
 
   // -----------------------------
-  // 🔹 HISTORY (attempt)
+  // 🔹 HISTORY (НЕ ТРОГАЕМ)
   // -----------------------------
   useEffect(() => {
     if (mode !== "history") return;
@@ -407,14 +311,12 @@ export default function CodeEditor({ analysis = [], mode, attempt, hideHints = f
       confidence: 1
     }));
 
-    console.log("📜 HISTORY RECOMMENDATIONS", mapped);
-
     setLocalAnalysis(mapped);
 
   }, [mode, attempt?.analysis]);
 
   // -----------------------------
-  // 🔹 LIVE (WebSocket)
+  // 🔹 LIVE (НЕ ТРОГАЕМ)
   // -----------------------------
   useEffect(() => {
     if (mode === "history") return;
@@ -426,10 +328,35 @@ export default function CodeEditor({ analysis = [], mode, attempt, hideHints = f
   }, [analysis, mode]);
 
   // -----------------------------
+  // 🔥 РЕАКТИВНОЕ ОБНОВЛЕНИЕ КОДА
+  // -----------------------------
+  useEffect(() => {
+    if (mode !== "module") return;
+
+    const newCode = getInitialCodeFromCondition();
+
+    if (newCode) {
+      setCode(newCode);
+    }
+  }, [condition, mode]);
+
+  // -----------------------------
   // 🔹 Editor mount
   // -----------------------------
   const handleMount = (editor) => {
     editorRef.current = editor;
+
+    setTimeout(resizeEditor, 0);
+
+    if (!code) {
+      const conditionCode = getInitialCodeFromCondition();
+
+      setCode(
+        conditionCode ||
+        taskCode ||
+        defaultCode
+      );
+    }
   };
 
   // -----------------------------
@@ -443,7 +370,7 @@ export default function CodeEditor({ analysis = [], mode, attempt, hideHints = f
       inherit: true,
       rules: [],
       colors: {
-        "editor.background": "#1B1C1E"
+        "editor.background": "#202123"
       },
     });
 
@@ -469,16 +396,13 @@ export default function CodeEditor({ analysis = [], mode, attempt, hideHints = f
             lineHeight: 20,
             readOnly: mode === "history"
           }}
-          onMount={(editor) => {
-            handleMount(editor);
-
-            if (!code) {
-              setCode(taskCode ? taskCode : defaultCode);
-            }
+          onMount={handleMount}
+          onChange={(value) => {
+            if (mode === "history") return;
+            setCode(value || "");
           }}
-          onChange={(value) => setCode(value || "")}
         />
       </div>
     </div>
   );
-}*/}
+}
