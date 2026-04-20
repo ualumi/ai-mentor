@@ -496,16 +496,24 @@ input:focus::placeholder {
     flex: 1;
 }
 
+.recomendation-content {
+    min-height: 0;
+}
+
 .reco-content {
     display: flex;
     flex-direction: column;
     width: 100%;
+    min-height: fit-content;
 }
 
 .reco-content .recommendation-list {
     margin-top: 10px;
 }
 
+.recommendation-list {
+min-height: 20px;
+}
 .module-button {
     background: #3B68FF;
     box-shadow: inset 0px -10px 40px -20px #FFFFFF;

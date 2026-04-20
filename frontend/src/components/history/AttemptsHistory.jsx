@@ -9,6 +9,22 @@ const ATTEMPTS_SERVICE = "http://localhost:8009";
 export default function AttemptsHistory({ onSelectAttempt }) {
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
+  /*const { data: history, isLoading, error } = useQuery({
+    queryKey: ['attemptsHistory'],
+    queryFn: async () => {
+      const res = await fetch(`${ATTEMPTS_SERVICE}/attempts/${token}/history`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch attempts history");
+      }
+
+      return res.json();
+    },
+  });*/
   const { data: history, isLoading, error } = useQuery({
     queryKey: ['attemptsHistory'],
     queryFn: async () => {
@@ -24,6 +40,8 @@ export default function AttemptsHistory({ onSelectAttempt }) {
 
       return res.json();
     },
+
+    refetchInterval: 3000, // 🔥 каждые 3 секунды
   });
 
   if (isLoading) {

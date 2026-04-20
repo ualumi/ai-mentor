@@ -66,12 +66,12 @@
 }
 
 .sidebar-closed {
-  width: 35px;
+  width: 40px;
   position: absolute;
 }
 
 .sidebar {
-    padding-inline: 20px;
+    padding-inline: 15px;
     height: calc(100% - 20px);
     display: flex;
     flex-direction: column;
