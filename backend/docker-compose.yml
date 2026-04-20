@@ -181,22 +181,6 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
-  annotation_service:
-    build:
-      context: ./annotation_service
-    container_name: annotation_service
-    ports:
-      - "8011:8011"
-    environment:
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-    depends_on:
-      - redis
-    networks:
-      - mentor-net
-    volumes:
-      - ./logs/annotation_service:/app/logs
-
   integration_service:
     build:
       context: ./integration_service
@@ -211,6 +195,23 @@ services:
     networks:
       - mentor-net
 
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ../frontend/nginx.conf:/etc/nginx/conf.d/default.conf
+      - ../frontend/dist:/usr/share/nginx/html
+    depends_on:
+      - user_service
+      - learning_service
+      - attempts_service
+      - progress_service
+      - integration_service
+      - scaffolding_service
+    networks:
+      - mentor-net
 
 
 

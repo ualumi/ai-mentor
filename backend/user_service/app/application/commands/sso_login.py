@@ -13,12 +13,12 @@ async def sso_login_command(sso_token: str, db: AsyncSession):
     async with httpx.AsyncClient() as client:
         r = await client.get(INTEGRATION_SERVICE_URL, params={"token": sso_token}, timeout=5)
     if r.status_code != 200:
-        raise ValueError(f"SSO failed: {r.text}")
+        raise ValueError(f"failed: {r.text}")
 
     data = r.json()
     user_data = data.get("user")
     if not user_data:
-        raise ValueError("No user data returned from SSO")
+        raise ValueError("No user data returned")
 
     email = user_data["email"]
 

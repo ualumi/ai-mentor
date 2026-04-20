@@ -69,7 +69,7 @@ async def request_task_generation(
     }
 
     await redis_client.publish(
-        CHANNEL_METHODLOGY_EVENTS,
+        "scaffolding.next_step",
         json.dumps(event_payload)
     )
 

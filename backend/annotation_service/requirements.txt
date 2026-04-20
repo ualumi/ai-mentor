@@ -1,7 +1,0 @@
-fastapi
-uvicorn
-redis
-pydantic
-pydantic-settings
-sentence-transformers
-scikit-learn

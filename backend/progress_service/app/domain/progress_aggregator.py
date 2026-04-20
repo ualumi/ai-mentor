@@ -53,6 +53,7 @@ def apply_evidence(user_progress: dict, ev: dict):
         "attempts": comp_state["attempts"] + 1,
         "trend": round(new - prev, 3),
         "mastery": new > 0.8 and comp_state["attempts"] >= 3
+        #"mastery": True
     })
 
     user_progress[comp] = comp_state

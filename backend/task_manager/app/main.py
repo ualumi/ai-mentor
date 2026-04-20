@@ -111,7 +111,7 @@ async def listen_task_condition(user_id: str):
                     "type": "task_condition",
                     "condition": condition
                 })
-
+                print(f"Sent task condition to user {user_id} for session {learning_session_id}")
                 # отмечаем последнее сообщение
                 last_id = message_id
 #получает одно тупое сообщение и валится
@@ -193,10 +193,53 @@ async def websocket_endpoint(websocket: WebSocket):
                 USER_STATE[user_id]["learning_session_id"] = data.learning_session_id
                 USER_STATE[user_id]["module_ready"] = True
                 # ❗ сбрасываем condition
-                #state["condition"] = None
+                state["condition"] = None
                 #state["module_ready"] = False
                 print("🔥 Session switched:", data.learning_session_id)
                 continue
+            
+            '''if data.type == "set_session":
+                USER_STATE[user_id]["learning_session_id"] = data.learning_session_id
+                USER_STATE[user_id]["module_ready"] = True
+
+                print("🔥 Session switched:", data.learning_session_id)
+
+                # -----------------------------
+                # 🔥 FIX: сразу отправляем condition если он уже есть
+                # -----------------------------
+
+                state = USER_STATE[user_id]
+
+                # 1. если condition уже в state
+                if state.get("condition"):
+                    await manager.send_to_user(user_id, {
+                        "type": "task_condition",
+                        "condition": state["condition"]
+                    })
+                    continue
+
+                # 2. если есть отложенные задачи (очень важно для SSO)
+                pending = PENDING_TASKS.get(user_id, [])
+
+                for task in pending:
+                    if task["learning_session_id"] == data.learning_session_id:
+                        state["condition"] = task["condition"]
+                        state["module_ready"] = True
+
+                        await manager.send_to_user(user_id, {
+                            "type": "task_condition",
+                            "condition": task["condition"]
+                        })
+
+                        # очищаем очередь
+                        PENDING_TASKS[user_id] = [
+                            t for t in pending
+                            if t["learning_session_id"] != data.learning_session_id
+                        ]
+
+                        break
+
+                continue'''
             # -----------------
             # Проверка module режима
             # -----------------
