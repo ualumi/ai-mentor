@@ -82,7 +82,7 @@ export default ProgressBar;*/}
 import React, { useEffect, useState } from 'react';
 import { wsService } from "../../../services/websocket";
 
-function ProgressBar({ progress, height = 10, color = '#3B68FF', mode }) {
+function ProgressBar({ progress, height = 10, color = '#3B68FF', mode, competency }) {
 
   const [liveProgress, setLiveProgress] = useState(progress);
 
