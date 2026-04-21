@@ -355,7 +355,7 @@ export default ProgressBar;*/}
 import React, { useEffect, useState } from 'react';
 import { wsService } from "../../../services/websocket";
 
-function ProgressBar({ progress, height = 10, color = '#3B68FF', mode }) {
+function ProgressBar({ progress, height = 10, color = '#3B68FF', mode, competency }) {
 
   const [liveProgress, setLiveProgress] = useState(progress);
 
@@ -373,13 +373,23 @@ function ProgressBar({ progress, height = 10, color = '#3B68FF', mode }) {
 
       if (!data?.progress) return;
 
-      const keys = Object.keys(data.progress);
+      /*const keys = Object.keys(data.progress);
       if (!keys.length) return;
 
       const firstKey = keys[0];
       const ema = data.progress[firstKey]?.ema;
 
+      if (ema === null || ema === undefined) return;*/
+      // 🔥 ищем нужную компетенцию
+      const skill = data.progress[competency];
+
+      if (!skill) return;
+
+      const ema = skill.ema;
+
       if (ema === null || ema === undefined) return;
+
+      //setLiveProgress(ema);
 
       setLiveProgress(ema);
     };
