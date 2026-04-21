@@ -494,6 +494,8 @@ input:focus::placeholder {
     display: flex;
     flex-direction: column;
     flex: 1;
+    /*min-height: 700px;
+    overflow-y: scroll;*/
 }
 
 .recomendation-content {
@@ -509,6 +511,8 @@ input:focus::placeholder {
 
 .reco-content .recommendation-list {
     margin-top: 10px;
+    max-height: 400px;
+    overflow-y: scroll;
 }
 
 .recommendation-list {

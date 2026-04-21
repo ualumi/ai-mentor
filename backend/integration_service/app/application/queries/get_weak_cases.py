@@ -18,46 +18,179 @@ def mock_external_progress():
 },
 "cases": [
 {
-"case_id": 7,
-"title": "Сумма двух чисел",
-"description": "Даны два числа, выведите их сумму.",
-"attempts_count": 4,
-"last_submission_at": "2026-02-02T17:40:10.000000",
-"submissions": [
-{
-"submission_id": 101,
-"language": "python",
-"code": "a, b = map(int, input().split())\nprint(a + b)",
-"verdict": "wrong_answer",
-"total_time_ms": 12,
-"created_at": "2026-02-02T17:35:10.000000",
-"tests": [
-{
-"test_case_id": 9001,
-"status": "failed",
-"time_ms": 5,
-"actual_text": "3",
-"passed": False
-}
+    "case_id": 7,
+    "title": "Сумма двух чисел",
+    "description": "Даны два числа, выведите их сумму.",
+    "attempts_count": 4,
+    "last_submission_at": "2026-02-02T17:40:10.000000",
+    "submissions": [
+    {
+        "submission_id": 101,
+        "language": "python",
+        "code": "a, b = map(int, input().split())\nprint(a + b)",
+        "verdict": "wrong_answer",
+        "total_time_ms": 12,
+        "created_at": "2026-02-02T17:35:10.000000",
+        "tests": [
+            {
+            "test_case_id": 9001,
+            "status": "failed",
+            "time_ms": 5,
+            "actual_text": "3",
+            "passed": False
+            },
+        ]
+    },
+    {
+        "submission_id": 102,
+        "language": "python",
+        "code": "a, b = map(int, input().split())\nprint(a + b)",
+        "verdict": "accepted",
+        "total_time_ms": 9,
+        "created_at": "2026-02-02T17:40:10.000000",
+        "tests": [
+            {
+            "test_case_id": 9001,
+            "status": "passed",
+            "time_ms": 3,
+            "actual_text": "4",
+            "passed": True
+            }
+        ]
+    },
+    
 ]
 },
 {
-"submission_id": 102,
-"language": "python",
-"code": "a, b = map(int, input().split())\nprint(a + b)",
-"verdict": "accepted",
-"total_time_ms": 9,
-"created_at": "2026-02-02T17:40:10.000000",
-"tests": [
-{
-"test_case_id": 9001,
-"status": "passed",
-"time_ms": 3,
-"actual_text": "4",
-"passed": True
-}
+    "case_id": 8,
+    "title": "Сумма nht[] чисел",
+    "description": "Даны два числа, выведите их сумму.",
+    "attempts_count": 4,
+    "last_submission_at": "2026-02-02T17:40:10.000000",
+    "submissions": [
+    {
+        "submission_id": 101,
+        "language": "python",
+        "code": "a, b = map(int, input().split())\nprint(a + b)",
+        "verdict": "wrong_answer",
+        "total_time_ms": 12,
+        "created_at": "2026-02-02T17:35:10.000000",
+        "tests": [
+            {
+            "test_case_id": 9001,
+            "status": "failed",
+            "time_ms": 5,
+            "actual_text": "3",
+            "passed": False
+            },
+        ]
+    },
+    {
+        "submission_id": 102,
+        "language": "python",
+        "code": "a, b = map(int, input().split())\nprint(a + b)",
+        "verdict": "accepted",
+        "total_time_ms": 9,
+        "created_at": "2026-02-02T17:40:10.000000",
+        "tests": [
+            {
+            "test_case_id": 9001,
+            "status": "passed",
+            "time_ms": 3,
+            "actual_text": "4",
+            "passed": False
+            }
+        ]
+    },
+    
 ]
-}
+},
+{
+    "case_id": 9,
+    "title": "Сумма 4 чисел",
+    "description": "Даны два числа, выведите их сумму.",
+    "attempts_count": 4,
+    "last_submission_at": "2026-02-02T17:40:10.000000",
+    "submissions": [
+    {
+        "submission_id": 101,
+        "language": "python",
+        "code": "a, b = map(int, input().split())\nprint(a + b)",
+        "verdict": "wrong_answer",
+        "total_time_ms": 12,
+        "created_at": "2026-02-02T17:35:10.000000",
+        "tests": [
+            {
+            "test_case_id": 9001,
+            "status": "failed",
+            "time_ms": 5,
+            "actual_text": "3",
+            "passed": False
+            },
+        ]
+    },
+    {
+        "submission_id": 102,
+        "language": "python",
+        "code": "a, b = map(int, input().split())\nprint(a + b)",
+        "verdict": "wrong_answer",
+        "total_time_ms": 9,
+        "created_at": "2026-02-02T17:40:10.000000",
+        "tests": [
+            {
+            "test_case_id": 9001,
+            "status": "passed",
+            "time_ms": 3,
+            "actual_text": "4",
+            "passed": False
+            }
+        ]
+    },
+    
+]
+},
+{
+    "case_id": 10,
+    "title": "Сумма 2 чисел",
+    "description": "Даны два числа, выведите их сумму.",
+    "attempts_count": 4,
+    "last_submission_at": "2026-02-02T17:40:10.000000",
+    "submissions": [
+    {
+        "submission_id": 101,
+        "language": "python",
+        "code": "a, b = map(int, input().split())\nprint(a + b)",
+        "verdict": "wrong_answer",
+        "total_time_ms": 12,
+        "created_at": "2026-02-02T17:35:10.000000",
+        "tests": [
+            {
+            "test_case_id": 9001,
+            "status": "failed",
+            "time_ms": 5,
+            "actual_text": "3",
+            "passed": False
+            },
+        ]
+    },
+    {
+        "submission_id": 102,
+        "language": "python",
+        "code": "a, b = map(int, input().split())\nprint(a + b)",
+        "verdict": "wrong_answer",
+        "total_time_ms": 9,
+        "created_at": "2026-02-02T17:40:10.000000",
+        "tests": [
+            {
+            "test_case_id": 9001,
+            "status": "passed",
+            "time_ms": 3,
+            "actual_text": "4",
+            "passed": False
+            }
+        ]
+    },
+    
 ]
 }
 ],
