@@ -41,7 +41,7 @@ export default ProgressBar;*/}
 
 export default ProgressBar;*/
 
-function ProgressBar({ progress, height = 10, color = '#3B68FF' }) {
+{/*function ProgressBar({ progress, height = 10, color = '#3B68FF' }) {
   // Определяем, является ли progress объектом с полем ema
   const isProgressObject = progress && typeof progress === 'object' && 'ema' in progress;
   
@@ -72,6 +72,87 @@ function ProgressBar({ progress, height = 10, color = '#3B68FF' }) {
           ...(isIndeterminate && { animation: 'indeterminate 1.5s infinite' })
         }}
       />
+    </div>
+  );
+}
+
+export default ProgressBar;*/}
+
+
+import React, { useEffect, useState } from 'react';
+import { wsService } from "../../../services/websocket";
+
+function ProgressBar({ progress, height = 10, color = '#3B68FF', mode }) {
+
+  const [liveProgress, setLiveProgress] = useState(progress);
+
+  useEffect(() => {
+    if (mode !== "listen") {
+      setLiveProgress(progress);
+    }
+  }, [progress, mode]);
+
+  useEffect(() => {
+    if (mode !== "listen") return;
+
+    const handler = (payload) => {
+      const data = payload?.data || payload;
+
+      if (!data?.progress) return;
+
+      const keys = Object.keys(data.progress);
+      if (!keys.length) return;
+
+      const firstKey = keys[0];
+      const ema = data.progress[firstKey]?.ema;
+
+      if (ema === null || ema === undefined) return;
+
+      setLiveProgress(ema);
+    };
+
+    wsService.on("user_progress", handler);
+
+    return () => {
+      wsService.off("user_progress", handler);
+    };
+  }, [mode]);
+
+  const progressValue =
+    typeof liveProgress === "number"
+      ? Math.min(100, Math.max(0, liveProgress * 100))
+      : null;
+
+  const isIndeterminate = progressValue === null;
+
+  return (
+    <div
+      className="progress-bar-container"
+      style={{
+        height: `${height}px`,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: isIndeterminate ? "center" : "flex-start",
+        position: "relative",
+        borderRadius: "6px",
+        overflow: "hidden"
+      }}
+    >
+      {isIndeterminate ? (
+        <span style={{ fontSize: "12px", color: "#666" }}>
+          Загрузка...
+        </span>
+      ) : (
+        <div
+          className="progress-bar-fill"
+          style={{
+            width: `${progressValue}%`,
+            height: "100%",
+            backgroundColor: color,
+            transition: "width 0.3s ease"
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -777,7 +777,7 @@ export default function Recommendation({ mode, attempt }) {
           }}
         >
           <MessageCircleCode strokeWidth={1} />
-          <span>Mentor reply</span>
+          <span>AI reply</span>
           {hasNewMentorReply && <span className="new-dot"></span>}
         </div>
 
