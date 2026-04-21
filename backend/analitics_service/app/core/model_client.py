@@ -160,11 +160,15 @@
 
     
 import json
+import os
+from pathlib import Path
 import torch
 import asyncio
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-MODEL_NAME = "Vilyam888/Code_analyze.1.0"
+DEFAULT_MODEL_ID = os.getenv("ANALYTICS_MODEL_ID", "Vilyam888/Code_analyze.1.0")
+LOCAL_MODEL_PATH = os.getenv("ANALYTICS_MODEL_PATH", "/models/code-analyze")
+OFFLINE_MODE = os.getenv("TRANSFORMERS_OFFLINE", "0").lower() in {"1", "true", "yes"}
 
 # ⬇️ ВРЕМЕННО: дефолтное условие задачи
 DEFAULT_TASK = """
@@ -175,6 +179,39 @@ DEFAULT_TASK = """
 model = None
 tokenizer = None
 model_lock = asyncio.Lock()  # защита от параллельной генерации
+
+
+def _has_local_model_files(path: str) -> bool:
+    model_dir = Path(path)
+    if not model_dir.is_dir():
+        return False
+
+    tokenizer_files = (
+        "tokenizer_config.json",
+        "tokenizer.json",
+        "tokenizer.model",
+        "vocab.json",
+    )
+    return (model_dir / "config.json").exists() and any(
+        (model_dir / file_name).exists() for file_name in tokenizer_files
+    )
+
+
+def _resolve_model_source() -> tuple[str, bool]:
+    if _has_local_model_files(LOCAL_MODEL_PATH):
+        return LOCAL_MODEL_PATH, True
+
+    if OFFLINE_MODE:
+        raise RuntimeError(
+            "Папка аналитической модели недоступна или заполнена не полностью. "
+            f"Ожидались локальные файлы по пути: {LOCAL_MODEL_PATH}"
+        )
+
+    print(
+        "Локальная аналитическая модель не найдена, переключаюсь на Hugging Face: "
+        f"{DEFAULT_MODEL_ID}"
+    )
+    return DEFAULT_MODEL_ID, False
 
 
 def load_model():
@@ -190,17 +227,21 @@ def load_model():
             "Куды не найдено."
         )
 
+    model_source, use_local_files = _resolve_model_source()
+
     tokenizer = AutoTokenizer.from_pretrained(
-        MODEL_NAME,
+        model_source,
         use_fast=False,
-        trust_remote_code=True
+        trust_remote_code=True,
+        local_files_only=use_local_files or OFFLINE_MODE,
     )
     print("Tokenizer loaded")
     print("Model loading... ")
     model = AutoModelForCausalLM.from_pretrained(
-        MODEL_NAME,
+        model_source,
         torch_dtype=torch.float16,
-        trust_remote_code=True
+        trust_remote_code=True,
+        local_files_only=use_local_files or OFFLINE_MODE,
     ).to("cuda:0")
 
     model.eval()
@@ -230,13 +271,13 @@ async def analyze_code(code: str, task=DEFAULT_TASK) -> dict:
     global model, tokenizer
 
     if model is None or tokenizer is None:
-        raise RuntimeError("Model is not loaded")
+        raise RuntimeError("Модель не загружена")
 
     #task_text = task.strip() if task else DEFAULT_TASK
     task_text = DEFAULT_TASK
     if not code or not code.strip():
         return {
-            "error": "Empty code"
+            "error": "Пустой код"
         }
 
     prompt = (

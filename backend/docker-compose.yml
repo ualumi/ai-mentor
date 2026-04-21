@@ -60,8 +60,13 @@ services:
   scaffolding_service:
     build: ./scaffolding_service
     container_name: scaffolding_service
+    gpus: all
     environment:
       - REDIS_URL=redis://redis:6379
+      - BROKEN_CODE_MODEL_ID=Vilyam888/Broken_Code_Generation.1.0
+      - BROKEN_CODE_MODEL_PATH=/models/broken-code
+      - HF_HUB_OFFLINE=${HF_HUB_OFFLINE:-1}
+      - TRANSFORMERS_OFFLINE=${TRANSFORMERS_OFFLINE:-1}
     ports:
       - "8003:8003"
     depends_on:
@@ -70,6 +75,11 @@ services:
       - user_service
     networks:
         - mentor-net
+    volumes:
+      - type: bind
+        source: "D:/Broken_Code_Generation.1.0" #Вот сюда путь до модели на фдлешке--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        target: /models/broken-code
+        read_only: true
 
   task_manager:
     build: 
@@ -139,12 +149,20 @@ services:
       REDIS_PORT: 6379
       NVIDIA_VISIBLE_DEVICES: all
       NVIDIA_DRIVER_CAPABILITIES: compute,utility
+      ANALYTICS_MODEL_ID: Vilyam888/Code_analyze.1.0
+      ANALYTICS_MODEL_PATH: /models/code-analyze
+      HF_HUB_OFFLINE: ${HF_HUB_OFFLINE:-1}
+      TRANSFORMERS_OFFLINE: ${TRANSFORMERS_OFFLINE:-1}
     depends_on:
       - redis
     networks:
       - mentor-net
     volumes:
       - ./logs/analitics_service:/app/logs
+      - type: bind
+        source: "D:/Code_analyze.1.0" #Вот сюда путь до модели на фдлешке ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+        target: /models/code-analyze
+        read_only: true
 
   progress_service:
     build:
