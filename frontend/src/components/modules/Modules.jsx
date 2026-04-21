@@ -249,8 +249,8 @@ import "../../App.css";
 import "./module.css";
 import { useState, useEffect } from "react";
 
-const LEARNING_SERVICE = "http://localhost:8001";
-const INTEGRATION_SERVICE = "http://localhost:8012/api/integration";
+const LEARNING_SERVICE = "/api/learning/";
+const INTEGRATION_SERVICE = "/api/integration/api/integration";
 
 import icon1 from "../../assets/module-icons/Scale.svg";
 import icon2 from "../../assets/module-icons/Box2.svg";
@@ -284,7 +284,7 @@ export default function Modules({ mode }) {
   const { data: sessions, isLoading: loadingSessions, error: sessionsError } = useQuery({
     queryKey: ['activeSessions'],
     queryFn: async () => {
-      const res = await fetch(`${LEARNING_SERVICE}/learning/my?status=active`, {
+      const res = await fetch(`${LEARNING_SERVICE}my?status=active`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to fetch sessions");
