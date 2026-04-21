@@ -169,7 +169,7 @@ export default function Module({ competency, session, mode, progress }) {
             {/* 🔥 используем localProgress 
             <ProgressBar progress={localProgress} mode={mode} />*/}
               {mode === 'listen' ? (
-                <ProgressBar progress={localProgress} mode={mode} />
+                <ProgressBar progress={localProgress} mode={mode} competency={competency} />
               ) : (
                 <ProgressBar progress={localProgress} />
               )}

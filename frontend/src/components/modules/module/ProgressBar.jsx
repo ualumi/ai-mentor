@@ -100,13 +100,23 @@ function ProgressBar({ progress, height = 10, color = '#3B68FF', mode }) {
 
       if (!data?.progress) return;
 
-      const keys = Object.keys(data.progress);
+      /*const keys = Object.keys(data.progress);
       if (!keys.length) return;
 
       const firstKey = keys[0];
       const ema = data.progress[firstKey]?.ema;
 
+      if (ema === null || ema === undefined) return;*/
+      // 🔥 ищем нужную компетенцию
+      const skill = data.progress[competency];
+
+      if (!skill) return;
+
+      const ema = skill.ema;
+
       if (ema === null || ema === undefined) return;
+
+      //setLiveProgress(ema);
 
       setLiveProgress(ema);
     };
@@ -117,6 +127,7 @@ function ProgressBar({ progress, height = 10, color = '#3B68FF', mode }) {
       wsService.off("user_progress", handler);
     };
   }, [mode]);
+
 
   const progressValue =
     typeof liveProgress === "number"

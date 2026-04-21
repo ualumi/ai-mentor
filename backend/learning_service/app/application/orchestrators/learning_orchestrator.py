@@ -1,4 +1,6 @@
 
+import json
+
 from app.application.queries.get_user_sessions import get_user_sessions
 from app.infrastructure.methodology_client import request_task_generation
 from app.infrastructure.attempt_client import get_attempts
@@ -43,76 +45,11 @@ async def generate_next_task(session):
             "attempts": []
         }
     )
-'''async def generate_next_task(learning_session_id: str):
-
-    key = f"learning:session:{learning_session_id}"
-
-    session_data = await redis_client.hgetall(key)
-
-    if not session_data:
-        raise Exception(
-            f"Learning session {learning_session_id} not found"
-        )
-
-    user_id = int(session_data["user_id"])
-    competency = session_data["competency"]
-    methodology = session_data["methodology"]
-
-    attempts = await get_attempts(learning_session_id)
-
-    await request_task_generation(
-        methodology=methodology,
-        payload={
-            "learning_session_id": learning_session_id,
-            "user_id": user_id,
-            "competency": competency,
-            "attempts": attempts
-        }
-    )'''
-
-'''async def handle_progress_event(event):
-
-    user_id = event["data"]["user_id"]
-    progress = event["data"]["progress"]
-
-    sessions = await get_user_sessions(user_id, status="active")
-
-    for session in sessions:
-        competency = session["competency"]
-        skill = progress.get(competency)
-
-        if not skill:
-            continue
-
-        if skill["mastery"]:
-            await complete_session(session["session_id"])
-        else:
-            await generate_next_task(session)'''
-
-'''async def handle_progress_event(event):
-
-    user_id = event["user_id"]
-    progress = event["progress"]
-
-    sessions = await get_user_sessions(user_id, status="active")
-
-    for session in sessions:
-
-        competency = session["competency"]
-        skill = progress.get(competency)
-
-        if not skill:
-            continue
-
-        if skill["mastery"]:
-            await complete_session(session["session_id"])
-        else:
-            await generate_next_task(session)'''
 
 async def handle_progress_event(event):
 
     user_id = event["user_id"]
-    progress = event["progress"]
+    progress_raw = event["progress"]
     target_session_id = event.get("learning_session_id")  # 🔥
 
     if not target_session_id:
@@ -124,19 +61,32 @@ async def handle_progress_event(event):
         return
 
     competency = session["competency"]
-    #skill = progress.get(competency)
-    if progress:
-        # Берем первый ключ из словаря
-        #first_tag = next(iter(progress.keys()))
-        #first_tag_data = progress[first_tag]
-        skill = progress.get('mastery')  # True или False
+    if progress_raw and isinstance(progress_raw, dict):
+
+            # Ищем ключ, соответствующий competency
+            if competency in progress_raw:
+                progress = progress_raw[competency]
+                print('PROGRESS', progress)
+                
+                # 🔥 1. сохраняем (merge, а не перезапись)
+                existing_raw = await redis_client.get(f"user_progress:{user_id}")
+                existing = json.loads(existing_raw) if existing_raw else {}
+                
+                existing.update(progress)
+                
+                await redis_client.set(
+                    f"user_progress:{user_id}",
+                    json.dumps(existing)
+                )
+                
+                skill = progress.get('mastery')  # True или False
+            else:
+                # Обработка случая, когда ключ не найден
+                print(f"Ключ '{competency}' не найден в progress_raw")
+                skill = False
     else:
         skill = False
-    '''if not skill:
-        return'''
 
-    '''if skill["mastery"]:
-        await complete_session(target_session_id)'''
     if skill == True:
         await complete_session(target_session_id)
         print("MODULE FINISHED")
