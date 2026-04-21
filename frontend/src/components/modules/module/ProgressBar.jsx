@@ -1,7 +1,7 @@
-import React from 'react';
+{/*import React from 'react';
 
 
-{/*function ProgressBar ({ progress, height = 10, color = '#3B68FF' }) {
+function ProgressBar ({ progress, height = 10, color = '#3B68FF' }) {
   return (
     <div className="progress-bar-container" style={{ height: `${height}px` }}>
       <div 
