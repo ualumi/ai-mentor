@@ -129,6 +129,7 @@ def extract_weak_cases(progress_data):
             title = case.get("title")
             attempts = case.get("attempts_count", 0)
             submissions = case.get("submissions", [])
+            description = case.get("description", "")
 
             accepted = any(sub.get("verdict") == "accepted" for sub in submissions)
 
@@ -138,6 +139,7 @@ def extract_weak_cases(progress_data):
                     "title": title,
                     "reason": "no_success",
                     "attempts": attempts,
+                    "description": description,
                     "last_code": submissions[-1]["code"] if submissions else None
                 })
 
@@ -145,6 +147,7 @@ def extract_weak_cases(progress_data):
                 weak_cases.append({
                     "title": title,
                     "reason": "too_many_attempts",
+                    "description": description,
                     "attempts": attempts,
                     "last_code": submissions[-1]["code"]
                 })

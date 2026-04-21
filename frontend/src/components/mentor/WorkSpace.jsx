@@ -28,7 +28,7 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
   // 🔹 SAFE STATE (без undefined крашей)
   // -----------------------------
   const taskData = location.state || {};
-
+  const taskDescription = taskData?.description;
   const initialCode = taskData?.code;
   const taskTitle = taskData?.title;
   const selectedAttemptId = taskData?.selectedAttemptId;
@@ -255,6 +255,7 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
                 restoredState={stableRestoredState}
                 code={initialCode}
                 titletask={taskTitle}
+                taskDescription={taskDescription}
                 isSidebarOpen={isSidebarOpen}
                 selectedAttemptId={selectedAttemptId}
                 conditionHistory={conditionHistory}
