@@ -700,8 +700,6 @@ export default function Recommendation({ mode, attempt }) {
     );
   }
 
-  console.log("ACTIVE TAB:", activeTab);
-  console.log("MENTOR REPLIES:", mentorReplies);
 
   return (
     <div

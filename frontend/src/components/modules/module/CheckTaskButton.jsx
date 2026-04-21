@@ -97,10 +97,10 @@ export default function CheckTaskButton({
       setWaitingForResult(false);
     };
 
-    wsService.on("user_progress", handler);
+    wsService.on("analytics_response", handler);
 
     return () => {
-      wsService.off("user_progress", handler);
+      wsService.off("analytics_response", handler);
     };
   }, []);
 
