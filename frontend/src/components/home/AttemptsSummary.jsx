@@ -60,7 +60,7 @@ export default function AttemptsSummary() {
                 </p>
                 <div className="home-summary-block-label-div">
                     <p className="home-summary-block-label-link">всего</p>
-                    <p className="home-summary-block-label-link">попыток</p>
+                    <p className="home-summary-block-label-link">решений</p>
                 </div>
             </div>
 
@@ -71,7 +71,7 @@ export default function AttemptsSummary() {
                 </p>
                 <div className="home-summary-block-label-div">
                     <p className="home-summary-block-label-link">пройдено</p>
-                    <p className="home-summary-block-label-link">сессий</p>
+                    <p className="home-summary-block-label-link">модулей</p>
                 </div>
             </div>
 

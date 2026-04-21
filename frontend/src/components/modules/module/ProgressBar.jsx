@@ -151,7 +151,7 @@ function ProgressBar({ progress, height = 10, color = '#3B68FF', mode, competenc
     >
       {isIndeterminate ? (
         <span style={{ fontSize: "12px", color: "#666" }}>
-          Загрузка...
+          
         </span>
       ) : (
         <div

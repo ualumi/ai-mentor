@@ -566,6 +566,7 @@ input:focus::placeholder {
     flex-direction: column;
     color: var(--side-color);
     gap: 5px;
+    overflow: hidden;
 }
 
 .item-primary svg {
