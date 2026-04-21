@@ -375,7 +375,7 @@ export default function AuthForm({ isOpen, onClose }) {
             />
           )}
 
-          <button className="def-button" type="submit" disabled={loading}>
+          <button className="def-button" type="submit" disabled={loading} onClick={handleSSOAuth}>
             {loading ? "Please wait..." : mode === "login" ? "Войти" : "Зарегистрироваться"}
           </button>
           <p className="auth-text-regular">или</p>

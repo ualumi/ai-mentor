@@ -70,13 +70,13 @@ async def handle_progress_event(event):
                 print('PROGRESS', progress)
                 
                 # 🔥 1. сохраняем (merge, а не перезапись)
-                existing_raw = await redis_client.get(f"user_progress:{user_id}")
+                existing_raw = await redis_client.get(f"user_progress:{target_session_id}")
                 existing = json.loads(existing_raw) if existing_raw else {}
                 
                 existing.update(progress)
                 
                 await redis_client.set(
-                    f"user_progress:{user_id}",
+                    f"user_progress:{target_session_id}",
                     json.dumps(existing)
                 )
                 

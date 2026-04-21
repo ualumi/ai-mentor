@@ -110,15 +110,16 @@ async def get_my_sessions(
     sessions = await get_user_sessions(user_id, status)
 
     # 🔥 достаем progress
-    progress_raw = await redis_client.get(f"user_progress:{user_id}")
-    print("progress_raw", progress_raw)
-    progress = json.loads(progress_raw) if progress_raw else {}
-    print("progress", progress)
+    #progress_raw = await redis_client.get(f"user_progress:{user_id}")
+    #print("progress_raw", progress_raw)
+    #progress = json.loads(progress_raw) if progress_raw else {}
+    #print("progress", progress)
     enriched = []
 
     for s in sessions:
         competency = s.get("competency")
-
+        progress_raw = await redis_client.get(f"user_progress:{s['session_id']}")
+        progress = json.loads(progress_raw) if progress_raw else {}
         enriched.append({
             **s,
             "progress": progress.get('ema', {})

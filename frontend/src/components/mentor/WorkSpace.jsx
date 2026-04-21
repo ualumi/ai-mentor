@@ -31,6 +31,8 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
 
   const initialCode = taskData?.code;
   const taskTitle = taskData?.title;
+  const taskDescription = taskData?.description;
+  console.log(taskDescription)
   const selectedAttemptId = taskData?.selectedAttemptId;
   const competency = taskData?.competency;
   const restoredStateFromRoute = taskData?.restoredState;
@@ -255,6 +257,7 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
                 restoredState={stableRestoredState}
                 code={initialCode}
                 titletask={taskTitle}
+                taskDescription={taskDescription}
                 isSidebarOpen={isSidebarOpen}
                 selectedAttemptId={selectedAttemptId}
                 conditionHistory={conditionHistory}

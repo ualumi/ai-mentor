@@ -183,6 +183,7 @@ export default function WeakCases() {
       state: {
         title: task.title,
         code: task.last_code,
+        description: task.description,
       },
     });
   };
