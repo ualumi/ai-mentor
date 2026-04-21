@@ -700,8 +700,6 @@ export default function Recommendation({ mode, attempt }) {
     );
   }
 
-  console.log("ACTIVE TAB:", activeTab);
-  console.log("MENTOR REPLIES:", mentorReplies);
 
   return (
     <div
@@ -745,7 +743,7 @@ export default function Recommendation({ mode, attempt }) {
           className="reco-content"
           style={{ display: activeTab === "mentor" ? "flex" : "none" }}
         >
-          <div className="menu-caption mentor-caption">AI mentor</div>
+          <div className="menu-caption mentor-caption">AI reply</div>
           <div className='recommendation-list'>
             {score && (
               <div className="menu-item mentor-item item-light mentor-score">
@@ -777,7 +775,7 @@ export default function Recommendation({ mode, attempt }) {
           }}
         >
           <MessageCircleCode strokeWidth={1} />
-          <span>Mentor reply</span>
+          <span>AI reply</span>
           {hasNewMentorReply && <span className="new-dot"></span>}
         </div>
 

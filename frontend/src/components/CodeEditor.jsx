@@ -384,7 +384,7 @@ export default function CodeEditor({
   // 🔹 Render
   // -----------------------------
   return (
-    <div className="editor-wrapper">
+    <div className="editor-wrapper" style={{marginTop:10}}>
       <div ref={containerRef} className="editor-container">
         <Editor
           height="100%"

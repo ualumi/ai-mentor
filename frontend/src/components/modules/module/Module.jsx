@@ -28,7 +28,7 @@ export default function Module ({competency}) {
     )
 }*/}
 
-import { useNavigate } from "react-router-dom";
+{/*import { useNavigate } from "react-router-dom";
 import icon3 from "../../../assets/module-icons/Layers.svg";
 import ProgressBar from "./ProgressBar";
 import { useStartModule } from "../../../hooks/useStartModule";
@@ -59,9 +59,7 @@ export default function Module({ competency, session, mode, progress }) {
         }
       });
 
-      /*setTimeout(() => {
-        window.location.reload();
-      }, 0);*/
+
 
     } catch (err) {
       console.error("Start module error:", err);
@@ -98,12 +96,87 @@ export default function Module({ competency, session, mode, progress }) {
 
       </div>
 
-      {/*{mode !== "free" && (
-        <div>
-          <div className='menu-item-processflag'>In process</div>
-          <ProgressBar progress={session?.progress || 0} />
+    </div>
+  );
+}*/}
+
+
+import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import icon3 from "../../../assets/module-icons/Layers.svg";
+import ProgressBar from "./ProgressBar";
+import { useStartModule } from "../../../hooks/useStartModule";
+
+export default function Module({ competency, session, mode, progress }) {
+
+  const navigate = useNavigate();
+  const { mutateAsync, isPending } = useStartModule();
+
+  // 🔥 локальный прогресс
+  const [localProgress, setLocalProgress] = useState(progress);
+
+  // 🔥 реакция на изменение пропса
+  useEffect(() => {
+    setLocalProgress(progress);
+  }, [progress]);
+
+  const handleStart = async () => {
+    const token = localStorage.getItem("token");
+
+    try {
+      const { sessionId, state, isExisting } = await mutateAsync({
+        competency,
+        token
+      });
+
+      navigate(`/module/${sessionId}`, {
+        state: {
+          competency,
+          restoredState: state,
+          isExisting
+        }
+      });
+
+    } catch (err) {
+      console.error("Start module error:", err);
+    }
+  };
+  console.log("progress", progress)
+  return (
+    <div 
+      className="item item-light item-module"
+      onClick={handleStart}
+      style={{ cursor: "pointer", opacity: isPending ? 0.6 : 1 }}
+    >
+      <div className='module-info'>
+        
+        <div className="module-icon">
+          <img
+            src={icon3}
+            alt="module icon"
+            className="module-icon-img"
+          />
         </div>
-      )}*/}
+
+        <div className='modules-description'>
+          <span className='modules-item-text home-summary-block-label-text'>
+            {competency}
+          </span>
+
+          <div className="jol">
+            <p className='modules-item-p'>Пройдено:</p>
+
+            {/* 🔥 используем localProgress 
+            <ProgressBar progress={localProgress} mode={mode} />*/}
+              {mode === 'listen' ? (
+                <ProgressBar progress={localProgress} mode={mode} competency={competency} />
+              ) : (
+                <ProgressBar progress={localProgress} />
+              )}
+          </div>
+        </div>
+
+      </div>
     </div>
   );
 }

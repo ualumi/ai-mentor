@@ -183,6 +183,7 @@ export default function WeakCases() {
       state: {
         title: task.title,
         code: task.last_code,
+        description: task.description,
       },
     });
   };
@@ -215,8 +216,8 @@ export default function WeakCases() {
       </div>
 
       {!showAll && weakCases.length > 3 && (
-        <button onClick={() => setShowAll(true)}>
-          Другие задачи
+        <button className="item tab-history-item" onClick={() => setShowAll(true)}>
+          <p className="home-summary-block-label-link">Другие задачи</p>
         </button>
       )}
     </div>

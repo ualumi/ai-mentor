@@ -15,9 +15,8 @@ export default function AttemptsSummary() {
             const token = localStorage.getItem("token");
 
             const res = await axios.get(
-                `/api/attempts/attempts/total`,
+                `/api/attempts/attempts/total/${token}`,
                 {
-                    params: { token },
                     timeout: 5000 // 👈 защита от зависаний
                 }
             );
@@ -61,7 +60,7 @@ export default function AttemptsSummary() {
                 </p>
                 <div className="home-summary-block-label-div">
                     <p className="home-summary-block-label-link">всего</p>
-                    <p className="home-summary-block-label-link">попыток</p>
+                    <p className="home-summary-block-label-link">решений</p>
                 </div>
             </div>
 
@@ -72,7 +71,7 @@ export default function AttemptsSummary() {
                 </p>
                 <div className="home-summary-block-label-div">
                     <p className="home-summary-block-label-link">пройдено</p>
-                    <p className="home-summary-block-label-link">сессий</p>
+                    <p className="home-summary-block-label-link">модулей</p>
                 </div>
             </div>
 

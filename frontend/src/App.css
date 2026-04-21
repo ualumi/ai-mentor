@@ -518,6 +518,8 @@ input:focus::placeholder {
 
 .reco-content .recommendation-list {
     margin-top: 10px;
+    max-height: 400px;
+    overflow-y: scroll;
 }
 
 .module-button {
@@ -564,6 +566,7 @@ input:focus::placeholder {
     flex-direction: column;
     color: var(--side-color);
     gap: 5px;
+    overflow: hidden;
 }
 
 .item-primary svg {

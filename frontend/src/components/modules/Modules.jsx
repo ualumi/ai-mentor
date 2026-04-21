@@ -1,5 +1,5 @@
 
-import { useQuery } from '@tanstack/react-query';
+{/*import { useQuery } from '@tanstack/react-query';
 import "../../App.css";
 import "./module.css";
 import { useState, useEffect } from "react";
@@ -171,24 +171,17 @@ export default function Modules({ mode }) {
 
         <div className='module-types'>
 
-          {/* ---------------- RECOMMENDED ---------------- */}
+
           {activeTab === "recommended" && (
             <div className='modules-container modules-container-reccomended'>
 
               {(importedSkills?.status === "imported" || finalLocalRecommended.length > 0) && (
                 <>
-                  {/*<div className="home-summary-block-label">
-                    <h3 className="home-summary-block-label-text">
-                      Рекомендованные модули
-                    </h3>
-                    <NavLink to="/module" className={"home-summary-block-label-link"}>
-                      перейти
-                    </NavLink>
-                  </div>*/}
+
 
                   <div className='modules-container scroll-container'>
 
-                    {/* SSO */}
+
                     {importedSkills?.status === "imported" &&
                       Object.entries(importedSkills.skills).map(([skillName, progress], idx) => (
                         <Module
@@ -201,7 +194,7 @@ export default function Modules({ mode }) {
                       ))
                     }
 
-                    {/* LOCAL STORAGE */}
+
                     {finalLocalRecommended.map((name, idx) => (
                       <Module
                         key={`local-${idx}`}
@@ -218,7 +211,7 @@ export default function Modules({ mode }) {
             </div>
           )}
 
-          {/* ---------------- ACTIVE ---------------- */}
+
           {activeTab === "active" && (
             <div className='modules-container scroll-container'>
               {sessions && sessions.length > 0 ? (
@@ -237,7 +230,493 @@ export default function Modules({ mode }) {
             </div>
           )}
 
-          {/* ---------------- FINISHED ---------------- */}
+
+          {activeTab === "finished" && (
+            <div className='item'>
+              Завершённые модули появятся здесь
+            </div>
+          )}
+
+        </div>
+      </div>
+    </div>
+  );
+}*/}
+
+
+{/*import { useQuery } from '@tanstack/react-query';
+import "../../App.css";
+import "./module.css";
+import { useState, useEffect } from "react";
+
+const LEARNING_SERVICE = "/api/learning/";
+const INTEGRATION_SERVICE = "/api/integration/api/integration";
+
+import icon1 from "../../assets/module-icons/Scale.svg";
+import icon2 from "../../assets/module-icons/Box2.svg";
+import icon3 from "../../assets/module-icons/Layers.svg";
+
+import ProgressBar from "./module/ProgressBar";
+import Module from "./module/Module";
+import { useAuth } from "../../context/AuthContext";
+import { NavLink } from "react-router-dom";
+
+const icons = [icon1, icon2, icon3];
+
+export default function Modules({ mode }) {
+
+  const containerClass =
+    mode === "history" ? "history-container" : "modules-container";
+
+  const { token, isSSO } = useAuth();
+
+  const [activeTab, setActiveTab] = useState(
+    isSSO ? "recommended" : "active"
+  );
+
+  useEffect(() => {
+    setActiveTab(isSSO ? "recommended" : "active");
+  }, [isSSO]);
+
+  // ---------------------------
+  // ACTIVE sessions
+  // ---------------------------
+  const { data: sessions, isLoading: loadingSessions, error: sessionsError } = useQuery({
+    queryKey: ['activeSessions'],
+    queryFn: async () => {
+      const res = await fetch(`${LEARNING_SERVICE}my?status=active`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to fetch sessions");
+      return res.json();
+    },
+  });
+
+  // ---------------------------
+  // LOCAL recommended
+  // ---------------------------
+  const localRecommended = (() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem("recommended_modules") || "[]");
+      return Array.isArray(stored) ? stored : [];
+    } catch {
+      return [];
+    }
+  })();
+
+  // ---------------------------
+  // SSO recommended (НЕ ЛОМАЕТ UI)
+  // ---------------------------
+  const {
+    data: importedSkills,
+    isLoading: loadingImported,
+    error: importedError
+  } = useQuery({
+    queryKey: ['importedSkills'],
+    queryFn: async () => {
+      if (!isSSO) return null;
+
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      if (!user?.email) {
+        throw new Error("No user email found");
+      }
+
+      const res = await fetch(`${INTEGRATION_SERVICE}/import-progress`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: user.email,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch imported skills");
+      }
+
+      return res.json();
+    },
+    enabled: !!isSSO,
+    retry: false, // 🔥 важно: не долбим API при ошибке
+  });
+
+  // ---------------------------
+  // LOADING (только sessions критичны)
+  // ---------------------------
+  if (loadingSessions) {
+    return <div className='item'>Загрузка модулей...</div>;
+  }
+
+  if (sessionsError) {
+    return (
+      <div className='item'>
+        Ошибка загрузки: {sessionsError.message}
+      </div>
+    );
+  }
+
+  // ---------------------------
+  // ACTIVE SET
+  // ---------------------------
+  const activeNames = new Set(
+    (sessions || []).map(s => s.competency)
+  );
+
+  // ---------------------------
+  // SAFE SSO (если ошибка — просто пусто)
+  // ---------------------------
+  const safeImportedSkills = importedError ? null : importedSkills;
+
+  const ssoNames = safeImportedSkills?.skills
+    ? Object.keys(safeImportedSkills.skills)
+    : [];
+
+  const filteredLocalRecommended = localRecommended.filter(
+    (name) => !activeNames.has(name)
+  );
+
+  const finalLocalRecommended = filteredLocalRecommended.filter(
+    (name) => !ssoNames.includes(name)
+  );
+
+  return (
+    <div className={`modules-block ${isSSO ? "modules-block-sso" : "modules-block-default"}`}>
+
+      <div className={containerClass}>
+
+        {mode ==! "free" && (
+          <div className="home-summary-block-label">
+            <h3 className="home-label module-label">Модули</h3>
+            <NavLink to="/module" className={"home-summary-block-label-link"}>
+              перейти
+            </NavLink>
+          </div>
+        )}
+
+        <ul className='module-type-list'>
+          <li
+            className={`module-type-list-item ${activeTab === "recommended" ? "module-type-list-item-active" : ""}`}
+            onClick={() => setActiveTab("recommended")}
+          >
+            Recommended
+          </li>
+
+          <li
+            className={`module-type-list-item ${activeTab === "active" ? "module-type-list-item-active" : ""}`}
+            onClick={() => setActiveTab("active")}
+          >
+            Active
+          </li>
+
+          <li
+            className={`module-type-list-item ${activeTab === "finished" ? "module-type-list-item-active" : ""}`}
+            onClick={() => setActiveTab("finished")}
+          >
+            Finished
+          </li>
+        </ul>
+
+        <div className='module-types'>
+
+
+          {activeTab === "recommended" && (
+            <div className='modules-container modules-container-reccomended'>
+
+              {(safeImportedSkills?.status === "imported" || finalLocalRecommended.length > 0) && (
+                <div className='modules-container scroll-container'>
+
+
+                  {safeImportedSkills?.status === "imported" &&
+                    Object.entries(safeImportedSkills.skills)
+                      .filter(([skillName]) => !activeNames.has(skillName))
+                      .map(([skillName], idx) => (
+                        <Module
+                          key={`sso-${idx}`}
+                          competency={skillName}
+                          progress={0}
+                          mode={'module'}
+                        />
+                      ))
+                  }
+
+
+                  {finalLocalRecommended.map((name, idx) => (
+                    <Module
+                      key={`local-${idx}`}
+                      competency={name}
+                      progress={0}
+                      mode={mode}
+                    />
+                  ))}
+
+                </div>
+              )}
+
+            </div>
+          )}
+
+
+          {activeTab === "active" && (
+            <div className='modules-container scroll-container'>
+              {sessions && sessions.length > 0 ? (
+                sessions.map((session) => (
+                  <Module
+                    key={session.session_id}
+                    competency={session.competency}
+                    session={session}
+                    mode={mode}
+                    progress={session.progress}
+                  />
+                ))
+              ) : (
+                <div className='item'>Нет активных модулей</div>
+              )}
+            </div>
+          )}
+
+
+          {activeTab === "finished" && (
+            <div className='item'>
+              Завершённые модули появятся здесь
+            </div>
+          )}
+
+        </div>
+      </div>
+    </div>
+  );
+}*/}
+
+import { useQuery } from '@tanstack/react-query';
+import "../../App.css";
+import "./module.css";
+import { useState, useEffect } from "react";
+
+const LEARNING_SERVICE = "/api/learning/";
+const INTEGRATION_SERVICE = "/api/integration/api/integration";
+
+import icon1 from "../../assets/module-icons/Scale.svg";
+import icon2 from "../../assets/module-icons/Box2.svg";
+import icon3 from "../../assets/module-icons/Layers.svg";
+
+import ProgressBar from "./module/ProgressBar";
+import Module from "./module/Module";
+import { useAuth } from "../../context/AuthContext";
+import { NavLink } from "react-router-dom";
+
+const icons = [icon1, icon2, icon3];
+
+export default function Modules({ mode }) {
+
+  const containerClass =
+    mode === "history" ? "history-container" : "modules-container";
+
+  const { token, isSSO } = useAuth();
+
+  const [activeTab, setActiveTab] = useState(
+    isSSO ? "recommended" : "active"
+  );
+
+  useEffect(() => {
+    setActiveTab(isSSO ? "recommended" : "active");
+  }, [isSSO]);
+
+  // ---------------------------
+  // ACTIVE sessions
+  // ---------------------------
+  const { 
+    data: sessions, 
+    isLoading: loadingSessions, 
+    error: sessionsError,
+    refetch: refetchSessions // 🔥 добавили
+  } = useQuery({
+    queryKey: ['activeSessions'],
+    queryFn: async () => {
+      const res = await fetch(`${LEARNING_SERVICE}my?status=active`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to fetch sessions");
+      return res.json();
+    },
+  });
+
+  // 🔥 refetch при переключении на active
+  useEffect(() => {
+    if (activeTab === "active") {
+      refetchSessions();
+    }
+  }, [activeTab]);
+
+  // ---------------------------
+  // LOCAL recommended
+  // ---------------------------
+  const localRecommended = (() => {
+    try {
+      const stored = JSON.parse(localStorage.getItem("recommended_modules") || "[]");
+      return Array.isArray(stored) ? stored : [];
+    } catch {
+      return [];
+    }
+  })();
+
+  // ---------------------------
+  // SSO recommended
+  // ---------------------------
+  const {
+    data: importedSkills,
+    isLoading: loadingImported,
+    error: importedError
+  } = useQuery({
+    queryKey: ['importedSkills'],
+    queryFn: async () => {
+      if (!isSSO) return null;
+
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      if (!user?.email) {
+        throw new Error("No user email found");
+      }
+
+      const res = await fetch(`${INTEGRATION_SERVICE}/import-progress`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: user.email,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch imported skills");
+      }
+
+      return res.json();
+    },
+    enabled: !!isSSO,
+    retry: false,
+  });
+
+  if (loadingSessions) {
+    return <div className='item'>Загрузка модулей...</div>;
+  }
+
+  if (sessionsError) {
+    return (
+      <div className='item'>
+        Ошибка загрузки: {sessionsError.message}
+      </div>
+    );
+  }
+
+  const activeNames = new Set(
+    (sessions || []).map(s => s.competency)
+  );
+
+  const safeImportedSkills = importedError ? null : importedSkills;
+
+  const ssoNames = safeImportedSkills?.skills
+    ? Object.keys(safeImportedSkills.skills)
+    : [];
+
+  const filteredLocalRecommended = localRecommended.filter(
+    (name) => !activeNames.has(name)
+  );
+
+  const finalLocalRecommended = filteredLocalRecommended.filter(
+    (name) => !ssoNames.includes(name)
+  );
+
+  return (
+    <div className={`modules-block ${isSSO ? "modules-block-sso" : "modules-block-default"}`}>
+      <div className={containerClass}>
+
+        {mode ==! "free" && (
+          <div className="home-summary-block-label">
+            <h3 className="home-label module-label">Модули</h3>
+            <NavLink to="/module" className={"home-summary-block-label-link"}>
+              перейти
+            </NavLink>
+          </div>
+        )}
+
+        <ul className='module-type-list'>
+          <li
+            className={`module-type-list-item ${activeTab === "recommended" ? "module-type-list-item-active" : ""}`}
+            onClick={() => setActiveTab("recommended")}
+          >
+            Recommended
+          </li>
+
+          <li
+            className={`module-type-list-item ${activeTab === "active" ? "module-type-list-item-active" : ""}`}
+            onClick={() => setActiveTab("active")}
+          >
+            Active
+          </li>
+
+          <li
+            className={`module-type-list-item ${activeTab === "finished" ? "module-type-list-item-active" : ""}`}
+            onClick={() => setActiveTab("finished")}
+          >
+            Finished
+          </li>
+        </ul>
+
+        <div className='module-types'>
+
+          {activeTab === "recommended" && (
+            <div className='modules-container modules-container-reccomended'>
+              {(safeImportedSkills?.status === "imported" || finalLocalRecommended.length > 0) && (
+                <div className='modules-container scroll-container'>
+
+                  {safeImportedSkills?.status === "imported" &&
+                    Object.entries(safeImportedSkills.skills)
+                      .filter(([skillName]) => !activeNames.has(skillName))
+                      .map(([skillName], idx) => (
+                        <Module
+                          key={`sso-${idx}`}
+                          competency={skillName}
+                          progress={0}
+                          mode={'module'}
+                        />
+                      ))
+                  }
+
+                  {finalLocalRecommended.map((name, idx) => (
+                    <Module
+                      key={`local-${idx}`}
+                      competency={name}
+                      progress={0}
+                      mode={mode}
+                    />
+                  ))}
+
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "active" && (
+            <div className='modules-container scroll-container'>
+              {sessions && sessions.length > 0 ? (
+                sessions.map((session) => (
+                  <Module
+                    key={session.session_id}
+                    competency={session.competency}
+                    session={session}
+                    mode={mode}
+                    progress={session.progress}
+                  />
+                ))
+              ) : (
+                <div className='item'>Нет активных модулей</div>
+              )}
+            </div>
+          )}
+
           {activeTab === "finished" && (
             <div className='item'>
               Завершённые модули появятся здесь
