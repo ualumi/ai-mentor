@@ -15,9 +15,8 @@ export default function AttemptsSummary() {
             const token = localStorage.getItem("token");
 
             const res = await axios.get(
-                `/api/attempts/attempts/total`,
+                `/api/attempts/attempts/total/${token}`,
                 {
-                    params: { token },
                     timeout: 5000 // 👈 защита от зависаний
                 }
             );

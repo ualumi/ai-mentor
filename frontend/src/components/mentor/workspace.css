@@ -382,3 +382,20 @@
 .tooltip-wrapper:hover .tooltip-text {
   transform: translateY(-50%) translateX(0);
 }
+
+.spin {
+  animation: spin 1s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  /*display: inline-block;*/
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  60% {
+    transform: rotate(220deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

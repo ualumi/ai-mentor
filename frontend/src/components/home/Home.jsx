@@ -60,17 +60,10 @@ export default function Home () {
                                 
                             </div>
                         </div>*/}
-                        {/*<AttemptsSummary />*/}
+                        <AttemptsSummary />
                         
                         
-                        <div className="home-summary-block">
-                            <div className="home-summary-block-label">
-                                <h3 className="home-summary-block-label-text">Навыки</h3>
-                                <NavLink to="/module" className={"home-summary-block-label-link"}>перейти</NavLink>
-                            </div>
-                            <Progress labels={["Навык 1", "Навык 2", "Навык 3", "Навык 4"]} values={[20, 40, 30, 80]}></Progress>
-                            {/*<Heatmap token={localStorage.getItem("token")} days={30}/>*/}
-                        </div>
+                        
 
                         <div className="home-summary-block">
                             <div className="home-summary-block-label">
@@ -79,6 +72,15 @@ export default function Home () {
                             </div>
                             <Heatmap token={localStorage.getItem("token")} days={30}/>
 
+                        </div>
+
+                        <div className="home-summary-block">
+                            <div className="home-summary-block-label">
+                                <h3 className="home-summary-block-label-text">Навыки</h3>
+                                <NavLink to="/module" className={"home-summary-block-label-link"}>перейти</NavLink>
+                            </div>
+                            <Progress labels={["Навык 1", "Навык 2", "Навык 3", "Навык 4"]} values={[20, 40, 30, 80]}></Progress>
+                            {/*<Heatmap token={localStorage.getItem("token")} days={30}/>*/}
                         </div>
                     </div>
                     

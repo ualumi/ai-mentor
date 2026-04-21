@@ -263,47 +263,39 @@ from sqlalchemy import select, func, distinct
 from sqlalchemy.ext.asyncio import AsyncSession
 import jwt
 
-@app.get("/attempts/total")
-async def get_attempts_total(token: str, db: AsyncSession = Depends(get_session)):
-
-    # 🔐 Декодируем токен
+@app.get("/attempts/total/{token}")
+async def get_attempts_total(token: str, db=Depends(get_session)):
+    # Декодируем токен
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id = str(payload.get("sub")).strip()
+        #user_id = str(payload["user_id"])
+        user_id = str(payload["sub"])
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token expired")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-    if not user_id:
-        raise HTTPException(status_code=400, detail="Invalid user_id in token")
-
-    # 🐞 DEBUG (можешь потом убрать)
-    print("USER_ID FROM TOKEN:", user_id)
-
-    # 📊 1. Общее количество попыток (БЫСТРО и правильно)
-    total_attempts_result = await db.execute(
-        select(func.count()).where(Attempt.user_id == user_id)
+    # Берем все попытки пользователя
+    # Берем только попытки без learning_session_id
+    res = await db.execute(
+        select(AttemptAlias)
+        .where(AttemptAlias.user_id == user_id)
+        .where(AttemptAlias.learning_session_id.is_(None))  # <-- фильтр на NULL
     )
-    total_attempts = total_attempts_result.scalar() or 0
-
-    # 📊 2. Количество уникальных learning_session_id
+    attempts = res.scalars().all()
+    total_attempts =  len(attempts)
+    #total_attempts = total_attempts_result.scalar() or 0
+    print("total_attempts", total_attempts)
+    # 📊 2. Количество уникальных learning_session_id (исключаем NULL)
     total_sessions_result = await db.execute(
         select(func.count(distinct(Attempt.learning_session_id)))
         .where(Attempt.user_id == user_id)
         .where(Attempt.learning_session_id.isnot(None))
     )
     total_sessions = total_sessions_result.scalar() or 0
-
-    # 🐞 ДОП. DEBUG (если вдруг снова будет 0)
-    if total_attempts == 0:
-        all_attempts_result = await db.execute(select(Attempt))
-        all_attempts = all_attempts_result.scalars().all()
-
-        print("ВСЕ ATTEMPTS В БД:", len(all_attempts))
-        print("ПЕРВЫЕ USER_ID В БД:", [a.user_id for a in all_attempts[:5]])
-
+    print("total_attempts", total_attempts, "total_learning_sessions", total_sessions)
     return {
         "total_attempts": total_attempts,
         "total_learning_sessions": total_sessions
     }
+

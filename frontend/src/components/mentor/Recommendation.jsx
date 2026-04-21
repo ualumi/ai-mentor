@@ -745,7 +745,7 @@ export default function Recommendation({ mode, attempt }) {
           className="reco-content"
           style={{ display: activeTab === "mentor" ? "flex" : "none" }}
         >
-          <div className="menu-caption mentor-caption">AI mentor</div>
+          <div className="menu-caption mentor-caption">AI</div>
           <div className='recommendation-list'>
             {score && (
               <div className="menu-item mentor-item item-light mentor-score">

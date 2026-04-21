@@ -595,8 +595,8 @@ export default function ModuleTask({
     >
       {!condition && (
         <div className="task-condition taskkk">
-          <p>Ожидание задания...</p>
-          <p>Статус: {connectionState}</p>
+          <p className="modules-item-text home-summary-block-label-text">Загрузка..</p>
+          <p style={{margin: 0, marginTop: 10}}>Загрузка...</p>
         </div>
       )}
 
@@ -606,7 +606,10 @@ export default function ModuleTask({
             <p>
               {isModuleFinished
                 ? "Модуль завершен!"
-                : condition.description}
+                : <div>
+                  <p className="modules-item-text home-summary-block-label-text">{condition.description}</p>
+                  <p className="" style={{margin: 0, marginTop: 10}}>Исправьте сломанный код ниже.</p>
+                </div>}
             </p>
           </div>
 

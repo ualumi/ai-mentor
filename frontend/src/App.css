@@ -518,6 +518,8 @@ input:focus::placeholder {
 
 .reco-content .recommendation-list {
     margin-top: 10px;
+    max-height: 400px;
+    overflow-y: scroll;
 }
 
 .module-button {
