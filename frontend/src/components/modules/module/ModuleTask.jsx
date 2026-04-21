@@ -127,7 +127,7 @@ export default function ModuleTask({
       {!condition && (
         <div className="task-condition taskkk">
           <p className="modules-item-text home-summary-block-label-text">Загрузка..</p>
-          <p style={{margin: 0, marginTop: 10}}>Загрузка...</p>
+          <p style={{margin: 0, marginTop: 10, color: '#ffff'}}>Загрузка...</p>
         </div>
       )}
 

@@ -342,7 +342,7 @@ export default function History({mode, name, attempt, restoredState, code, title
                 {/*<ProgressBar progress={restoredState?.attempts?.length || 0} />*/}
                 <Module
                   competency={moduleName}
-                  mode={"free"}
+                  mode={'listen'}
                   progress={progress}
                 />
               </div>
@@ -370,14 +370,27 @@ export default function History({mode, name, attempt, restoredState, code, title
           <p class="history-label tasks-label">Текущая задача</p>
           <div
             className="item item-light module-task-item-history"
-            onClick={() =>
+            /*onClick={() =>
               navigate(`/module/${sessionId}`, {
                 state: {
                   competency: name,
                   restoredState
                 }
               })
-            }
+            }*/
+           onClick={() => {
+            navigate(`/module/${sessionId}`, {
+              state: {
+                competency: name,
+                restoredState
+              }
+            });
+            
+            // Ждем пока завершится навигация
+            setTimeout(() => {
+              window.location.reload();
+            }, 0);
+          }}
             style={{ cursor: "pointer" }}
           >
             <p>{condition.description}</p>
