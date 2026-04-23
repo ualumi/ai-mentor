@@ -192,7 +192,7 @@ export default function SandBox({ mode, name, attempt, restoredState, code, titl
         <ModuleTask />
       </div>}
       {/* 🔥 PANEL */}
-      <div className={s["section-panel"]}>
+      <div className={s["section-panel"]} id="panel">
         <div className={s["section-panel-main"]}>
 
           {/*{mode === "free" && (

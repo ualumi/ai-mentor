@@ -22,7 +22,8 @@ def generate_condition(competency: str, attempts: list):
     if not tasks:
         return {
             "description": f"Пример задачи {competency} с параметром {cse}",
-            "broken_code": "def mean_row_count_of_values_below_train_mean_per_column_detailed(train_matrix, val_matrix):\\n    baselines = [sum(column) / len(column) for column in zip(*val_matrix)]\\n\\n    values = []\\n    for row in val_matrix:\\n        current = 0\\n        for value, baseline in zip(row, baselines):\\n            if value >= baseline:\\n                current += 1\\n        values.append(current)\\n\\n    return sum(values) / len(values)"
+            "broken_code": "def mean_row_count_of_values_below_train_mean_per_column_detailed(train_matrix, val_matrix):\\n    baselines = [sum(column) / len(column) for column in zip(*val_matrix)]\\n\\n    values = []\\n    for row in val_matrix:\\n        current = 0\\n        for value, baseline in zip(row, baselines):\\n            if value >= baseline:\\n                current += 1\\n        values.append(current)\\n\\n    return sum(values) / len(values)",
+            "task_context": "Для обучения простых rule-of-thumb можно сравнивать validation значения не с global baseline, а с train mean своего столбца. Число значений ниже этого baseline показывает, насколько validation строка лежит ниже train центра. В текущем коде baseline считается по validation, а условие перевёрнуто."
         }
        
 

@@ -27,7 +27,7 @@ from datetime import datetime
 
     user_progress[comp] = comp_state'''
 
-ALPHA = 0.5  # скорость обучения
+ALPHA = 0.3  # скорость обучения
 
 def apply_evidence(user_progress: dict, ev: dict):
     comp = ev["competency"]

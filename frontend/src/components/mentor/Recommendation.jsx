@@ -785,7 +785,7 @@ export default function Recommendation({ mode, attempt }) {
 
         {mode !== "history" && (
           <div
-            className={`mentor-tab ${activeTab === "recommendation" ? "mentor-tab-active" : ""}`}
+            className={`mentor-tab ${activeTab === "recommendation" ? "mentor-tab-active" : "recommendation-tab-active"}`}
             onClick={() => {
               setActiveTab("recommendation");
               setHasNewRecommendation(false);
