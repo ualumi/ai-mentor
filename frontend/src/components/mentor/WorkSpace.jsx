@@ -438,7 +438,7 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
     },
     {
       target: ".editor-wrapper",
-      content: "Это редактор кода, здесь вы будете писать свои решения. Не бойтесь экспериментировать!",
+      content: "Это редактор кода, здесь вы будете писать свои решения.",
       placement: "left",
     },  
   ];
@@ -670,15 +670,15 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
       {showIntroModal && (
         <div className="intro-modal">
           <div className="intro-content">
-            <button className="item" onClick={() => {
+            <button className="item end" onClick={() => {
                 finishIntro();
               }}
             >
               ✕
             </button>
-            <h3 className="home-summary-block-label-text">Впервые на платформе?</h3>
+            <h3 className="home-summary-block-label-text">Навигация на платформе</h3>
             
-            <p className="home-summary-block-label-link">Пройдите короткий обзор</p>
+            <p className="home-summary-block-label-link">Пройдите короткий обзор по основным функциям</p>
 
             <button className="module-next-button module-button" onClick={() => {
               localStorage.setItem("has_seen_intro", "true");

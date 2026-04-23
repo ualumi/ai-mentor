@@ -489,3 +489,23 @@
 .module-next-button-wrapper:focus-within .module-next-button-hint {
   opacity: 1;
 }
+
+
+
+.item.end {
+  justify-self: end;
+  display: flex;
+}
+
+.react-joyride__beacon span {
+  border-color: #3B68FF !important;
+}
+
+.react-joyride__beacon span:nth-child(2) {
+  background-color: #3B68FF !important;
+}
+
+.react-joyride__beacon:focus {
+  border: none !important;
+  outline: none !important;
+}
