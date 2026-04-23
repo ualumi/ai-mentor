@@ -38,6 +38,10 @@ export default function AuthForm({ isOpen, onClose }) {
         if (!registerResponse.ok) {
           throw new Error("registration failed");
         }
+
+        // 🔥 ВОТ ЭТО ГЛАВНОЕ
+        localStorage.setItem("has_seen_intro", "false");
+
       }
 
       // 🔹 потом всегда логинимся
@@ -113,6 +117,10 @@ export default function AuthForm({ isOpen, onClose }) {
         if (!registerResponse.ok) {
           throw new Error("Registration failed");
         }
+
+        // 🔥 ВОТ ЭТО ГЛАВНОЕ
+        localStorage.setItem("has_seen_intro", "false");
+
       }
 
       const loginResponse = await fetch(`${API_BASE}/auth/login`, {

@@ -229,26 +229,23 @@
 
 .editor-wrapper {
   flex: 1;
-  min-height: 300px;
+  min-height: 200px;
   min-width: 0;
   display: flex;
   margin-top: 10px;
 }
 
+
+
 .editor-container {
   flex: 1;
-  min-height: 300px;
+  /*min-height: 200px;*/
   min-width: 0;
   overflow: hidden;
 }
 
 .free .editor-wrapper {
-  min-height: 55vh;
-}
-
-
-.free .editor-container {
-  min-height: 55vh;
+  /*min-height: 55vh;*/
 }
 
 .module .editor-wrapper, 

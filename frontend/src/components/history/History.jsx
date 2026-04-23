@@ -320,7 +320,7 @@ export default function History({mode, name, attempt, restoredState, code, title
       {mode === "free" && }*/}
       {mode === "free" && (
           titletask 
-              ? <div className={s["progress"]}><h1 className={s["section-caption"]} style={{margin: 0}}>Задача: {titletask}</h1>
+              ? <div id="progress" className={s["progress"]}><h1 className={s["section-caption"]} style={{margin: 0}}>Задача: {titletask}</h1>
                 <p className="weak-case-item" style={{margin: 0, fontSize:11.5}}>{taskDescription}</p>
               </div>
               : <h1 className={s["section-caption"]}>Самостоятельная практика</h1>

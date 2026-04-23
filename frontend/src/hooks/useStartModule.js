@@ -27,7 +27,7 @@ export const useStartModule = () => {
           isExisting: true
         };
       }
-
+      const state = await getLearningState(startData.sessionId, token);
       // 🔥 если новый
       return {
         sessionId: startData.sessionId,
