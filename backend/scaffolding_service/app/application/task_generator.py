@@ -1,5 +1,7 @@
 import json
 import random
+
+from sympy import re
 from app.model import model, tokenizer
 from app.inference import generate_bugfix_task
 
@@ -48,16 +50,21 @@ def generate_condition(competency: str, attempts: list):
     data = json.loads(result)
     title = data["title"]
     broken_code = data["broken_code"].replace('\\n', '\n')  # Простой способ
-
+    
+    # Удаляем всё после "ВОТ ТУТ НУЖНО ИСПРАВИТЬ КОД:" до конца строки
+    broken_code = re.sub(r'ВОТ ТУТ НУЖНО ИСПРАВИТЬ КОД:.*$', r'ВОТ ТУТ НУЖНО ИСПРАВИТЬ КОД:', broken_code, flags=re.MULTILINE)
     #tasks = TASK_POOL.get(competency, [])
     #cse= random.randint(1, 100)
-    if title and broken_code:
+    if title and broken_code and data.get("task_context"):
         return {
             "description": title,
-            "broken_code": broken_code
+            "broken_code": broken_code,
+            "task_context": data["task_context"]
         }
 
     return {
             "description": f"Пример задачи {competency} с параметром",
-            "broken_code": "def mean_row_count_of_values_below_train_mean_per_column_detailed(train_matrix, val_matrix):\\n    baselines = [sum(column) / len(column) for column in zip(*val_matrix)]\\n\\n    values = []\\n    for row in val_matrix:\\n        current = 0\\n        for value, baseline in zip(row, baselines):\\n            if value >= baseline:\\n                current += 1\\n        values.append(current)\\n\\n    return sum(values) / len(values)"
+            "broken_code": "def mean_row_count_of_values_below_train_mean_per_column_detailed(train_matrix, val_matrix):\\n    baselines = [sum(column) / len(column) for column in zip(*val_matrix)]\\n\\n    values = []\\n    for row in val_matrix:\\n        current = 0\\n        for value, baseline in zip(row, baselines):\\n            if value >= baseline:\\n                current += 1\\n        values.append(current)\\n\\n    return sum(values) / len(values)",
+            "task_context": "Для обучения простых rule-of-thumb можно сравнивать validation значения не с global baseline, а с train mean своего столбца. Число значений ниже этого baseline показывает, насколько validation строка лежит ниже train центра. В текущем коде baseline считается по validation, а условие перевёрнуто."
+
     }
