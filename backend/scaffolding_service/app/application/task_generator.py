@@ -1,7 +1,7 @@
 import json
 import random
 
-from sympy import re
+import re
 from app.model import model, tokenizer
 from app.inference import generate_bugfix_task
 
@@ -50,7 +50,7 @@ def generate_condition(competency: str, attempts: list):
     data = json.loads(result)
     title = data["title"]
     broken_code = data["broken_code"].replace('\\n', '\n')  # Простой способ
-    
+
     # Удаляем всё после "ВОТ ТУТ НУЖНО ИСПРАВИТЬ КОД:" до конца строки
     broken_code = re.sub(r'ВОТ ТУТ НУЖНО ИСПРАВИТЬ КОД:.*$', r'ВОТ ТУТ НУЖНО ИСПРАВИТЬ КОД:', broken_code, flags=re.MULTILINE)
     #tasks = TASK_POOL.get(competency, [])
