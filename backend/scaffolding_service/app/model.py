@@ -1,8 +1,11 @@
 import os
 from pathlib import Path
+import logging
 
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
+
+logger = logging.getLogger(__name__)
 
 DEFAULT_MODEL_ID = os.getenv(
     "BROKEN_CODE_MODEL_ID",
@@ -38,20 +41,29 @@ def _resolve_model_source() -> tuple[str, bool]:
             f"Ожидались локальные файлы по пути: {LOCAL_MODEL_PATH}"
         )
 
-    print(
-        "⚠️ Локальная модель генерации сломанного кода не найдена, переключаюсь на Hugging Face: "
-        f"{DEFAULT_MODEL_ID}"
+    logger.warning(
+        "Локальная модель генерации сломанного кода не найдена, переключаюсь на Hugging Face: %s",
+        DEFAULT_MODEL_ID,
     )
     return DEFAULT_MODEL_ID, False
 
 
 MODEL_PATH, USE_LOCAL_FILES = _resolve_model_source()
 
+logger.info("Loading Broken Code Generator model...")
+logger.info(
+    "Model source resolved: %s (local_files_only=%s)",
+    MODEL_PATH,
+    USE_LOCAL_FILES or OFFLINE_MODE,
+)
+
 tokenizer = AutoTokenizer.from_pretrained(
     MODEL_PATH,
     trust_remote_code=True,
     local_files_only=USE_LOCAL_FILES or OFFLINE_MODE,
 )
+
+logger.info("Tokenizer loaded")
 
 if tokenizer.pad_token is None:
     tokenizer.pad_token = tokenizer.eos_token
@@ -68,3 +80,5 @@ model = AutoModelForCausalLM.from_pretrained(
 )
 
 model.eval()
+logger.info("Model moved to device: %s", model.device)
+logger.info("Model loaded successfully")

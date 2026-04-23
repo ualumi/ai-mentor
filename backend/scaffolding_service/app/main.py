@@ -24,11 +24,29 @@ if __name__ == "__main__":
     uvicorn.run("app.main:app", host="0.0.0.0", port=8003)'''
 
 import asyncio
+import logging
+from logging.handlers import RotatingFileHandler
+import os
+
+os.makedirs("logs", exist_ok=True)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    handlers=[
+        RotatingFileHandler(
+            "logs/app.log",
+            maxBytes=5_000_000,
+            backupCount=3,
+        ),
+        logging.StreamHandler(),
+    ],
+)
+
 from fastapi import FastAPI
-#from app.api.scaffolding import router
 from app.application.redis_listener import redis_listener
-import json
-from app.infrastructure.redis import redis_client
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Scaffolding Service")
 #app.include_router(router)
@@ -36,6 +54,7 @@ app = FastAPI(title="Scaffolding Service")
 
 @app.on_event("startup")
 async def startup():
+    logger.info("Starting Scaffolding Service")
     asyncio.create_task(redis_listener())
 
 
