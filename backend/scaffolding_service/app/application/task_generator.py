@@ -52,7 +52,7 @@ def generate_condition(competency: str, attempts: list):
     broken_code = data["broken_code"].replace('\\n', '\n')  # Простой способ
 
     # Удаляем всё после "ВОТ ТУТ НУЖНО ИСПРАВИТЬ КОД:" до конца строки
-    broken_code = re.sub(r'ВОТ ТУТ НУЖНО ИСПРАВИТЬ КОД:.*$', r'ВОТ ТУТ НУЖНО ИСПРАВИТЬ КОД:', broken_code, flags=re.MULTILINE)
+    broken_code = re.sub(r'ВОТ ТУТ НУЖНО ИСПРАВИТЬ КОД.*$', r'ВОТ ТУТ НУЖНО ИСПРАВИТЬ КОД', broken_code, flags=re.MULTILINE)
     #tasks = TASK_POOL.get(competency, [])
     #cse= random.randint(1, 100)
     if title and broken_code and data.get("task_context"):
