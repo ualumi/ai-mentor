@@ -2,6 +2,18 @@
 
 # session_id -> {competency_name -> {evidence_count, avg_confidence, trend}}
 USER_PROGRESS: Dict[str, Dict[str, dict]] = {}'''
+from collections import defaultdict
+
+# competency -> related competency -> weight
+COMPETENCY_GRAPH = defaultdict(lambda: defaultdict(float))
+
+# statistics for ε-greedy
+ACTION_STATS = defaultdict(
+    lambda: {
+        "count": 0,
+        "value": 0.0
+    }
+)
 
 from typing import Dict, List, Any
 

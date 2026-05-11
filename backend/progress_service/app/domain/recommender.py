@@ -1,21 +1,6 @@
+
+
 '''def build_recommendations(progress: dict) -> list[dict]:
-    """
-    Генерирует рекомендации на основе прогресса.
-    """
-    recommendations = []
-
-    for comp, state in progress.items():
-        if state["level"] < 0.4 and state["evidence_count"] >= 2:
-            recommendations.append({
-                "type": "module",
-                "competency": comp,
-                "reason": "low_confidence",
-                "priority": "high"
-            })
-
-    return recommendations'''
-
-def build_recommendations(progress: dict) -> list[dict]:
     recs = []
 
     for comp, state in progress.items():
@@ -45,4 +30,39 @@ def build_recommendations(progress: dict) -> list[dict]:
                 "priority": "low"
             })
 
-    return recs
+    return recs'''
+
+from app.domain.bandit_policy import choose_action
+from app.state import COMPETENCY_GRAPH
+
+def build_recommendations(progress):
+
+    candidate_actions = []
+
+    for comp, state in progress.items():
+
+        ema = state["ema"]
+
+        # слабая компетенция
+        if ema < 0.7:
+
+            candidate_actions.append(comp)
+
+            # добавляем связанные узлы графа
+            neighbors = COMPETENCY_GRAPH.get(comp, {})
+
+            for neighbor, weight in neighbors.items():
+
+                if weight > 0.3:
+                    candidate_actions.append(neighbor)
+
+    if not candidate_actions:
+        return []
+
+    selected = choose_action(candidate_actions)
+    print(f"🎯 Selected action: {selected} from candidates: {candidate_actions}")
+    print(COMPETENCY_GRAPH)
+    return [{
+        "type": "adaptive_practice",
+        "competency": selected
+    }]
