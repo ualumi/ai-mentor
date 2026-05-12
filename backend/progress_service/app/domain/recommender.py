@@ -32,7 +32,7 @@
 
     return recs'''
 
-from app.domain.bandit_policy import choose_action
+'''from app.domain.bandit_policy import choose_action
 from app.state import COMPETENCY_GRAPH
 
 def build_recommendations(progress):
@@ -65,4 +65,31 @@ def build_recommendations(progress):
     return [{
         "type": "adaptive_practice",
         "competency": selected
-    }]
+    }]'''
+
+from app.domain.bandit_policy import choose_action
+
+def build_recommendations(user_id: str, user_progress: dict):
+
+    #actions = list(user_progress.keys())  # кандидаты
+    actions = [
+        weak
+        for weak in user_progress.keys()
+    ]
+    
+    if not actions:
+        return []
+
+    action = choose_action(user_id, actions)
+
+    if not action:
+        return []
+
+    return [
+        {
+            "type": "bandit_recommendation",
+            "competency": action,
+            "priority": "adaptive",
+            "strategy": "contextual_epsilon_greedy"
+        }
+    ]

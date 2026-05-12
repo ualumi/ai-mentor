@@ -67,6 +67,10 @@ from app.state import (
 from app.adapters.analysis_adapter import extract_evidence
 from app.domain.progress_aggregator import apply_evidence
 from app.domain.recommender import build_recommendations
+from app.domain.graph_builder import update_graph
+from app.domain.reward import compute_reward
+from app.domain.bandit_policy import update_action_value
+from app.domain.bandit_policy import choose_action
 
 CHANNEL_ANALYSIS_PATTERN = "analytics_response:*"
 
@@ -114,6 +118,21 @@ async def redis_listener(pubsub):
         print("evidence_list", evidence_list)
         EVIDENCE_STORE.setdefault(user_id, []).extend(evidence_list)
 
+        '''# -----------------------------
+        # 3️⃣ обновляем прогресс
+        # -----------------------------
+        user_progress = USER_PROGRESS.setdefault(user_id, {})
+
+        for ev in evidence_list:
+            apply_evidence(user_progress, ev)
+            # 2.5 update graph
+            update_graph(user_id, evidence_list)
+        action = choose_action(user_id)
+        # -----------------------------
+        # 4️⃣ пересчитываем рекомендации
+        # -----------------------------
+        #USER_RECOMMENDATIONS[user_id] = build_recommendations(user_progress)
+        USER_RECOMMENDATIONS[user_id] = build_recommendations(user_id, user_progress)'''
         # -----------------------------
         # 3️⃣ обновляем прогресс
         # -----------------------------
@@ -123,9 +142,49 @@ async def redis_listener(pubsub):
             apply_evidence(user_progress, ev)
 
         # -----------------------------
-        # 4️⃣ пересчитываем рекомендации
+        # 3.1️⃣ обновляем граф
         # -----------------------------
-        USER_RECOMMENDATIONS[user_id] = build_recommendations(user_progress)
+        update_graph(evidence_list)
+
+        # -----------------------------
+        # 4️⃣ выбираем действие (ε-greedy)
+        # -----------------------------
+        actions = list(user_progress.keys())  # компетенции как actions
+        #action = choose_action(actions)
+
+        action = choose_action(user_id, actions)
+
+        # baseline до воздействия
+        prev_ema = user_progress[action]["ema"]
+
+        # -----------------------------
+        # 4.1️⃣ (симуляция "эффекта действия")
+        # -----------------------------
+        # ВАЖНО: в реальной системе тут будет результат задания/ответа
+        new_ema = user_progress[action]["ema"]
+
+        # -----------------------------
+        # 5️⃣ reward
+        # -----------------------------
+        reward = compute_reward(
+            prev_ema=prev_ema,
+            new_ema=new_ema,
+            is_correct=score["is_correct"] if isinstance(score, dict) else score > 0.7,
+            time_spent=1.0,
+            attempts=user_progress[action]["attempts"],
+            deficit_before=1.0 - prev_ema
+        )
+
+        # -----------------------------
+        # 6️⃣ обновляем bandit
+        # -----------------------------
+        update_action_value(action, reward)
+
+        # -----------------------------
+        # 7️⃣ рекомендации
+        # -----------------------------
+        #USER_RECOMMENDATIONS[user_id] = build_recommendations(user_progress)
+        USER_RECOMMENDATIONS[user_id] = build_recommendations(user_id, user_progress)
 
         # -----------------------------
         # 5️⃣ публикуем наружу
