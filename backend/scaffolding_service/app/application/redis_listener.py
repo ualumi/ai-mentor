@@ -120,9 +120,11 @@ async def redis_listener():
             user_id = payload["user_id"]
             competency = payload["competency"]
             attempts = payload.get("attempts", [])
+            task = payload.get("task", {})
 
             condition = generate_condition(
                 competency,
+                task,
                 attempts
             )
 
@@ -148,9 +150,10 @@ async def redis_listener():
             user_id = payload["user_id"]
             competency = payload["competency"]
             attempts = payload.get("attempts", [])
-
+            task = payload.get("task", {})
             condition = generate_condition(
                 competency,
+                task,
                 attempts
             )
 
@@ -206,9 +209,9 @@ async def redis_listener():
 
                 competency = payload.get("competency")  # может не быть!
                 attempts = payload.get("attempts", [])
-
+                task_gen= payload.get("task", {})
                 # ❗ лучше достать из Redis или передать в событии
-                condition = generate_condition(competency, attempts)
+                condition = generate_condition(competency, task_gen, attempts)
 
                 task = {
                     "user_id": user_id,

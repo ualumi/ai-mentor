@@ -1,9 +1,12 @@
+import json
+
 from app.domain.learning_session import LearningSession
 from app.infrastructure.redis import redis_client
 from app.infrastructure.event_bus import EventBus
 from app.infrastructure.attempt_client import get_attempts
 from app.infrastructure.methodology_client import submit_to_methodology
 from app.application.orchestrators.learning_orchestrator import generate_next_task
+from app.application.orchestrators.task_payload_builder import build_adaptive_task_payload
 
 SESSION_TTL = 60 * 60 * 24  # 24 часа
 
@@ -22,12 +25,13 @@ async def find_active_session(user_id: int, competency: str):
 async def start_session(
     user_id: int,
     competency: str,
-    methodology="scaffolding"
+    methodology="scaffolding",
 ):
+
     session = LearningSession(
         user_id=user_id,
         competency=competency,
-        methodology=methodology
+        methodology=methodology,
     )
 
     existing = await find_active_session(user_id, competency)
@@ -53,6 +57,21 @@ async def start_session(
         a for a in attempts
         if a.get("is_correct") is False
     ]
+    progress_raw = await redis_client.get(
+        f"all_user_progress:{user_id}"
+    )
+
+    progress = (
+        json.loads(progress_raw)
+        if progress_raw
+        else {}
+    )
+    print(progress, "in_start_session")
+    task = await build_adaptive_task_payload(
+        competency=competency,
+        progress_raw=progress
+    )
+    print("task", task)
 
     # отправить событие методологии
     await submit_to_methodology(
@@ -61,13 +80,15 @@ async def start_session(
             "learning_session_id": session.id,
             "user_id": user_id,
             "attempts": failed_attempts,
-            "competency": competency
+            "competency": competency,
+            "task": task  # можно передать последний таск, чтобы методология могла сгенерировать следующий с учетом неудачных попыток
         }
     )
     payload={
             "learning_session_id": session.id,
             "user_id": user_id,
-            "attempts": failed_attempts
+            "attempts": failed_attempts,
+            "task":task
         }
     print(payload)
 

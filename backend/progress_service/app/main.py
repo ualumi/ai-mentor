@@ -8,6 +8,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 import asyncio
 from fastapi.middleware.cors import CORSMiddleware
+import torch
+
+torch.set_num_threads(1)
+torch.set_num_interop_threads(1)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

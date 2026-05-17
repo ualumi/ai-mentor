@@ -51,14 +51,14 @@ async def get_session_state(
     progress = json.loads(progress_raw) if progress_raw else {}
 
     print({
-        "session": session,
-        "attempts": attempts,
+        #"session": session,
+        #"attempts": attempts,
         "progress": progress.get('ema', {})
     })
     return {
         "session": session,
         "attempts": attempts,
-        "progress": progress.get('ema', {}),
+        "progress": progress['ema'] if 'ema' in progress else {},
         "current_condition": json.loads(session.get("current_condition", "null")),
     }
 
@@ -119,10 +119,13 @@ async def get_my_sessions(
     for s in sessions:
         competency = s.get("competency")
         progress_raw = await redis_client.get(f"user_progress:{s['session_id']}")
+        print('progress_raw', progress_raw)
         progress = json.loads(progress_raw) if progress_raw else {}
+        print(progress['ema'])
         enriched.append({
             **s,
-            "progress": progress.get('ema', {})
+            #"progress": progress_raw.get('ema', {})
+            "progress": progress['ema'], 
         })
 
     return enriched

@@ -61,6 +61,7 @@ from app.redis_client import redis
 from app.state import (
     RAW_ANALYSIS,
     EVIDENCE_STORE,
+    TRAINING_BUFFER,
     USER_PROGRESS,
     USER_RECOMMENDATIONS
 )
@@ -71,7 +72,10 @@ from app.domain.graph_builder import update_graph
 from app.domain.reward import compute_reward
 from app.domain.bandit_policy import update_action_value
 from app.domain.bandit_policy import choose_action
-
+from app.domain.cluster_builder import update_clusters
+#from app.domain.embedding_propagation import propagate_embeddings
+from app.domain.embedding_updater import update_embeddings
+from app.domain.trainer import train_step
 CHANNEL_ANALYSIS_PATTERN = "analytics_response:*"
 
 
@@ -99,6 +103,7 @@ async def redis_listener(pubsub):
         user_id = payload.get("user_id")
         raw_analysis = payload.get("analysis")
         score = payload.get('analysis', {}).get('correctness')
+        attempt_id = payload.get('attempt_id')
         if not user_id or not raw_analysis:
             print("не то")
             continue
@@ -136,32 +141,45 @@ async def redis_listener(pubsub):
         # -----------------------------
         # 3️⃣ обновляем прогресс
         # -----------------------------
-        user_progress = USER_PROGRESS.setdefault(user_id, {})
-
+        #user_progress = USER_PROGRESS.setdefault(user_id, {})
+        user_progress = USER_PROGRESS.setdefault(
+            user_id,
+            {
+                "skills": {},
+                "clusters": {}
+            }
+        )
         for ev in evidence_list:
-            apply_evidence(user_progress, ev)
-
+            apply_evidence(
+                user_progress["skills"],
+                ev
+            )
         # -----------------------------
         # 3.1️⃣ обновляем граф
         # -----------------------------
         update_graph(evidence_list)
+        update_clusters(user_progress)
+        #propagate_embeddings()  
+        update_embeddings(user_id, user_progress)
 
         # -----------------------------
         # 4️⃣ выбираем действие (ε-greedy)
         # -----------------------------
-        actions = list(user_progress.keys())  # компетенции как actions
+        #actions = list(user_progress.keys())  # компетенции как actions
         #action = choose_action(actions)
-
+        actions = list(user_progress["skills"].keys())
+        if not actions:
+            continue
         action = choose_action(user_id, actions)
 
         # baseline до воздействия
-        prev_ema = user_progress[action]["ema"]
+        prev_ema = user_progress["skills"][action]["ema"]
 
         # -----------------------------
         # 4.1️⃣ (симуляция "эффекта действия")
         # -----------------------------
         # ВАЖНО: в реальной системе тут будет результат задания/ответа
-        new_ema = user_progress[action]["ema"]
+        new_ema = user_progress["skills"][action]["ema"]
 
         # -----------------------------
         # 5️⃣ reward
@@ -171,9 +189,22 @@ async def redis_listener(pubsub):
             new_ema=new_ema,
             is_correct=score["is_correct"] if isinstance(score, dict) else score > 0.7,
             time_spent=1.0,
-            attempts=user_progress[action]["attempts"],
+            attempts=user_progress["skills"][action]["attempts"],
             deficit_before=1.0 - prev_ema
         )
+
+        knowledge_gain = new_ema - prev_ema
+
+        TRAINING_BUFFER.append({
+            "user_id": user_id,
+            "skill": action,
+            "gain": knowledge_gain,
+            "reward": reward,
+            "state": user_progress
+        })
+        if len(TRAINING_BUFFER) % 5 == 0:
+            for sample in TRAINING_BUFFER[-5:]:
+                train_step(sample)
 
         # -----------------------------
         # 6️⃣ обновляем bandit
@@ -196,7 +227,8 @@ async def redis_listener(pubsub):
                 "learning_session_id": learning_session_id,
                 "progress": user_progress,
                 "recommendations": USER_RECOMMENDATIONS[user_id],
-                "score": score
+                "score": score,
+                "attempt_id":attempt_id
             })
         )
 

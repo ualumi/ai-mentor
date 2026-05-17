@@ -7,6 +7,7 @@ from app.infrastructure.attempt_client import get_attempts
 from app.infrastructure.event_bus import EventBus
 from app.infrastructure.redis import redis_client
 from app.application.queries.get_session import get_session
+from app.application.orchestrators.task_payload_builder import build_adaptive_task_payload
 
 async def complete_session(session_id):
 
@@ -32,7 +33,7 @@ async def complete_session(session_id):
         }
     )
 
-async def generate_next_task(session):
+async def generate_next_task(session, task):
 
     #attempts = await get_attempts(session["session_id"])
     print("next task_condition query sent")
@@ -42,7 +43,8 @@ async def generate_next_task(session):
             "learning_session_id": session["session_id"],
             "user_id": session["user_id"],
             "competency": session["competency"],
-            "attempts": []
+            "attempts": [],
+            "task": task
         }
     )
 
@@ -52,6 +54,13 @@ async def handle_progress_event(event):
     user_id = event["user_id"]
     progress_raw = event["progress"]
     target_session_id = event.get("learning_session_id")  # 🔥
+    print(target_session_id, "target_session_id in handle_progress_event")
+
+    task_recommendations = event.get("task_recommendations", [])
+    score = event.get("score", {})
+    attempt_id = event.get("attempt_id")
+    score = event.get("score", {})
+    print(score, "score in handle_progress_event")
 
     if not target_session_id:
         return  # или fallback логика
@@ -63,11 +72,38 @@ async def handle_progress_event(event):
 
     competency = session["competency"]
     if progress_raw and isinstance(progress_raw, dict):
-
+            print('PROGRESS_RAW', progress_raw)
             # Ищем ключ, соответствующий competency
-            if competency in progress_raw:
-                progress = progress_raw[competency]
+            if competency in progress_raw['skills']:
+                progress = progress_raw['skills'][competency]
                 print('PROGRESS', progress)
+                #ADAPTIVE TASK SELECTION
+                '''module_recs = [
+                    r for r in task_recommendations
+                    if r["competency"] == competency
+                ]
+                if not module_recs:
+                    return  # fallback
+                rec = max(module_recs, key=lambda x: x["priority"])
+                clusters = progress_raw.get("clusters", {}).get("membership", {})
+                cluster_links = clusters.get(competency, [])
+                topic_tags = {
+                    competency: 0.5
+                }
+
+                total = sum(w for _, w in cluster_links) or 1.0
+
+                for skill, w in cluster_links:
+                    topic_tags[skill] = (w / total) * 0.5
+
+                task = {
+                    "difficulty": rec["difficulty"] if rec else "easy",
+                    "topic_tags": topic_tags
+                }'''
+                task = await build_adaptive_task_payload(
+                    competency=competency,
+                    progress_raw=progress
+                )
                 
                 # 🔥 1. сохраняем (merge, а не перезапись)
                 existing_raw = await redis_client.get(f"user_progress:{target_session_id}")
@@ -87,10 +123,38 @@ async def handle_progress_event(event):
                 skill = False
     else:
         skill = False
-
-    if skill == True:
+    print(score.get('is_correct'), skill, "SCORE AND SKILL")
+    if score.get('is_correct') ==True and skill == True:
         await complete_session(target_session_id)
         print("MODULE FINISHED")
     else:
-        await generate_next_task(session)
-        print("query for generation sent")
+        if score.get('is_correct') == False:
+            await EventBus.publish(
+                "tasks_correctness",
+                {
+                    "event": "task_not_completed",
+                    "attempt_id": attempt_id,
+                }
+            )
+            print("task not completed")
+        else:
+            print("task completed but skill not mastered", score.get('is_correct'))
+            await EventBus.publish(
+                "tasks_correctness",
+                {
+                    "event": "task_completed",
+                    "attempt_id": attempt_id,
+                }
+            )
+            #обновляем подготовленное задание, чтобы методология могла сгенерировать следующее с учетом успешного выполнения
+            existing_task = await redis_client.get(f"pending_next_task:{target_session_id}")
+            current_task = json.loads(existing_task) if existing_task else {}
+            current_task.update(task)
+            print(target_session_id, current_task, "updated pending task in handle_progress_event")
+            await redis_client.set(
+                    f"pending_next_task:{target_session_id}",
+                    json.dumps(current_task)
+            )
+            
+            #await generate_next_task(session, task)
+            print("next step available")

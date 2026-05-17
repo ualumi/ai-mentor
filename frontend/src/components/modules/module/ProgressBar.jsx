@@ -381,7 +381,8 @@ function ProgressBar({ progress, height = 10, color = '#3B68FF', mode, competenc
 
       if (ema === null || ema === undefined) return;*/
       // 🔥 ищем нужную компетенцию
-      const skill = data.progress[competency];
+      const skill = data.progress["skills"]?.[competency];
+      //const skill = data.progress[competency];
 
       if (!skill) return;
 

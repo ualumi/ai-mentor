@@ -44,7 +44,8 @@ async def submit_to_methodology(methodology: str, payload: dict):
         "learning_session_id": payload["learning_session_id"],
         "user_id": payload["user_id"],
         "competency": payload["competency"],
-        "attempts": payload.get("attempts", [])
+        "attempts": payload.get("attempts", []),
+        "task": payload.get("task", {})
     }
 
     await redis_client.publish(
@@ -60,12 +61,14 @@ async def request_task_generation(
 ):
 
     event_payload = {
-        "event": "generate_task",
+        #"event": "generate_task",
+        "event": "next_step",
         "methodology": methodology,
         "learning_session_id": payload["learning_session_id"],
         "user_id": payload["user_id"],
         "competency": payload["competency"],
-        "attempts": payload.get("attempts", [])
+        "attempts": payload.get("attempts", []),
+        "task": payload.get("task", {})
     }
 
     await redis_client.publish(

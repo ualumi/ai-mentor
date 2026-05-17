@@ -98,7 +98,7 @@ def compute_graph_signal(action, context):
 
     return best_action'''
 
-def choose_action(user_id: str, actions: list[str]):
+'''def choose_action(user_id: str, actions: list[str]):
 
     # exploration
     if random.random() < EPSILON:
@@ -129,7 +129,81 @@ def choose_action(user_id: str, actions: list[str]):
             best_score = score
             best_action = action
 
-    return best_action or random.choice(actions)
+    return best_action or random.choice(actions)'''
+import random
+
+from app.state import (
+    USER_PROGRESS,
+    ACTION_STATS,
+    COMPETENCY_GRAPH
+)
+
+EPSILON = 0.2
+
+
+def choose_action(user_id: str, actions: list[str]):
+
+    if not actions:
+        return None
+
+    # exploration
+    if random.random() < EPSILON:
+        return random.choice(actions)
+
+    best_action = None
+    best_score = -1e9
+
+    user_progress = USER_PROGRESS.get(
+        user_id,
+        {
+            "skills": {},
+            "clusters": {}
+        }
+    )
+
+    skills = user_progress.get(
+        "skills",
+        {}
+    )
+
+    # -----------------------------
+    # weak skills context
+    # -----------------------------
+    context = {
+        comp: state.get("deficit", 1.0)
+        for comp, state in skills.items()
+    }
+
+    # -----------------------------
+    # graph-aware scoring
+    # -----------------------------
+    for action in actions:
+
+        base_value = ACTION_STATS[action]["value"]
+
+        graph_bonus = 0.0
+
+        for weak_skill, deficit in context.items():
+
+            relation_weight = (
+                COMPETENCY_GRAPH[weak_skill]
+                .get(action, 0.0)
+            )
+
+            graph_bonus += (
+                relation_weight * deficit
+            )
+
+        final_score = (
+            base_value
+            + 0.7 * graph_bonus
+        )
+
+        if final_score > best_score:
+            best_score = final_score
+            best_action = action
+
+    return best_action
 
 
 def update_action_value(action: str, reward: float):

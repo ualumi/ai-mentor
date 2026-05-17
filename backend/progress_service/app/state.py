@@ -3,6 +3,7 @@
 # session_id -> {competency_name -> {evidence_count, avg_confidence, trend}}
 USER_PROGRESS: Dict[str, Dict[str, dict]] = {}'''
 from collections import defaultdict
+import numpy as np
 
 # competency -> related competency -> weight
 COMPETENCY_GRAPH = defaultdict(lambda: defaultdict(float))
@@ -25,8 +26,13 @@ EVIDENCE_STORE: Dict[str, List[dict]] = {}
 
 # 3. Агрегированный прогресс по компетенциям
 # session_id -> competency -> state
-USER_PROGRESS: Dict[str, Dict[str, dict]] = {}
-
+#USER_PROGRESS: Dict[str, Dict[str, dict]] = {}
+USER_PROGRESS = {
+}
 
 # 4. Рекомендации (derived state)
 USER_RECOMMENDATIONS: Dict[str, List[dict]] = {}
+
+NODE_EMBEDDINGS = defaultdict(lambda: np.random.normal(0, 0.1, 16))
+SKILL_EMBEDDINGS = {}
+TRAINING_BUFFER = []

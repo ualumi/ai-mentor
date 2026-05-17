@@ -18,6 +18,7 @@ manager = ConnectionManager()
 # Храним состояние пользователя
 USER_STATE = {}
 PENDING_TASKS = {}
+TASK_STATE = {}
 # -----------------------------
 # Redis listeners
 # -----------------------------
@@ -94,6 +95,44 @@ async def listen_task_condition(user_id: str):
                 last_id = message_id
 #получает одно тупое сообщение и валится
 
+async def listen_task_correctness(user_id: str):
+    pubsub = redis_client.pubsub()
+
+    await pubsub.subscribe(f"tasks_correctness")
+
+    async for message in pubsub.listen():
+        print("tasks_correctness", message)
+        if message["type"] != "message":
+            continue
+
+        data = json.loads(message["data"])
+        event = data["event"]
+        print(event, "event task_correctness")
+        task_state = TASK_STATE.get(user_id, {})
+
+        if event == "task_completed":
+            task_state.update({
+                "locked": False,
+                "status": "completed"
+            })
+
+            await manager.send_to_user(user_id, {
+                "type": "task_completed",
+                "attempt_id": data["attempt_id"],
+                "next_step_available": True
+            })
+
+        elif event == "task_not_completed":
+            task_state.update({
+                "locked": True,
+                "status": "failed"
+            })
+
+            await manager.send_to_user(user_id, {
+                "type": "task_failed",
+                "attempt_id": data["attempt_id"],
+                "next_step_available": False
+            })
 
 
 # -----------------------------
@@ -133,17 +172,26 @@ async def websocket_endpoint(websocket: WebSocket):
 
     asyncio.create_task(listen_user_channels(user_id))
     asyncio.create_task(listen_task_condition(user_id))
+    asyncio.create_task(listen_task_correctness(user_id))
 
     try:
         while True:
             raw = await websocket.receive_text()
             data = FrontendMessage(**json.loads(raw))
             if data.type == "next_step":
+                task_state = TASK_STATE.get(user_id, {})
+
+                if task_state.get("locked"):
+                    await manager.send_to_user(user_id, {
+                        "type": "error",
+                        "error": "Wait until task is completed"
+                    })
+                    continue
 
                 state = USER_STATE[user_id]
 
                 await redis_client.publish(
-                    "scaffolding.next_step",
+                    "learning.next_step",
                     json.dumps({
                         "user_id": user_id,
                         "learning_session_id": state["learning_session_id"]

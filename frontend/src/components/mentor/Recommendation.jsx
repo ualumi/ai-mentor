@@ -598,7 +598,7 @@ export default function Recommendation({ mode, attempt }) {
         setIsHighlighted(true);
         setTimeout(() => setIsHighlighted(false), 2000);
       }
-
+      
       if (data.source?.startsWith("mentor_response")) {
         console.log("MENTOR", data);
 
