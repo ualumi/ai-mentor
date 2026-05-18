@@ -335,7 +335,8 @@ def build_recommendations(user_id, user_progress):
         for s, sc in ranked[:3]
     ]'''
 
-from app.state import SKILL_EMBEDDINGS
+
+'''from app.state import SKILL_EMBEDDINGS
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 
@@ -365,9 +366,7 @@ def build_recommendations(user_id, user_progress):
     # build graph
     # -----------------------------------
 
-    '''data, ordered_skills = build_pyg_graph(
-        user_progress
-    )'''
+
     data, ordered_skills, _ = build_pyg_graph(user_progress)
 
     # -----------------------------------
@@ -411,6 +410,89 @@ def build_recommendations(user_id, user_progress):
             ),
             "predicted_gain": round(gain, 3),
             "deficit": round(deficit, 3)
+        })
+
+    ranked.sort(
+        key=lambda x: x["priority"],
+        reverse=True
+    )
+
+    return ranked[:3]'''
+
+from app.state import COMPETENCY_GRAPH
+
+
+def choose_difficulty(deficit):
+
+    if deficit < 0.3:
+        return "easy"
+
+    if deficit < 0.7:
+        return "medium"
+
+    return "hard"
+
+
+def build_recommendations(user_id, user_progress):
+
+    skills = user_progress["skills"]
+    clusters = user_progress.get("clusters", {})
+
+    if not skills:
+        return []
+
+    ranked = []
+
+    cluster_signals = (
+        clusters.get("signals", {})
+    )
+
+    for skill, state in skills.items():
+
+        deficit = state["deficit"]
+
+        negative_trend = max(
+            0.0,
+            -state["trend"]
+        )
+
+        cluster_score = (
+            cluster_signals.get(skill, 0.0)
+        )
+
+        graph_degree = len(
+            COMPETENCY_GRAPH[skill]
+        )
+
+        graph_bonus = min(
+            graph_degree / 10.0,
+            1.0
+        )
+
+        priority = (
+            0.5 * deficit +
+            0.2 * negative_trend +
+            0.2 * cluster_score +
+            0.1 * graph_bonus
+        )
+
+        related = sorted(
+            COMPETENCY_GRAPH[skill].items(),
+            key=lambda x: x[1],
+            reverse=True
+        )
+
+        related_skills = [
+            s for s, _ in related[:2]
+        ]
+
+        ranked.append({
+            "competency": skill,
+            "priority": round(priority, 3),
+            "difficulty": choose_difficulty(deficit),
+            "related_skills": related_skills,
+            "deficit": round(deficit, 3),
+            "trend": round(state["trend"], 3)
         })
 
     ranked.sort(

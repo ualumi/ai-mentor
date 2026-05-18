@@ -34,6 +34,7 @@ def apply_evidence(user_progress: dict, ev: dict):
 from datetime import datetime
 
 ALPHA = 0.3
+DECAY = 0.995
 
 def apply_evidence(skills_state: dict, ev: dict):
 
@@ -72,10 +73,14 @@ def apply_evidence(skills_state: dict, ev: dict):
     # -----------------------------------
 
     weighted_score = score * involvement_weight
-
-    new_ema = (
+    decayed_prev = prev_ema * DECAY
+    '''new_ema = (
         ALPHA * weighted_score
         + (1 - ALPHA) * prev_ema
+    )'''
+    new_ema = (
+        ALPHA * weighted_score
+        + (1 - ALPHA) * decayed_prev
     )
 
     # -----------------------------------

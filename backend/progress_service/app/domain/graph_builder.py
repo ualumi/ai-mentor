@@ -84,7 +84,8 @@ def update_graph(evidence_list):
         COMPETENCY_GRAPH[a][b] += 1.0
         COMPETENCY_GRAPH[b][a] += 1.0'''
 
-from itertools import combinations
+
+'''from itertools import combinations
 
 import torch
 from torch_geometric.data import Data
@@ -98,45 +99,6 @@ MAX_EDGE_WEIGHT = 10.0
 # =========================================================
 # 1. UPDATE COMPETENCY GRAPH
 # =========================================================
-
-'''def update_graph(evidence_list):
-
-    competencies = [
-        ev["competency"]
-        for ev in evidence_list
-    ]
-
-    unique = set(competencies)
-
-    # -----------------------------------
-    # decay old edges
-    # -----------------------------------
-
-    for a in COMPETENCY_GRAPH:
-
-        for b in COMPETENCY_GRAPH[a]:
-
-            COMPETENCY_GRAPH[a][b] *= EDGE_DECAY
-
-    # -----------------------------------
-    # reinforce co-occurrence
-    # -----------------------------------
-
-    for a, b in combinations(unique, 2):
-
-        COMPETENCY_GRAPH[a][b] += 1.0
-        COMPETENCY_GRAPH[b][a] += 1.0
-
-        # clip edge weights
-        COMPETENCY_GRAPH[a][b] = min(
-            COMPETENCY_GRAPH[a][b],
-            MAX_EDGE_WEIGHT
-        )
-
-        COMPETENCY_GRAPH[b][a] = min(
-            COMPETENCY_GRAPH[b][a],
-            MAX_EDGE_WEIGHT
-        )'''
 
 
 def update_graph(evidence_list):
@@ -311,4 +273,107 @@ def build_pyg_graph(user_progress):
         x=x,
         edge_index=edge_index,
         edge_attr=edge_weight
-    ), skills, node_index
+    ), skills, node_index'''
+
+from app.state import COMPETENCY_GRAPH
+
+EDGE_DECAY = 0.995
+
+EDGE_INCREMENT = 0.15
+
+MAX_EDGE_WEIGHT = 1.0
+
+MIN_EDGE_WEIGHT = 0.05
+
+
+def update_graph(evidence_list):
+
+    competencies = [
+        ev["competency"]
+        for ev in evidence_list
+    ]
+
+    unique = set(competencies)
+
+    # =====================================================
+    # 1. global decay
+    # =====================================================
+
+    for a in list(COMPETENCY_GRAPH.keys()):
+
+        for b in list(COMPETENCY_GRAPH[a].keys()):
+
+            COMPETENCY_GRAPH[a][b] *= EDGE_DECAY
+
+            # remove weak noisy edges
+            if (
+                COMPETENCY_GRAPH[a][b]
+                < MIN_EDGE_WEIGHT
+            ):
+
+                del COMPETENCY_GRAPH[a][b]
+
+    # =====================================================
+    # 2. self reinforcement
+    # =====================================================
+
+    for skill in unique:
+
+        COMPETENCY_GRAPH[skill][skill] = 1.0
+
+    # =====================================================
+    # 3. reinforce co-occurrence
+    # =====================================================
+
+    for ev in evidence_list:
+
+        source = ev["competency"]
+
+        score = ev["score"] / 10.0
+
+        weight = ev["weight"]
+
+        reinforcement = (
+            EDGE_INCREMENT
+            * score
+            * weight
+        )
+
+        for target in unique:
+
+            if source == target:
+                continue
+
+            current = (
+                COMPETENCY_GRAPH[source]
+                .get(target, 0.0)
+            )
+
+            updated = min(
+                current + reinforcement,
+                MAX_EDGE_WEIGHT
+            )
+
+            COMPETENCY_GRAPH[source][target] = updated
+
+def get_related_skills(
+    skill: str,
+    top_k: int = 2
+):
+
+    neighbors = (
+        COMPETENCY_GRAPH
+        .get(skill, {})
+    )
+
+    ranked = sorted(
+        neighbors.items(),
+        key=lambda x: x[1],
+        reverse=True
+    )
+
+    return [
+        s
+        for s, w in ranked
+        if s != skill
+    ][:top_k]

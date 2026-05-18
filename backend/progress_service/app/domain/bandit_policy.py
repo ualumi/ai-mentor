@@ -36,7 +36,7 @@ def update_action_value(action, reward):
     ) / n'''
 
 import random
-from app.state import ACTION_STATS, COMPETENCY_GRAPH, USER_PROGRESS
+from app.state import COMPETENCY_GRAPH, USER_ACTION_STATS, USER_PROGRESS
 
 
 EPSILON = 0.2
@@ -134,7 +134,7 @@ import random
 
 from app.state import (
     USER_PROGRESS,
-    ACTION_STATS,
+    USER_ACTION_STATS,
     COMPETENCY_GRAPH
 )
 
@@ -179,7 +179,10 @@ def choose_action(user_id: str, actions: list[str]):
     # -----------------------------
     for action in actions:
 
-        base_value = ACTION_STATS[action]["value"]
+        #base_value = ACTION_STATS[action]["value"]
+        base_value = (
+            USER_ACTION_STATS[user_id][action]["value"]
+        )
 
         graph_bonus = 0.0
 
@@ -206,9 +209,16 @@ def choose_action(user_id: str, actions: list[str]):
     return best_action
 
 
-def update_action_value(action: str, reward: float):
+#def update_action_value(action: str, reward: float):
 
-    stats = ACTION_STATS[action]
+    #stats = ACTION_STATS[action]
+def update_action_value(
+    user_id: str,
+    action: str,
+    reward: float
+):
+
+    stats = USER_ACTION_STATS[user_id][action]
 
     stats["count"] += 1
 

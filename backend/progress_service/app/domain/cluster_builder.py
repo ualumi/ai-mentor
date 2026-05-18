@@ -186,7 +186,7 @@ def update_clusters(user_progress: dict):
     }'''
 
 
-from app.state import NODE_EMBEDDINGS
+#from app.state import NODE_EMBEDDINGS
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 from app.state import COMPETENCY_GRAPH

@@ -61,9 +61,9 @@ from app.redis_client import redis
 from app.state import (
     RAW_ANALYSIS,
     EVIDENCE_STORE,
-    TRAINING_BUFFER,
     USER_PROGRESS,
-    USER_RECOMMENDATIONS
+    USER_RECOMMENDATIONS,
+    PENDING_ACTIONS
 )
 from app.adapters.analysis_adapter import extract_evidence
 from app.domain.progress_aggregator import apply_evidence
@@ -74,8 +74,8 @@ from app.domain.bandit_policy import update_action_value
 from app.domain.bandit_policy import choose_action
 from app.domain.cluster_builder import update_clusters
 #from app.domain.embedding_propagation import propagate_embeddings
-from app.domain.embedding_updater import update_embeddings
-from app.domain.trainer import train_step
+#from app.domain.embedding_updater import update_embeddings
+#from app.domain.trainer import train_step
 CHANNEL_ANALYSIS_PATTERN = "analytics_response:*"
 
 
@@ -149,18 +149,60 @@ async def redis_listener(pubsub):
                 "clusters": {}
             }
         )
+        previous_state = {}
+
+        for skill, state in user_progress["skills"].items():
+
+            previous_state[skill] = {
+                "ema": state["ema"],
+                "attempts": state["attempts"]
+            }
+
         for ev in evidence_list:
             apply_evidence(
                 user_progress["skills"],
                 ev
             )
+        pending = PENDING_ACTIONS.get(user_id)
+
+        if pending:
+
+            action = pending["action"]
+
+            old_ema = pending["prev_ema"]
+
+            new_ema = (
+                user_progress["skills"]
+                .get(action, {})
+                .get("ema", old_ema)
+            )
+
+            reward = compute_reward(
+                prev_ema=old_ema,
+                new_ema=new_ema,
+                is_correct=score["is_correct"]
+                if isinstance(score, dict)
+                else score > 0.7,
+                time_spent=1.0,
+                attempts=user_progress["skills"][action]["attempts"],
+                deficit_before=1.0 - old_ema
+            )
+
+            update_action_value(
+                user_id,
+                action,
+                reward
+            )
+
+            del PENDING_ACTIONS[user_id]
         # -----------------------------
         # 3.1️⃣ обновляем граф
         # -----------------------------
         update_graph(evidence_list)
         update_clusters(user_progress)
         #propagate_embeddings()  
-        update_embeddings(user_id, user_progress)
+        
+        #update_embeddings(user_id, user_progress)
 
         # -----------------------------
         # 4️⃣ выбираем действие (ε-greedy)
@@ -171,9 +213,15 @@ async def redis_listener(pubsub):
         if not actions:
             continue
         action = choose_action(user_id, actions)
+        
 
         # baseline до воздействия
         prev_ema = user_progress["skills"][action]["ema"]
+
+        PENDING_ACTIONS[user_id] = {
+            "action": action,
+            "prev_ema": prev_ema
+        }
 
         # -----------------------------
         # 4.1️⃣ (симуляция "эффекта действия")
@@ -195,7 +243,7 @@ async def redis_listener(pubsub):
 
         knowledge_gain = new_ema - prev_ema
 
-        TRAINING_BUFFER.append({
+        '''TRAINING_BUFFER.append({
             "user_id": user_id,
             "skill": action,
             "gain": knowledge_gain,
@@ -204,12 +252,12 @@ async def redis_listener(pubsub):
         })
         if len(TRAINING_BUFFER) % 5 == 0:
             for sample in TRAINING_BUFFER[-5:]:
-                train_step(sample)
+                train_step(sample)'''
 
         # -----------------------------
         # 6️⃣ обновляем bandit
         # -----------------------------
-        update_action_value(action, reward)
+        update_action_value(user_id, action, reward)
 
         # -----------------------------
         # 7️⃣ рекомендации

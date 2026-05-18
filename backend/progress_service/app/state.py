@@ -9,11 +9,14 @@ import numpy as np
 COMPETENCY_GRAPH = defaultdict(lambda: defaultdict(float))
 
 # statistics for ε-greedy
-ACTION_STATS = defaultdict(
-    lambda: {
-        "count": 0,
-        "value": 0.0
-    }
+
+USER_ACTION_STATS = defaultdict(
+    lambda: defaultdict(
+        lambda: {
+            "count": 0,
+            "value": 0.0
+        }
+    )
 )
 
 from typing import Dict, List, Any
@@ -26,13 +29,13 @@ EVIDENCE_STORE: Dict[str, List[dict]] = {}
 
 # 3. Агрегированный прогресс по компетенциям
 # session_id -> competency -> state
-#USER_PROGRESS: Dict[str, Dict[str, dict]] = {}
 USER_PROGRESS = {
 }
 
 # 4. Рекомендации (derived state)
 USER_RECOMMENDATIONS: Dict[str, List[dict]] = {}
 
-NODE_EMBEDDINGS = defaultdict(lambda: np.random.normal(0, 0.1, 16))
-SKILL_EMBEDDINGS = {}
-TRAINING_BUFFER = []
+PENDING_ACTIONS = {}
+
+USER_BANDIT_STATS = defaultdict(dict)
+RECOMMENDATION_HISTORY = defaultdict(list)
