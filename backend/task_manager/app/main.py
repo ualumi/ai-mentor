@@ -303,7 +303,8 @@ async def websocket_endpoint(websocket: WebSocket):
                 base_payload = {
                     "user_id": user_id,
                     "attempt_id": attempt_id,
-                    "code": data.code
+                    "code": data.code,
+                    "mode": state["mode"]
                 }
 
                 if state["mode"] == "module":

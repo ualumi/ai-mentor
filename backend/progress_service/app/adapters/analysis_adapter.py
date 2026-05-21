@@ -1,51 +1,29 @@
-'''def extract_evidence(raw_analysis: dict) -> list[dict]:
-    """
-    Преобразует ЛЮБОЙ формат аналитики
-    в унифицированные evidence.
-    """
-    evidence = []
+def _clamp(value, low: float, high: float) -> float:
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        numeric = low
 
-    # БАЗОВЫЙ контракт (можно менять позже)
-    competencies = raw_analysis.get("competencies", {})
-
-    for name, signal in competencies.items():
-        evidence.append({
-            "competency": name,
-            "signal": signal,          # может быть +/-
-            "confidence": raw_analysis.get("confidence", 0.5),
-            "weight": raw_analysis.get("weight", 1.0),
-            "source": raw_analysis.get("source", "unknown")
-        })
-
-    return evidence'''
+    return max(low, min(numeric, high))
 
 
 def extract_evidence(raw_analysis: dict) -> list[dict]:
     evidence = []
 
-    compliance = raw_analysis.get("task_compliance", {})
-    tags = raw_analysis.get("tags", [])
+    for tag_data in raw_analysis.get("tags", []):
+        name = tag_data.get("name") or tag_data.get("competency")
 
-    # Добавляем is_correct из correctness
-    correctness = raw_analysis.get("correctness", {})
-    is_correct = correctness.get("is_correct", False)
-    
-    '''for tag, data in tags.items():
+        if not name:
+            continue
+
         evidence.append({
-            "competency": tag,
-            "score": data.get("score", 0),
-            "weight": data.get("required_weight", 1.0),
-            "applied": data.get("applied", False),
-            "source": "ai_analysis"
-        })'''
-    
-    for tag_data in tags:  # tag_data — это каждый словарь из списка
-        evidence.append({
-            "competency": tag_data.get("name"),  # поле 'name', не 'competency'
-            "score": tag_data.get("score", 0),
-            "weight": tag_data.get("weight", 1.0),  # было 'required_weight', а нужно 'weight'
-            "applied": tag_data.get("applied", False),
-            "source": "ai_analysis"
+            "competency": str(name),
+            "score": _clamp(tag_data.get("score", 0.0), 0.0, 10.0),
+            "weight": _clamp(tag_data.get("weight", 1.0), 0.0, 1.0),
+            "applied": bool(tag_data.get("applied", False)),
+            "confidence": _clamp(tag_data.get("confidence", 1.0), 0.0, 1.0),
+            "source": "ai_analysis",
+            "reason": tag_data.get("reason") or tag_data.get("evidence"),
         })
 
     return evidence

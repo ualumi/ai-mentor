@@ -1,27 +1,39 @@
 import asyncio
+from contextlib import asynccontextmanager
+
+import torch
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from jose import JWTError, jwt
+
+from app.domain.offline_evaluator import evaluate_recent_events
+from app.model_versions import MODEL_VERSIONS
+from app.redis_client import redis
 from app.redis_listener import redis_listener
 from app.state import USER_PROGRESS, USER_RECOMMENDATIONS
-from app.redis_client import redis
+from app.storage import load_runtime_state
+
+
 CHANNEL_ANALYSIS_PATTERN = "analytics_response:*"
-from contextlib import asynccontextmanager
-from fastapi import FastAPI
-import asyncio
-from fastapi.middleware.cors import CORSMiddleware
-import torch
+SECRET_KEY = "supersecret"
+ALGORITHM = "HS256"
 
 torch.set_num_threads(1)
 torch.set_num_interop_threads(1)
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    try:
+        load_runtime_state()
+        print("Progress Service restored persisted ML state")
+    except Exception as exc:
+        print(f"Progress Service could not restore persisted ML state: {exc}")
 
     pubsub = redis.pubsub()
     await pubsub.psubscribe(CHANNEL_ANALYSIS_PATTERN)
-
     asyncio.create_task(redis_listener(pubsub))
-
-    print("✅ Progress Service started and subscribed")
+    print("Progress Service started and subscribed")
 
     yield
 
@@ -35,81 +47,47 @@ app.add_middleware(
     allow_origins=["http://localhost:5173"],
     allow_methods=["*"],
     allow_headers=["*"],
-    allow_credentials=True
+    allow_credentials=True,
 )
+
 
 @app.get("/health")
 async def health():
-    return {"status": "ok"}
+    return {"status": "ok", "model_versions": MODEL_VERSIONS}
 
-'''@app.get("/progress/{user_id}")
-async def get_progress(user_id: str):
-    print("USER_PROGRESS:", USER_PROGRESS)
-    progress = USER_PROGRESS.get(user_id)
 
-    if user_id not in USER_PROGRESS:
-        raise HTTPException(
-            status_code=404,
-            detail=f"No progress found for {user_id}"
-        )
-
+@app.get("/ml/evaluation")
+async def ml_evaluation(limit: int = 1000):
     return {
-        "progress": progress,
-        "recommendations": USER_RECOMMENDATIONS.get(user_id, [])
-    }'''
-
-from jose import jwt, JWTError
-
-SECRET_KEY = "supersecret"
-ALGORITHM = "HS256"
+        "model_versions": MODEL_VERSIONS,
+        "metrics": evaluate_recent_events(limit=limit),
+    }
 
 
 @app.get("/progress/{token}")
 async def get_progress(token: str):
-    # 🔐 Декодируем токен
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id = int(payload["sub"])
+        user_id = str(payload["sub"])
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid or expired token")
-
-    print("USER_PROGRESS:", USER_PROGRESS)
 
     progress = USER_PROGRESS.get(user_id)
 
     if not progress:
         raise HTTPException(
             status_code=404,
-            detail=f"No progress found for user {user_id}"
+            detail=f"No progress found for user {user_id}",
         )
 
     return {
         "progress": progress,
-        "recommendations": USER_RECOMMENDATIONS.get(user_id, [])
+        "recommendations": USER_RECOMMENDATIONS.get(user_id, []),
+        "model_versions": MODEL_VERSIONS,
     }
+
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run("app.main:app", host="0.0.0.0", port=8008, reload=True)
-
-'''import asyncio
-from fastapi import FastAPI
-from contextlib import asynccontextmanager
-from app.redis_listener import redis_listener
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    task = asyncio.create_task(redis_listener())
-    print("✅ Progress Service started")
-    yield
-    task.cancel()
-    await asyncio.gather(task, return_exceptions=True)
-
-app = FastAPI(
-    title="Progress Service",
-    lifespan=lifespan
-)
-
-@app.get("/health")
-async def health():
-    return {"status": "ok"}'''

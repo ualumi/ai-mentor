@@ -1,41 +1,40 @@
-'''from typing import Dict
-
-# session_id -> {competency_name -> {evidence_count, avg_confidence, trend}}
-USER_PROGRESS: Dict[str, Dict[str, dict]] = {}'''
 from collections import defaultdict
-import numpy as np
+from typing import Dict, List
+
 
 # competency -> related competency -> weight
 COMPETENCY_GRAPH = defaultdict(lambda: defaultdict(float))
 
-# statistics for ε-greedy
-
+# user_id -> action/module key -> value estimate
 USER_ACTION_STATS = defaultdict(
     lambda: defaultdict(
         lambda: {
             "count": 0,
-            "value": 0.0
+            "value": 0.0,
         }
     )
 )
 
-from typing import Dict, List, Any
+# user_id -> bandit action key -> LinUCB matrices/vectors
+USER_BANDIT_STATS = defaultdict(dict)
 
-# 1. Raw данные от аналитики (не интерпретируем!)
+# user_id -> raw analysis payloads
 RAW_ANALYSIS: Dict[str, List[dict]] = {}
 
-# 2. Унифицированные evidence (через адаптер)
+# user_id -> normalized evidence items
 EVIDENCE_STORE: Dict[str, List[dict]] = {}
 
-# 3. Агрегированный прогресс по компетенциям
-# session_id -> competency -> state
-USER_PROGRESS = {
-}
+# user_id -> {"skills": ..., "clusters": ...}
+USER_PROGRESS = {}
 
-# 4. Рекомендации (derived state)
+# user_id -> latest module recommendations
 USER_RECOMMENDATIONS: Dict[str, List[dict]] = {}
 
+# user_id -> pending recommendation waiting for the next attempt result
 PENDING_ACTIONS = {}
 
-USER_BANDIT_STATS = defaultdict(dict)
-RECOMMENDATION_HISTORY = defaultdict(list)
+# user_id:learning_session_id -> selected module context
+ACTIVE_MODULES = {}
+
+# user_id -> historical recommendations and rewards
+RECOMMENDATION_HISTORY: Dict[str, List[dict]] = defaultdict(list)
