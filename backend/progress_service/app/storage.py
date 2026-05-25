@@ -22,6 +22,9 @@ from app.state import (
 
 
 DEFAULT_DB_PATH = Path(os.getenv("PROGRESS_DB_PATH", "data/progress_service.sqlite3"))
+DEFAULT_EVENT_LOG_PATH = Path(
+    os.getenv("PROGRESS_EVENT_LOG_PATH", "data/progress_service_events.jsonl")
+)
 
 
 STATE_KEYS = {
@@ -142,6 +145,7 @@ def append_event(
     db_path: Path | str = DEFAULT_DB_PATH,
 ) -> None:
     init_storage(db_path)
+    created_at = _utc_now()
 
     with _connect(db_path) as conn:
         conn.execute(
@@ -164,9 +168,21 @@ def append_event(
                 None if attempt_id is None else str(attempt_id),
                 None if mode is None else str(mode),
                 json.dumps(_to_jsonable(payload)),
-                _utc_now(),
+                created_at,
             ),
         )
+
+    _append_jsonl_event(
+        {
+            "event_type": event_type,
+            "user_id": user_id,
+            "learning_session_id": None if learning_session_id is None else str(learning_session_id),
+            "attempt_id": None if attempt_id is None else str(attempt_id),
+            "mode": None if mode is None else str(mode),
+            "payload": _to_jsonable(payload),
+            "created_at": created_at,
+        }
+    )
 
 
 def load_events(
@@ -248,6 +264,14 @@ def _to_jsonable(value):
         return value.item()
 
     return value
+
+
+def _append_jsonl_event(event: dict, log_path: Path | str = DEFAULT_EVENT_LOG_PATH) -> None:
+    path = Path(log_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
+    with path.open("a", encoding="utf-8") as file:
+        file.write(json.dumps(event, ensure_ascii=False) + "\n")
 
 
 def _utc_now() -> str:

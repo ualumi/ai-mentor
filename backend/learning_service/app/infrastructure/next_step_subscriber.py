@@ -5,6 +5,9 @@ from app.application.queries.get_session import get_session
 from app.application.orchestrators.learning_orchestrator import (
     generate_next_task
 )
+from app.application.orchestrators.task_payload_builder import (
+    build_adaptive_task_payload
+)
 
 async def listen_next_step():
 
@@ -40,15 +43,22 @@ async def listen_next_step():
         # pending task
         # -----------------------------
 
-        raw_task = await redis_client.get(
-            f"pending_next_task:{session_id}"
-        )
+        raw_task = await redis_client.get(f"pending_next_task:{session_id}")
 
-        if not raw_task:
-            print("No pending task")
-            continue
-
-        task = json.loads(raw_task)
+        if raw_task:
+            task = json.loads(raw_task)
+        else:
+            progress_raw = await redis_client.get(
+                f"all_user_progress:{session['user_id']}"
+            )
+            progress = json.loads(progress_raw) if progress_raw else {}
+            task = await build_adaptive_task_payload(
+                competency=session["competency"],
+                progress_raw=progress
+            )
+            print(
+                f"No pending task for {session_id}; built task from progress"
+            )
 
         # -----------------------------
         # generate
@@ -68,6 +78,4 @@ async def listen_next_step():
         # cleanup
         # -----------------------------
 
-        await redis_client.delete(
-            f"pending_next_task:{session_id}"
-        )
+        await redis_client.delete(f"pending_next_task:{session_id}")

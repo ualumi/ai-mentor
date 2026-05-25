@@ -1,5 +1,8 @@
 import asyncio
+import logging
+import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import torch
 from fastapi import FastAPI, HTTPException
@@ -17,6 +20,20 @@ from app.storage import load_runtime_state
 CHANNEL_ANALYSIS_PATTERN = "analytics_response:*"
 SECRET_KEY = "supersecret"
 ALGORITHM = "HS256"
+LOG_PATH = Path(os.getenv("PROGRESS_LOG_PATH", "data/progress_service.log"))
+
+
+def setup_logging() -> None:
+    LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)s [%(name)s] %(message)s",
+        handlers=[
+            logging.FileHandler(LOG_PATH, encoding="utf-8"),
+            logging.StreamHandler(),
+        ],
+        force=True,
+    )
 
 torch.set_num_threads(1)
 torch.set_num_interop_threads(1)
@@ -24,20 +41,24 @@ torch.set_num_interop_threads(1)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    setup_logging()
+    logger = logging.getLogger("progress_service")
+
     try:
         load_runtime_state()
-        print("Progress Service restored persisted ML state")
+        logger.info("Progress Service restored persisted ML state")
     except Exception as exc:
-        print(f"Progress Service could not restore persisted ML state: {exc}")
+        logger.exception("Progress Service could not restore persisted ML state: %s", exc)
 
     pubsub = redis.pubsub()
     await pubsub.psubscribe(CHANNEL_ANALYSIS_PATTERN)
     asyncio.create_task(redis_listener(pubsub))
-    print("Progress Service started and subscribed")
+    logger.info("Progress Service started and subscribed to %s", CHANNEL_ANALYSIS_PATTERN)
 
     yield
 
     await pubsub.close()
+    logger.info("Progress Service stopped")
 
 
 app = FastAPI(lifespan=lifespan)

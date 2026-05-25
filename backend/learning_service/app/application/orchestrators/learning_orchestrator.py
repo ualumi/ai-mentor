@@ -155,13 +155,6 @@ async def handle_progress_event(event):
             print("task not completed")
         else:
             print("task completed but skill not mastered", score.get('is_correct'))
-            await EventBus.publish(
-                "tasks_correctness",
-                {
-                    "event": "task_completed",
-                    "attempt_id": attempt_id,
-                }
-            )
             #обновляем подготовленное задание, чтобы методология могла сгенерировать следующее с учетом успешного выполнения
             existing_task = await redis_client.get(f"pending_next_task:{target_session_id}")
             current_task = json.loads(existing_task) if existing_task else {}
@@ -170,6 +163,13 @@ async def handle_progress_event(event):
             await redis_client.set(
                     f"pending_next_task:{target_session_id}",
                     json.dumps(current_task)
+            )
+            await EventBus.publish(
+                "tasks_correctness",
+                {
+                    "event": "task_completed",
+                    "attempt_id": attempt_id,
+                }
             )
             
             #await generate_next_task(session, task)
