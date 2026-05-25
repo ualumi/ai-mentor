@@ -28,7 +28,7 @@ async def build_adaptive_task_payload(
 
     module_recs = [
         r for r in recommendations
-        if r["competency"] == competency
+        if _recommendation_competency(r) == competency
     ]
 
     rec = (
@@ -48,8 +48,9 @@ async def build_adaptive_task_payload(
         []
     )'''
     clusters = progress_raw.get("clusters", {})
+    membership = clusters.get("membership", clusters)
 
-    cluster_links = clusters.get(
+    cluster_links = membership.get(
         competency,
         []
     )
@@ -76,3 +77,16 @@ async def build_adaptive_task_payload(
 
         "topic_tags": topic_tags
     }
+
+
+def _recommendation_competency(recommendation: dict) -> str | None:
+    if not isinstance(recommendation, dict):
+        return None
+
+    module = recommendation.get("module")
+
+    return (
+        recommendation.get("main_competency")
+        or recommendation.get("competency")
+        or (module.get("main_competency") if isinstance(module, dict) else None)
+    )

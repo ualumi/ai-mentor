@@ -57,6 +57,7 @@ async def handle_progress_event(event):
     print(target_session_id, "target_session_id in handle_progress_event")
 
     task_recommendations = event.get("task_recommendations", [])
+    task_parameters = event.get("task_parameters")
     score = event.get("score", {})
     attempt_id = event.get("attempt_id")
     score = event.get("score", {})
@@ -71,11 +72,16 @@ async def handle_progress_event(event):
         return
 
     competency = session["competency"]
+    task = await build_adaptive_task_payload(
+        competency=competency,
+        progress_raw=progress_raw if isinstance(progress_raw, dict) else {}
+    )
     if progress_raw and isinstance(progress_raw, dict):
             print('PROGRESS_RAW', progress_raw)
             # Ищем ключ, соответствующий competency
-            if competency in progress_raw['skills']:
-                progress = progress_raw['skills'][competency]
+            skills = progress_raw.get("skills", {})
+            if competency in skills:
+                progress = skills[competency]
                 print('PROGRESS', progress)
                 #ADAPTIVE TASK SELECTION
                 '''module_recs = [
@@ -100,9 +106,16 @@ async def handle_progress_event(event):
                     "difficulty": rec["difficulty"] if rec else "easy",
                     "topic_tags": topic_tags
                 }'''
+                progress_for_task = dict(progress_raw)
+                progress_for_task["recommendations"] = (
+                    [task_parameters]
+                    if task_parameters
+                    else task_recommendations
+                )
+
                 task = await build_adaptive_task_payload(
                     competency=competency,
-                    progress_raw=progress
+                    progress_raw=progress_for_task
                 )
                 
                 # 🔥 1. сохраняем (merge, а не перезапись)
@@ -116,7 +129,10 @@ async def handle_progress_event(event):
                     json.dumps(existing)
                 )
                 
-                skill = progress.get('mastery')  # True или False
+                skill = progress.get(
+                    "mastery_reached",
+                    progress.get("mastery", progress.get("bkt_mastery", False))
+                )
             else:
                 # Обработка случая, когда ключ не найден
                 print(f"Ключ '{competency}' не найден в progress_raw")

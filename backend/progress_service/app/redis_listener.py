@@ -183,6 +183,10 @@ async def redis_listener(pubsub):
             if task_parameters
             else module_recommendations
         )
+        published_progress = copy.deepcopy(user_progress)
+        published_progress["module_recommendations"] = module_recommendations
+        published_progress["task_parameters"] = task_parameters
+        published_progress["recommendations"] = recommendations
 
         USER_RECOMMENDATIONS[user_id] = recommendations
         _safe_append_event(
@@ -206,7 +210,7 @@ async def redis_listener(pubsub):
                 "user_id": user_id,
                 "learning_session_id": learning_session_id,
                 "mode": mode,
-                "progress": user_progress,
+                "progress": published_progress,
                 "module_recommendations": module_recommendations,
                 "task_parameters": task_parameters,
                 "recommendations": recommendations,
