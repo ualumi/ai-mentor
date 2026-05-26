@@ -14,7 +14,7 @@ from app.model_versions import MODEL_VERSIONS
 from app.redis_client import redis
 from app.redis_listener import redis_listener
 from app.state import USER_PROGRESS, USER_RECOMMENDATIONS
-from app.storage import load_runtime_state
+from app.storage import DEFAULT_EVENT_LOG_PATH, load_runtime_state
 
 
 CHANNEL_ANALYSIS_PATTERN = "analytics_response:*"
@@ -25,6 +25,9 @@ LOG_PATH = Path(os.getenv("PROGRESS_LOG_PATH", "data/progress_service.log"))
 
 def setup_logging() -> None:
     LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    LOG_PATH.touch(exist_ok=True)
+    DEFAULT_EVENT_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    DEFAULT_EVENT_LOG_PATH.touch(exist_ok=True)
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s %(levelname)s [%(name)s] %(message)s",

@@ -529,6 +529,52 @@ import "../../App.css";
 import StartModuleButton from "../modules/StartModuleButton";
 import Module from '../modules/module/Module';
 
+const getActiveRecommendationCompetency = (recommendation) => {
+  if (typeof recommendation === "string") return recommendation;
+
+  return (
+    recommendation?.main_competency ||
+    recommendation?.competency ||
+    recommendation?.module?.main_competency ||
+    null
+  );
+};
+
+const getActiveRecommendationNames = (message) => {
+  const payload = message?.data || message || {};
+  const candidates = [];
+
+  if (Array.isArray(payload.recommendations)) {
+    candidates.push(...payload.recommendations);
+  }
+
+  if (Array.isArray(payload.module_recommendations)) {
+    candidates.push(...payload.module_recommendations);
+  }
+
+  if (Array.isArray(payload.progress?.recommendations)) {
+    candidates.push(...payload.progress.recommendations);
+  }
+
+  if (Array.isArray(payload.progress?.module_recommendations)) {
+    candidates.push(...payload.progress.module_recommendations);
+  }
+
+  if (payload.task_parameters) {
+    candidates.push(payload.task_parameters);
+  }
+
+  if (payload.progress?.task_parameters) {
+    candidates.push(payload.progress.task_parameters);
+  }
+
+  return [...new Set(
+    candidates
+      .map(getActiveRecommendationCompetency)
+      .filter(Boolean)
+  )];
+};
+
 export default function Recommendation({ mode, attempt }) {
 
   const [activeTab, setActiveTab] = useState("mentor");
@@ -569,16 +615,19 @@ export default function Recommendation({ mode, attempt }) {
     const handler = (data) => {
       console.log("📡 WS EVENT RECEIVED:", data);
 
-      if (data.source?.startsWith("user_progress")) {
-        if (data.data?.score) setScore(data.data.score);
+      const unique = getActiveRecommendationNames(data);
+      const payload = data?.data || data || {};
+      const isUserProgressEvent =
+        data.source?.startsWith("user_progress") ||
+        Boolean(payload.skills) ||
+        unique.length > 0;
 
-        if (data.data?.recommendations && data.data.recommendations.length > 0) {
+      if (isUserProgressEvent) {
+        if (payload.score) setScore(payload.score);
+
+        if (unique.length > 0) {
 
           wsRecommendationRef.current = true;
-
-          const unique = [...new Set(
-            data.data.recommendations.map(r => r.competency)
-          )];
 
           setRecommendations(prev => {
             const newOnes = unique.filter(r => !prev.includes(r));
@@ -628,9 +677,12 @@ export default function Recommendation({ mode, attempt }) {
   useEffect(() => {
     if (mode === "history" && attempt?.analysis) {
       const recs = attempt.analysis.recommendations || [];
+      const normalizedRecs = recs
+        .map(getActiveRecommendationCompetency)
+        .filter(Boolean);
 
-      if (recs.length > 0) {
-        setRecommendations(recs);
+      if (normalizedRecs.length > 0) {
+        setRecommendations(normalizedRecs);
         setNoRecommendations([]);
       } else {
         setRecommendations([]);
