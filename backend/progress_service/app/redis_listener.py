@@ -12,6 +12,11 @@ from app.domain.graph_builder import update_graph
 from app.domain.module_builder import build_task_parameter_candidates
 from app.domain.progress_aggregator import apply_evidence
 from app.domain.recommender import build_recommendations
+from app.domain.skill_ontology import (
+    canonicalize_evidence_list,
+    canonicalize_skill,
+    register_skill_alias,
+)
 from app.domain.reward import compute_module_reward
 from app.model_versions import MODEL_VERSIONS
 from app.redis_client import redis
@@ -78,7 +83,10 @@ async def redis_listener(pubsub):
             "clusters": copy.deepcopy(user_progress.get("clusters", {})),
         }
 
-        evidence_list = extract_evidence(raw_analysis)
+        evidence_list = canonicalize_evidence_list(
+            extract_evidence(raw_analysis),
+            user_progress,
+        )
         EVIDENCE_STORE.setdefault(user_id, []).extend(evidence_list)
 
         for evidence in evidence_list:
@@ -280,6 +288,11 @@ def _module_from_condition(condition) -> dict | None:
         or condition.get("competency")
         or condition.get("module")
     )
+    if main_competency:
+        raw_main_competency = str(main_competency)
+        main_competency, confidence, method = canonicalize_skill(raw_main_competency)
+        register_skill_alias(raw_main_competency, main_competency, confidence, method)
+
     tags = _normalize_tags(
         condition.get("tags") or condition.get("tag_requirements"),
         main_competency,
@@ -315,6 +328,9 @@ def _normalize_tags(tags, main_competency: str) -> list[dict]:
 
     for tag in tags:
         if isinstance(tag, str):
+            raw_tag = tag
+            tag, confidence, method = canonicalize_skill(raw_tag)
+            register_skill_alias(raw_tag, tag, confidence, method)
             normalized.append({
                 "name": tag,
                 "required_level": 0.5 if tag != main_competency else 0.75,
@@ -325,6 +341,9 @@ def _normalize_tags(tags, main_competency: str) -> list[dict]:
             name = tag.get("name") or tag.get("competency")
             if not name:
                 continue
+            raw_name = str(name)
+            name, confidence, method = canonicalize_skill(raw_name)
+            register_skill_alias(raw_name, name, confidence, method)
 
             normalized.append({
                 "name": name,

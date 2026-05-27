@@ -5,6 +5,15 @@ from typing import Dict, List
 # competency -> related competency -> weight
 COMPETENCY_GRAPH = defaultdict(lambda: defaultdict(float))
 
+# source competency -> target competency -> relation type -> weight
+TYPED_COMPETENCY_GRAPH = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
+
+# raw competency label -> canonical competency label
+SKILL_ALIASES: Dict[str, str] = {}
+
+# canonical competency -> metadata about known aliases and semantic matching
+SKILL_REGISTRY: Dict[str, dict] = {}
+
 # user_id -> action/module key -> value estimate
 USER_ACTION_STATS = defaultdict(
     lambda: defaultdict(

@@ -15,6 +15,9 @@ from app.state import (
     PENDING_ACTIONS,
     RAW_ANALYSIS,
     RECOMMENDATION_HISTORY,
+    SKILL_ALIASES,
+    SKILL_REGISTRY,
+    TYPED_COMPETENCY_GRAPH,
     USER_BANDIT_STATS,
     USER_PROGRESS,
     USER_RECOMMENDATIONS,
@@ -34,6 +37,9 @@ STATE_KEYS = {
     "pending_actions": PENDING_ACTIONS,
     "raw_analysis": RAW_ANALYSIS,
     "recommendation_history": RECOMMENDATION_HISTORY,
+    "skill_aliases": SKILL_ALIASES,
+    "skill_registry": SKILL_REGISTRY,
+    "typed_competency_graph": TYPED_COMPETENCY_GRAPH,
     "user_bandit_stats": USER_BANDIT_STATS,
     "user_progress": USER_PROGRESS,
     "user_recommendations": USER_RECOMMENDATIONS,
@@ -96,6 +102,8 @@ def load_runtime_state(db_path: Path | str = DEFAULT_DB_PATH) -> None:
     _replace_dict(EVIDENCE_STORE, loaded.get("evidence_store", {}))
     _replace_dict(PENDING_ACTIONS, loaded.get("pending_actions", {}))
     _replace_dict(ACTIVE_MODULES, loaded.get("active_modules", {}))
+    _replace_dict(SKILL_ALIASES, loaded.get("skill_aliases", {}))
+    _replace_dict(SKILL_REGISTRY, loaded.get("skill_registry", {}))
 
     RECOMMENDATION_HISTORY.clear()
     for user_id, history in loaded.get("recommendation_history", {}).items():
@@ -104,6 +112,12 @@ def load_runtime_state(db_path: Path | str = DEFAULT_DB_PATH) -> None:
     COMPETENCY_GRAPH.clear()
     for source, edges in loaded.get("competency_graph", {}).items():
         COMPETENCY_GRAPH[source] = defaultdict(float, edges)
+
+    TYPED_COMPETENCY_GRAPH.clear()
+    for source, targets in loaded.get("typed_competency_graph", {}).items():
+        TYPED_COMPETENCY_GRAPH[source] = defaultdict(lambda: defaultdict(float))
+        for target, relations in targets.items():
+            TYPED_COMPETENCY_GRAPH[source][target] = defaultdict(float, relations)
 
     USER_BANDIT_STATS.clear()
     for context_id, actions in loaded.get("user_bandit_stats", {}).items():

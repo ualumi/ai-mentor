@@ -1,4 +1,5 @@
 from app.state import COMPETENCY_GRAPH
+from app.domain.skill_ontology import typed_relation_weight, update_typed_relations
 
 
 EDGE_DECAY = 0.995
@@ -41,12 +42,14 @@ def update_graph(evidence_list: list[dict]):
                 MAX_EDGE_WEIGHT,
             )
 
+    update_typed_relations(evidence_list)
+
 
 def get_related_skills(skill: str, top_k: int = 2) -> list[str]:
     neighbors = COMPETENCY_GRAPH.get(skill, {})
     ranked = sorted(
         neighbors.items(),
-        key=lambda item: item[1],
+        key=lambda item: _related_rank(skill, item[0], item[1]),
         reverse=True,
     )
 
@@ -55,3 +58,13 @@ def get_related_skills(skill: str, top_k: int = 2) -> list[str]:
         for related_skill, _ in ranked
         if related_skill != skill
     ][:top_k]
+
+
+def _related_rank(source: str, target: str, graph_weight: float) -> float:
+    pedagogical_weight = typed_relation_weight(
+        source,
+        target,
+        {"prerequisite_of", "child_of", "parent_of", "supports"},
+    )
+    duplicate_penalty = typed_relation_weight(source, target, {"same_as"})
+    return graph_weight + 0.35 * pedagogical_weight - 0.5 * duplicate_penalty

@@ -13,7 +13,13 @@ from app.domain.offline_evaluator import evaluate_recent_events
 from app.model_versions import MODEL_VERSIONS
 from app.redis_client import redis
 from app.redis_listener import redis_listener
-from app.state import USER_PROGRESS, USER_RECOMMENDATIONS
+from app.state import (
+    SKILL_ALIASES,
+    SKILL_REGISTRY,
+    TYPED_COMPETENCY_GRAPH,
+    USER_PROGRESS,
+    USER_RECOMMENDATIONS,
+)
 from app.storage import DEFAULT_EVENT_LOG_PATH, load_runtime_state
 
 
@@ -88,6 +94,16 @@ async def ml_evaluation(limit: int = 1000):
     }
 
 
+@app.get("/ml/skill-ontology")
+async def skill_ontology():
+    return {
+        "aliases": SKILL_ALIASES,
+        "registry": SKILL_REGISTRY,
+        "typed_graph": _plain_dict(TYPED_COMPETENCY_GRAPH),
+        "model_versions": MODEL_VERSIONS,
+    }
+
+
 @app.get("/progress/{token}")
 async def get_progress(token: str):
     try:
@@ -109,6 +125,19 @@ async def get_progress(token: str):
         "recommendations": USER_RECOMMENDATIONS.get(user_id, []),
         "model_versions": MODEL_VERSIONS,
     }
+
+
+def _plain_dict(value):
+    if isinstance(value, dict):
+        return {
+            key: _plain_dict(item)
+            for key, item in value.items()
+        }
+
+    if isinstance(value, list):
+        return [_plain_dict(item) for item in value]
+
+    return value
 
 
 if __name__ == "__main__":

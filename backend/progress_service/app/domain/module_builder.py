@@ -1,4 +1,5 @@
 from app.domain.graph_builder import get_related_skills
+from app.domain.skill_ontology import typed_relation_weight
 from app.state import COMPETENCY_GRAPH
 
 
@@ -75,6 +76,7 @@ def build_module_candidate(
                 "confidence": main_state.get("confidence", 0.0),
                 "uncertainty": main_state.get("uncertainty", 1.0),
                 "graph_degree": _graph_degree(main_skill),
+                "typed_graph_degree": _typed_graph_degree(main_skill),
             },
         },
     }
@@ -192,6 +194,11 @@ def _select_related_skills(main_skill: str, user_progress: dict) -> list[str]:
             continue
 
         relation = COMPETENCY_GRAPH[main_skill].get(skill, 0.0)
+        relation += 0.4 * typed_relation_weight(
+            main_skill,
+            skill,
+            {"prerequisite_of", "child_of", "parent_of", "supports"},
+        )
         deficit = skills[skill].get("deficit", 1.0)
         ranked.append((skill, relation * (0.5 + deficit)))
 
@@ -269,6 +276,19 @@ def _graph_degree(skill: str) -> int:
         related_skill
         for related_skill in COMPETENCY_GRAPH[skill]
         if related_skill != skill
+    ])
+
+
+def _typed_graph_degree(skill: str) -> int:
+    return len([
+        related_skill
+        for related_skill in COMPETENCY_GRAPH[skill]
+        if related_skill != skill
+        and typed_relation_weight(
+            skill,
+            related_skill,
+            {"parent_of", "child_of", "prerequisite_of", "supports"},
+        ) > 0
     ])
 
 
