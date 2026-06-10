@@ -12,7 +12,7 @@ SESSION_TTL = 60 * 60 * 24  # 24 часа
 
 async def find_active_session(user_id: int, competency: str):
     # можно хранить индекс:
-    key = f"learning:active:{user_id}:{competency}"
+    key = _active_session_key(user_id, competency)
     session_id = await redis_client.get(key)
     if not session_id:
         return None
@@ -93,7 +93,7 @@ async def start_session(
     print(payload)
 
     # 🔥 индекс активной сессии
-    active_key = f"learning:active:{user_id}:{competency}"
+    active_key = _active_session_key(user_id, competency)
     await redis_client.set(active_key, session.id)
 
     # сгенерировать первое задание
@@ -103,3 +103,11 @@ async def start_session(
         "session": session.to_dict(),
         "is_existing": False
     }
+
+
+def _active_session_key(user_id: int, competency: str) -> str:
+    return f"learning:active:{user_id}:{_normalize_skill_name(competency)}"
+
+
+def _normalize_skill_name(name) -> str:
+    return str(name or "").strip().lower().replace("-", "_").replace("/", "_").replace(" ", "_")

@@ -25,7 +25,7 @@ async def complete_session(session_id):
     )
     session = await redis_client.hgetall(key)
     user_id = session["user_id"]
-    active_key = f"learning:active:{session['user_id']}:{session['competency']}"
+    active_key = _active_session_key(session["user_id"], session["competency"])
     await redis_client.delete(active_key)
     await redis_client.delete(_module_success_key(session_id))
     await redis_client.delete(_module_anonymous_success_key(session_id))
@@ -250,3 +250,7 @@ def _module_anonymous_success_key(session_id: str) -> str:
 
 def _normalize_skill_name(name) -> str:
     return str(name or "").strip().lower().replace("-", "_").replace("/", "_").replace(" ", "_")
+
+
+def _active_session_key(user_id, competency: str) -> str:
+    return f"learning:active:{user_id}:{_normalize_skill_name(competency)}"
