@@ -1,6 +1,11 @@
 from app.domain.graph_builder import get_related_skills
-from app.domain.skill_ontology import typed_relation_weight
-from app.state import COMPETENCY_GRAPH
+from app.domain.skill_ontology import normalize_skill_state, typed_relation_weight
+from app.state import (
+    COMPETENCY_GRAPH,
+    TYPED_COMPETENCY_GRAPH,
+    USER_COMPETENCY_GRAPHS,
+    USER_TYPED_COMPETENCY_GRAPHS,
+)
 
 
 MAX_RECOMMENDATIONS = 3
@@ -11,22 +16,28 @@ TASK_VARIANTS = (
 )
 
 
-def build_module_candidates(user_progress: dict, limit: int = MAX_RECOMMENDATIONS) -> list[dict]:
+def build_module_candidates(
+    user_progress: dict,
+    limit: int = MAX_RECOMMENDATIONS,
+    user_id: str | None = None,
+) -> list[dict]:
     skills = user_progress.get("skills", {})
 
     if not skills:
         return []
 
+    normalize_skill_state(skills)
+
     ranked = []
 
     for skill, state in skills.items():
-        priority = _learning_need(skill, state, user_progress)
+        priority = _learning_need(skill, state, user_progress, user_id=user_id)
         ranked.append((skill, priority))
 
     ranked.sort(key=lambda item: item[1], reverse=True)
 
     return [
-        build_module_candidate(skill, priority, user_progress)
+        build_module_candidate(skill, priority, user_progress, user_id=user_id)
         for skill, priority in ranked[:limit]
     ]
 
@@ -35,10 +46,11 @@ def build_module_candidate(
     main_skill: str,
     priority: float,
     user_progress: dict,
+    user_id: str | None = None,
 ) -> dict:
     skills = user_progress["skills"]
     main_state = skills[main_skill]
-    related_skills = _select_related_skills(main_skill, user_progress)
+    related_skills = _select_related_skills(main_skill, user_progress, user_id=user_id)
     difficulty = _choose_difficulty(main_state)
     goal = _choose_goal(main_state)
 
@@ -75,8 +87,8 @@ def build_module_candidate(
                 "avg_involvement": main_state.get("avg_involvement", 0.0),
                 "confidence": main_state.get("confidence", 0.0),
                 "uncertainty": main_state.get("uncertainty", 1.0),
-                "graph_degree": _graph_degree(main_skill),
-                "typed_graph_degree": _typed_graph_degree(main_skill),
+                "graph_degree": _graph_degree(main_skill, user_id=user_id),
+                "typed_graph_degree": _typed_graph_degree(main_skill, user_id=user_id),
             },
         },
     }
@@ -136,7 +148,11 @@ def recommendation_key(recommendation: dict) -> str:
     return f"{recommendation['main_competency']}|{difficulty_bucket}|{tags}"
 
 
-def recommendation_features(recommendation: dict, user_progress: dict) -> list[float]:
+def recommendation_features(
+    recommendation: dict,
+    user_progress: dict,
+    user_id: str | None = None,
+) -> list[float]:
     skill = recommendation["main_competency"]
     state = user_progress.get("skills", {}).get(skill, {})
     related_tags = [
@@ -153,17 +169,22 @@ def recommendation_features(recommendation: dict, user_progress: dict) -> list[f
         state.get("avg_involvement", 0.0),
         state.get("confidence", 0.0),
         state.get("uncertainty", 1.0),
-        min(_graph_degree(skill), 10) / 10.0,
+        min(_graph_degree(skill, user_id=user_id), 10) / 10.0,
         related_deficit,
     ]
 
 
-def _learning_need(skill: str, state: dict, user_progress: dict) -> float:
+def _learning_need(
+    skill: str,
+    state: dict,
+    user_progress: dict,
+    user_id: str | None = None,
+) -> float:
     deficit = state.get("deficit", 1.0)
     negative_trend = max(0.0, -state.get("trend", 0.0))
     avg_involvement = state.get("avg_involvement", 0.0)
     uncertainty = state.get("uncertainty", 1.0)
-    graph_bonus = min(_graph_degree(skill), 10) / 10.0
+    graph_bonus = min(_graph_degree(skill, user_id=user_id), 10) / 10.0
     cluster_signal = (
         user_progress
         .get("clusters", {})
@@ -184,20 +205,27 @@ def _learning_need(skill: str, state: dict, user_progress: dict) -> float:
     )
 
 
-def _select_related_skills(main_skill: str, user_progress: dict) -> list[str]:
+def _select_related_skills(
+    main_skill: str,
+    user_progress: dict,
+    user_id: str | None = None,
+) -> list[str]:
     skills = user_progress.get("skills", {})
-    related = get_related_skills(main_skill, top_k=6)
+    graph = _graph_for_user(user_id)
+    typed_graph = _typed_graph_for_user(user_id)
+    related = get_related_skills(main_skill, top_k=6, user_id=user_id)
     ranked = []
 
     for skill in related:
         if skill not in skills:
             continue
 
-        relation = COMPETENCY_GRAPH[main_skill].get(skill, 0.0)
+        relation = graph[main_skill].get(skill, 0.0)
         relation += 0.4 * typed_relation_weight(
             main_skill,
             skill,
             {"prerequisite_of", "child_of", "parent_of", "supports"},
+            typed_graph=typed_graph,
         )
         deficit = skills[skill].get("deficit", 1.0)
         ranked.append((skill, relation * (0.5 + deficit)))
@@ -271,23 +299,27 @@ def _average_related_deficit(related_tags: list[str], user_progress: dict) -> fl
     return sum(deficits) / len(deficits)
 
 
-def _graph_degree(skill: str) -> int:
+def _graph_degree(skill: str, user_id: str | None = None) -> int:
+    graph = _graph_for_user(user_id)
     return len([
         related_skill
-        for related_skill in COMPETENCY_GRAPH[skill]
+        for related_skill in graph[skill]
         if related_skill != skill
     ])
 
 
-def _typed_graph_degree(skill: str) -> int:
+def _typed_graph_degree(skill: str, user_id: str | None = None) -> int:
+    graph = _graph_for_user(user_id)
+    typed_graph = _typed_graph_for_user(user_id)
     return len([
         related_skill
-        for related_skill in COMPETENCY_GRAPH[skill]
+        for related_skill in graph[skill]
         if related_skill != skill
         and typed_relation_weight(
             skill,
             related_skill,
             {"parent_of", "child_of", "prerequisite_of", "supports"},
+            typed_graph=typed_graph,
         ) > 0
     ])
 
@@ -307,3 +339,17 @@ def _explain_goal(goal: str, main_skill: str) -> str:
 
 def _clamp(value: float, low: float, high: float) -> float:
     return max(low, min(float(value), high))
+
+
+def _graph_for_user(user_id: str | None) -> dict:
+    if user_id is None:
+        return COMPETENCY_GRAPH
+
+    return USER_COMPETENCY_GRAPHS[str(user_id)]
+
+
+def _typed_graph_for_user(user_id: str | None) -> dict:
+    if user_id is None:
+        return TYPED_COMPETENCY_GRAPH
+
+    return USER_TYPED_COMPETENCY_GRAPHS[str(user_id)]

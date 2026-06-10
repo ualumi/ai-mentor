@@ -9,6 +9,10 @@ from app.infrastructure.redis import redis_client
 from app.application.queries.get_session import get_session
 from app.application.orchestrators.task_payload_builder import build_adaptive_task_payload
 
+MIN_MODULE_SUCCESSFUL_TASKS = 3
+SESSION_TTL = 60 * 60 * 24
+
+
 async def complete_session(session_id):
 
     key = f"learning:session:{session_id}"
@@ -23,6 +27,8 @@ async def complete_session(session_id):
     user_id = session["user_id"]
     active_key = f"learning:active:{session['user_id']}:{session['competency']}"
     await redis_client.delete(active_key)
+    await redis_client.delete(_module_success_key(session_id))
+    await redis_client.delete(_module_anonymous_success_key(session_id))
 
     await EventBus.publish(
         "scaffolding.next_step",
@@ -80,8 +86,8 @@ async def handle_progress_event(event):
             print('PROGRESS_RAW', progress_raw)
             # Ищем ключ, соответствующий competency
             skills = progress_raw.get("skills", {})
-            if competency in skills:
-                progress = skills[competency]
+            progress = _find_skill_progress(skills, competency)
+            if progress:
                 print('PROGRESS', progress)
                 #ADAPTIVE TASK SELECTION
                 '''module_recs = [
@@ -129,32 +135,43 @@ async def handle_progress_event(event):
                     json.dumps(existing)
                 )
                 
-                skill = progress.get(
-                    "mastery_reached",
-                    progress.get("mastery", progress.get("bkt_mastery", False))
-                )
+                skill = _explicit_mastery_reached(progress)
             else:
                 # Обработка случая, когда ключ не найден
                 print(f"Ключ '{competency}' не найден в progress_raw")
                 skill = False
     else:
         skill = False
-    print(score.get('is_correct'), skill, "SCORE AND SKILL")
-    if score.get('is_correct') ==True and skill == True:
+    is_correct = _is_correct_score(score)
+    module_success_count = (
+        await _record_module_success(target_session_id, attempt_id)
+        if is_correct
+        else await _module_success_count(target_session_id)
+    )
+    module_ready = (
+        is_correct
+        and skill is True
+        and module_success_count >= MIN_MODULE_SUCCESSFUL_TASKS
+    )
+
+    print(is_correct, skill, module_success_count, "SCORE SKILL AND MODULE SUCCESS COUNT")
+    if module_ready:
         await complete_session(target_session_id)
         print("MODULE FINISHED")
     else:
-        if score.get('is_correct') == False:
+        if is_correct is False:
             await EventBus.publish(
                 "tasks_correctness",
                 {
                     "event": "task_not_completed",
+                    "user_id": user_id,
+                    "learning_session_id": target_session_id,
                     "attempt_id": attempt_id,
                 }
             )
             print("task not completed")
         else:
-            print("task completed but skill not mastered", score.get('is_correct'))
+            print("task completed but module is not ready", is_correct)
             #обновляем подготовленное задание, чтобы методология могла сгенерировать следующее с учетом успешного выполнения
             existing_task = await redis_client.get(f"pending_next_task:{target_session_id}")
             current_task = json.loads(existing_task) if existing_task else {}
@@ -168,9 +185,68 @@ async def handle_progress_event(event):
                 "tasks_correctness",
                 {
                     "event": "task_completed",
+                    "user_id": user_id,
+                    "learning_session_id": target_session_id,
                     "attempt_id": attempt_id,
                 }
             )
             
             #await generate_next_task(session, task)
             print("next step available")
+
+
+def _find_skill_progress(skills: dict, competency: str) -> dict | None:
+    if not isinstance(skills, dict):
+        return None
+
+    canonical_competency = _normalize_skill_name(competency)
+    if canonical_competency in skills:
+        return skills[canonical_competency]
+
+    for skill, progress in skills.items():
+        if _normalize_skill_name(skill) == canonical_competency:
+            return progress
+
+    return None
+
+
+def _explicit_mastery_reached(progress: dict) -> bool:
+    return progress.get("mastery_reached") is True
+
+
+def _is_correct_score(score) -> bool:
+    if isinstance(score, dict):
+        return score.get("is_correct") is True
+
+    return score is True
+
+
+async def _record_module_success(session_id: str, attempt_id) -> int:
+    key = _module_success_key(session_id)
+    member = str(attempt_id) if attempt_id else await _next_anonymous_success_id(session_id)
+    await redis_client.sadd(key, member)
+    await redis_client.expire(key, SESSION_TTL)
+    return await redis_client.scard(key)
+
+
+async def _module_success_count(session_id: str) -> int:
+    return await redis_client.scard(_module_success_key(session_id))
+
+
+async def _next_anonymous_success_id(session_id: str) -> str:
+    key = _module_anonymous_success_key(session_id)
+    count = await redis_client.incr(key)
+    await redis_client.expire(key, SESSION_TTL)
+    return f"anonymous:{count}"
+
+
+def _module_success_key(session_id: str) -> str:
+    return f"learning:module_successes:{session_id}"
+
+
+def _module_anonymous_success_key(session_id: str) -> str:
+    return f"learning:module_successes:{session_id}:anonymous"
+
+
+def _normalize_skill_name(name) -> str:
+    return str(name or "").strip().lower().replace("-", "_").replace("/", "_").replace(" ", "_")

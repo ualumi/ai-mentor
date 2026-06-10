@@ -14,6 +14,23 @@ SKILL_ALIASES: Dict[str, str] = {}
 # canonical competency -> metadata about known aliases and semantic matching
 SKILL_REGISTRY: Dict[str, dict] = {}
 
+# source competency -> target competency -> inferred relation statistics
+SKILL_RELATION_STATS = defaultdict(lambda: defaultdict(dict))
+
+# user_id -> competency -> related competency -> weight
+USER_COMPETENCY_GRAPHS = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
+
+# user_id -> source competency -> target competency -> relation type -> weight
+USER_TYPED_COMPETENCY_GRAPHS = defaultdict(
+    lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
+)
+
+# user_id -> source competency -> target competency -> inferred relation statistics
+USER_SKILL_RELATION_STATS = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
+
+# inferred embedding hierarchy for canonical competencies
+SKILL_HIERARCHY: Dict[str, dict] = {}
+
 # user_id -> action/module key -> value estimate
 USER_ACTION_STATS = defaultdict(
     lambda: defaultdict(

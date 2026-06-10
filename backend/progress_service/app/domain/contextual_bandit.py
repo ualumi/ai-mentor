@@ -17,6 +17,7 @@ def choose_task_parameters(
     bandit_context_id: str,
     candidates: list[dict],
     user_progress: dict,
+    user_id: str | None = None,
 ) -> dict | None:
     if not candidates:
         return None
@@ -27,7 +28,7 @@ def choose_task_parameters(
     for candidate in candidates:
         action_key = recommendation_key(candidate)
         features = np.array(
-            recommendation_features(candidate, user_progress),
+            recommendation_features(candidate, user_progress, user_id=user_id),
             dtype=float,
         )
         personal_score = _ucb_score(bandit_context_id, action_key, features)
@@ -49,10 +50,11 @@ def update_task_parameter_value(
     recommendation: dict,
     user_progress_before: dict,
     reward: float,
+    user_id: str | None = None,
 ):
     action_key = recommendation_key(recommendation)
     features = np.array(
-        recommendation_features(recommendation, user_progress_before),
+        recommendation_features(recommendation, user_progress_before, user_id=user_id),
         dtype=float,
     )
     stats = _get_stats(bandit_context_id, action_key)

@@ -26,8 +26,11 @@ from app.state import (
     PENDING_ACTIONS,
     RAW_ANALYSIS,
     RECOMMENDATION_HISTORY,
+    USER_COMPETENCY_GRAPHS,
     USER_PROGRESS,
     USER_RECOMMENDATIONS,
+    USER_SKILL_RELATION_STATS,
+    USER_TYPED_COMPETENCY_GRAPHS,
 )
 from app.storage import append_event, persist_runtime_state
 
@@ -92,8 +95,13 @@ async def redis_listener(pubsub):
         for evidence in evidence_list:
             apply_evidence(user_progress["skills"], evidence)
 
-        update_graph(evidence_list)
-        update_clusters(user_progress)
+        update_graph(
+            evidence_list,
+            user_id=user_id,
+            progress_before=progress_before,
+            progress_after=user_progress,
+        )
+        update_clusters(user_progress, user_id=user_id)
         _safe_append_event(
             "progress_updated",
             {
@@ -123,6 +131,7 @@ async def redis_listener(pubsub):
                 recommendation=pending["task_parameters"],
                 user_progress_before=pending["state_before"],
                 reward=reward,
+                user_id=user_id,
             )
             RECOMMENDATION_HISTORY[user_id].append({
                 "learning_session_id": learning_session_id,
@@ -170,6 +179,7 @@ async def redis_listener(pubsub):
                 bandit_context_id=pending_key,
                 candidates=task_candidates,
                 user_progress=user_progress,
+                user_id=user_id,
             )
             task_parameters = _with_model_versions(task_parameters)
 
@@ -192,6 +202,11 @@ async def redis_listener(pubsub):
             else module_recommendations
         )
         published_progress = copy.deepcopy(user_progress)
+        published_progress["personal_deficit_model"] = {
+            "competency_graph": copy.deepcopy(USER_COMPETENCY_GRAPHS[user_id]),
+            "typed_competency_graph": copy.deepcopy(USER_TYPED_COMPETENCY_GRAPHS[user_id]),
+            "relation_stats": copy.deepcopy(USER_SKILL_RELATION_STATS[user_id]),
+        }
         published_progress["module_recommendations"] = module_recommendations
         published_progress["task_parameters"] = task_parameters
         published_progress["recommendations"] = recommendations
@@ -249,12 +264,17 @@ def _get_active_module(
     condition,
 ) -> dict:
     if pending_key in ACTIVE_MODULES:
-        return ACTIVE_MODULES[pending_key]
+        module = ACTIVE_MODULES[pending_key]
+        module = _enrich_module_from_recommendations(module, module_recommendations)
+        ACTIVE_MODULES[pending_key] = module
+        return module
 
     module = _module_from_condition(condition)
 
     if not module:
         module = module_recommendations[0] if module_recommendations else None
+    else:
+        module = _enrich_module_from_recommendations(module, module_recommendations)
 
     if not module:
         module = {
@@ -277,6 +297,51 @@ def _get_active_module(
 
     ACTIVE_MODULES[pending_key] = module
     return module
+
+
+def _enrich_module_from_recommendations(
+    module: dict,
+    module_recommendations: list[dict],
+) -> dict:
+    if not module:
+        return module
+
+    current_tags = module.get("tags") or []
+    if len(current_tags) >= 3:
+        return module
+
+    recommendation = _matching_module_recommendation(module, module_recommendations)
+    recommendation_tags = recommendation.get("tags", []) if recommendation else []
+    if len(recommendation_tags) <= len(current_tags):
+        return module
+
+    enriched = copy.deepcopy(module)
+    enriched["tags"] = copy.deepcopy(recommendation_tags[:3])
+    enriched["main_competency"] = recommendation.get(
+        "main_competency",
+        enriched.get("main_competency"),
+    )
+    enriched["explanation"] = {
+        **enriched.get("explanation", {}),
+        "module_reason": recommendation.get("explanation", {}).get("reason"),
+        "signals": recommendation.get("explanation", {}).get("signals", {}),
+    }
+    return enriched
+
+
+def _matching_module_recommendation(
+    module: dict,
+    module_recommendations: list[dict],
+) -> dict | None:
+    main_competency = module.get("main_competency")
+    if not main_competency:
+        return module_recommendations[0] if module_recommendations else None
+
+    for recommendation in module_recommendations:
+        if recommendation.get("main_competency") == main_competency:
+            return recommendation
+
+    return module_recommendations[0] if module_recommendations else None
 
 
 def _module_from_condition(condition) -> dict | None:

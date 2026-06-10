@@ -84,11 +84,18 @@ async def listen_task_condition(user_id: str):
                     "condition": condition,
                     "module_ready": True
                 })
+                TASK_STATE[user_id] = {
+                    "learning_session_id": learning_session_id,
+                    "next_step_available": False,
+                    "status": "pending",
+                }
                 print("condition for user", user_id, ":", condition)
                 # отправляем через websocket
                 await manager.send_to_user(user_id, {
                     "type": "task_condition",
-                    "condition": condition
+                    "condition": condition,
+                    "learning_session_id": learning_session_id,
+                    "next_step_available": False,
                 })
                 print(f"Sent task condition to user {user_id} for session {learning_session_id}")
                 # отмечаем последнее сообщение
@@ -108,29 +115,43 @@ async def listen_task_correctness(user_id: str):
         data = json.loads(message["data"])
         event = data["event"]
         print(event, "event task_correctness")
+        if str(data.get("user_id")) != str(user_id):
+            continue
+
+        current_session_id = USER_STATE.get(user_id, {}).get("learning_session_id")
+        event_session_id = data.get("learning_session_id")
+        if event_session_id and current_session_id and str(event_session_id) != str(current_session_id):
+            continue
+
         task_state = TASK_STATE.get(user_id, {})
 
         if event == "task_completed":
             task_state.update({
-                "locked": False,
-                "status": "completed"
+                "learning_session_id": event_session_id or current_session_id,
+                "next_step_available": True,
+                "status": "completed",
             })
+            TASK_STATE[user_id] = task_state
 
             await manager.send_to_user(user_id, {
                 "type": "task_completed",
                 "attempt_id": data["attempt_id"],
+                "learning_session_id": event_session_id,
                 "next_step_available": True
             })
 
         elif event == "task_not_completed":
             task_state.update({
-                "locked": True,
-                "status": "failed"
+                "learning_session_id": event_session_id or current_session_id,
+                "next_step_available": False,
+                "status": "failed",
             })
+            TASK_STATE[user_id] = task_state
 
             await manager.send_to_user(user_id, {
                 "type": "task_failed",
                 "attempt_id": data["attempt_id"],
+                "learning_session_id": event_session_id,
                 "next_step_available": False
             })
 
@@ -181,14 +202,18 @@ async def websocket_endpoint(websocket: WebSocket):
             if data.type == "next_step":
                 task_state = TASK_STATE.get(user_id, {})
 
-                if task_state.get("locked"):
+                if not task_state.get("next_step_available"):
                     await manager.send_to_user(user_id, {
                         "type": "error",
-                        "error": "Wait until task is completed"
+                        "error": "Next step is not available yet",
+                        "next_step_available": False,
                     })
                     continue
 
                 state = USER_STATE[user_id]
+                task_state["next_step_available"] = False
+                task_state["status"] = "requested"
+                TASK_STATE[user_id] = task_state
 
                 await redis_client.publish(
                     "learning.next_step",
@@ -218,6 +243,11 @@ async def websocket_endpoint(websocket: WebSocket):
             '''if data.type == "set_session":
                 USER_STATE[user_id]["learning_session_id"] = data.learning_session_id
                 USER_STATE[user_id]["module_ready"] = True
+                TASK_STATE[user_id] = {
+                    "learning_session_id": data.learning_session_id,
+                    "next_step_available": False,
+                    "status": "pending",
+                }
                 # ❗ сбрасываем condition
                 state["condition"] = None
                 #state["module_ready"] = False
@@ -227,6 +257,11 @@ async def websocket_endpoint(websocket: WebSocket):
             if data.type == "set_session":
                 USER_STATE[user_id]["learning_session_id"] = data.learning_session_id
                 USER_STATE[user_id]["module_ready"] = True
+                TASK_STATE[user_id] = {
+                    "learning_session_id": data.learning_session_id,
+                    "next_step_available": False,
+                    "status": "pending",
+                }
 
                 # ❗ сбрасываем condition
                 state["condition"] = None

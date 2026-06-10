@@ -7,6 +7,8 @@ import sys
 from pathlib import Path
 from statistics import mean
 
+from sklearn.metrics import accuracy_score, brier_score_loss, log_loss, roc_auc_score
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
@@ -30,6 +32,9 @@ from app.state import (
     SKILL_REGISTRY,
     TYPED_COMPETENCY_GRAPH,
     USER_BANDIT_STATS,
+    USER_COMPETENCY_GRAPHS,
+    USER_SKILL_RELATION_STATS,
+    USER_TYPED_COMPETENCY_GRAPHS,
 )
 
 
@@ -67,6 +72,13 @@ CONFIGS = (
         "canonicalization": True,
         "graph": True,
         "typed_graph": False,
+        "policy": "rule",
+    },
+    {
+        "name": "canonical_typed_graph_rule_policy",
+        "canonicalization": True,
+        "graph": True,
+        "typed_graph": True,
         "policy": "rule",
     },
     {
@@ -224,6 +236,7 @@ def main() -> None:
         histories.extend(history)
 
     structural_cases = run_ml_structural_deficit_cases()
+    policy_comparison = run_policy_mastery_gain_comparison()
 
     write_json(output_dir / "personalization_experiment_summary.json", results)
     write_csv(output_dir / "personalization_experiment_summary.csv", results)
@@ -231,10 +244,13 @@ def main() -> None:
     write_csv(output_dir / "personalization_experiment_history.csv", histories)
     write_json(output_dir / "ml_structural_deficit_cases.json", structural_cases)
     write_csv(output_dir / "ml_structural_deficit_cases.csv", structural_cases)
+    write_json(output_dir / "policy_mastery_gain_comparison.json", policy_comparison)
+    write_csv(output_dir / "policy_mastery_gain_comparison.csv", policy_comparison)
 
     print(json.dumps({
         "summary": results,
         "ml_structural_cases": structural_cases,
+        "policy_mastery_gain_comparison": policy_comparison,
     }, ensure_ascii=False, indent=2))
 
 
@@ -247,6 +263,11 @@ def run_config(config: dict) -> tuple[dict, list[dict]]:
     user_progress = {"skills": {}, "clusters": {}}
     pending = None
     rewards = []
+    next_success_predictions = []
+    next_success_labels = []
+    main_mastery_gains = []
+    related_mastery_gains = []
+    deficit_reductions = []
     predictions = {"bkt": [], "ema": []}
     observations = []
     history = []
@@ -266,20 +287,52 @@ def run_config(config: dict) -> tuple[dict, list[dict]]:
         canonical_labels.update(evidence["competency"] for evidence in evidence_list)
         collect_prediction_errors(progress_before, evidence_list, predictions, observations)
 
+        progress_before_update = copy.deepcopy(user_progress)
         for evidence in evidence_list:
             apply_evidence(user_progress["skills"], evidence)
 
-        update_graph(evidence_list)
+        update_graph(
+            evidence_list,
+            user_id=user_id,
+            progress_before=progress_before_update,
+            progress_after=user_progress,
+        )
         if not config["graph"]:
-            COMPETENCY_GRAPH.clear()
-            TYPED_COMPETENCY_GRAPH.clear()
+            USER_COMPETENCY_GRAPHS[user_id].clear()
+            USER_TYPED_COMPETENCY_GRAPHS[user_id].clear()
         elif not config["typed_graph"]:
-            TYPED_COMPETENCY_GRAPH.clear()
+            USER_TYPED_COMPETENCY_GRAPHS[user_id].clear()
 
-        update_clusters(user_progress)
+        update_clusters(user_progress, user_id=user_id)
 
         reward = None
         if pending:
+            next_success_predictions.append(predict_task_success(
+                pending["task_parameters"],
+                pending["state_before"],
+            ))
+            next_success_labels.append(int(is_correct(raw_analysis)))
+
+            main_mastery_gains.append(skill_gain(
+                pending["state_before"]["skills"],
+                user_progress["skills"],
+                pending["task_parameters"]["main_competency"],
+            ))
+            related_skills = [
+                tag["name"]
+                for tag in pending["task_parameters"].get("tags", [])
+                if tag["name"] != pending["task_parameters"]["main_competency"]
+            ]
+            related_mastery_gains.append(average_skill_gain(
+                pending["state_before"]["skills"],
+                user_progress["skills"],
+                related_skills,
+            ))
+            deficit_reductions.append(skill_deficit_reduction(
+                pending["state_before"]["skills"],
+                user_progress["skills"],
+                pending["task_parameters"]["main_competency"],
+            ))
             reward = compute_module_reward(
                 state_before=pending["state_before"]["skills"],
                 state_after=user_progress["skills"],
@@ -295,6 +348,7 @@ def run_config(config: dict) -> tuple[dict, list[dict]]:
                     recommendation=pending["task_parameters"],
                     user_progress_before=pending["state_before"],
                     reward=reward,
+                    user_id=user_id,
                 )
 
         recommendations = build_recommendations(user_id, user_progress)
@@ -307,6 +361,7 @@ def run_config(config: dict) -> tuple[dict, list[dict]]:
                 context_id=context_id,
                 candidates=candidates,
                 user_progress=user_progress,
+                user_id=user_id,
             )
 
         if task_parameters:
@@ -338,16 +393,29 @@ def run_config(config: dict) -> tuple[dict, list[dict]]:
         ),
         "canonicalization_accuracy": canonicalization_accuracy(config),
         "typed_edge_precision": typed_edge_precision(config),
-        "structural_deficit_hit_at_3": structural_deficit_hit_at_3(config, user_progress),
+        "structural_deficit_hit_at_3": structural_deficit_hit_at_3(
+            config,
+            user_progress,
+            user_id=user_id,
+        ),
         "progress_updates": len(OBSERVATIONS),
         "recommendations": generated_recommendations,
         "reward_events": reward_events,
         "average_reward": round(mean(rewards), 4) if rewards else None,
         "cumulative_reward": round(sum(rewards), 4),
+        "average_main_mastery_gain": round(mean(main_mastery_gains), 4)
+        if main_mastery_gains else None,
+        "cumulative_main_mastery_gain": round(sum(main_mastery_gains), 4),
+        "average_related_mastery_gain": round(mean(related_mastery_gains), 4)
+        if related_mastery_gains else None,
+        "average_deficit_reduction": round(mean(deficit_reductions), 4)
+        if deficit_reductions else None,
+        "cumulative_deficit_reduction": round(sum(deficit_reductions), 4),
         "success_rate": round(
             mean(float(is_correct(item)) for item in OBSERVATIONS),
             4,
         ),
+        **prediction_metrics(next_success_labels, next_success_predictions),
         "bkt_mae": mae(predictions["bkt"], observations),
         "ema_mae": mae(predictions["ema"], observations),
         "final_average_mastery": average_state_value(user_progress, "mastery"),
@@ -424,16 +492,28 @@ def run_ml_structural_deficit_cases() -> list[dict]:
     rows = []
     for case in cases:
         reset_runtime_state()
+        user_id = case["student"]
         user_progress = {"skills": {}, "clusters": {}}
         for raw_analysis in case["observations"]:
             evidence_list = canonicalize_evidence_list(extract_evidence(raw_analysis), user_progress)
+            progress_before_update = copy.deepcopy(user_progress)
             for evidence in evidence_list:
                 apply_evidence(user_progress["skills"], evidence)
-            update_graph(evidence_list)
-            update_clusters(user_progress)
+            update_graph(
+                evidence_list,
+                user_id=user_id,
+                progress_before=progress_before_update,
+                progress_after=user_progress,
+            )
+            update_clusters(user_progress, user_id=user_id)
 
         main_skill = "model_evaluation"
-        related = ranked_structural_neighbors(main_skill, user_progress, limit=4)
+        related = ranked_structural_neighbors(
+            main_skill,
+            user_progress,
+            limit=4,
+            user_id=user_id,
+        )
         main_state = user_progress["skills"].get(main_skill, {})
         rows.append({
             "student": case["student"],
@@ -451,13 +531,183 @@ def run_ml_structural_deficit_cases() -> list[dict]:
     return rows
 
 
-def ranked_structural_neighbors(main_skill: str, user_progress: dict, limit: int) -> list[dict]:
+def run_policy_mastery_gain_comparison() -> list[dict]:
+    rows = []
+    for policy in ("rule", "linucb"):
+        reset_runtime_state()
+        total_main_gain = 0.0
+        total_deficit_reduction = 0.0
+        total_related_gain = 0.0
+        total_reward = 0.0
+        next_success_predictions = []
+        next_success_labels = []
+        events = 0
+
+        for student_index in range(1, 31):
+            user_progress = {"skills": {}, "clusters": {}}
+            context_id = f"policy_{policy}:student_{student_index}"
+            pending = None
+            ability = 0.35 + 0.02 * (student_index % 10)
+            preferred_variant = ("support", "balanced", "stretch")[student_index % 3]
+
+            for step in range(1, 9):
+                previous_variant = (
+                    pending["task_parameters"].get("variant")
+                    if pending
+                    else None
+                )
+                raw_analysis = policy_observation(step, ability, preferred_variant, previous_variant)
+                evidence_list = canonicalize_evidence_list(extract_evidence(raw_analysis), user_progress)
+
+                progress_before_update = copy.deepcopy(user_progress)
+                for evidence in evidence_list:
+                    apply_evidence(user_progress["skills"], evidence)
+
+                update_graph(
+                    evidence_list,
+                    user_id=context_id,
+                    progress_before=progress_before_update,
+                    progress_after=user_progress,
+                )
+                update_clusters(user_progress, user_id=context_id)
+
+                if pending:
+                    next_success_predictions.append(predict_task_success(
+                        pending["task_parameters"],
+                        pending["state_before"],
+                    ))
+                    next_success_labels.append(int(is_correct(raw_analysis)))
+
+                    main_skill = pending["task_parameters"]["main_competency"]
+                    related_skills = [
+                        tag["name"]
+                        for tag in pending["task_parameters"].get("tags", [])
+                        if tag["name"] != main_skill
+                    ]
+                    total_main_gain += skill_gain(
+                        pending["state_before"]["skills"],
+                        user_progress["skills"],
+                        main_skill,
+                    )
+                    total_related_gain += average_skill_gain(
+                        pending["state_before"]["skills"],
+                        user_progress["skills"],
+                        related_skills,
+                    )
+                    total_deficit_reduction += skill_deficit_reduction(
+                        pending["state_before"]["skills"],
+                        user_progress["skills"],
+                        main_skill,
+                    )
+                    reward = compute_module_reward(
+                        state_before=pending["state_before"]["skills"],
+                        state_after=user_progress["skills"],
+                        recommendation=pending["task_parameters"],
+                        is_correct=is_correct(raw_analysis),
+                    )
+                    total_reward += reward
+                    events += 1
+
+                    if policy == "linucb":
+                        update_task_parameter_value(
+                            bandit_context_id=context_id,
+                            recommendation=pending["task_parameters"],
+                            user_progress_before=pending["state_before"],
+                            reward=reward,
+                            user_id=context_id,
+                        )
+
+                recommendations = build_recommendations(context_id, user_progress)
+                if not recommendations:
+                    pending = None
+                    continue
+
+                module = recommendations[0]
+                candidates = build_task_parameter_candidates(module, user_progress)
+                task_parameters = choose_policy_action(
+                    config={"policy": policy},
+                    context_id=context_id,
+                    candidates=candidates,
+                    user_progress=user_progress,
+                    user_id=context_id,
+                )
+                pending = {
+                    "task_parameters": task_parameters,
+                    "state_before": copy.deepcopy(user_progress),
+                }
+
+        rows.append({
+            "policy": "Rule-based" if policy == "rule" else "LinUCB",
+            "students": 30,
+            "steps_per_student": 8,
+            "reward_events": events,
+            "average_main_mastery_gain": round(total_main_gain / max(events, 1), 4),
+            "cumulative_main_mastery_gain": round(total_main_gain, 4),
+            "average_related_mastery_gain": round(total_related_gain / max(events, 1), 4),
+            "average_deficit_reduction": round(total_deficit_reduction / max(events, 1), 4),
+            "cumulative_deficit_reduction": round(total_deficit_reduction, 4),
+            "average_reward": round(total_reward / max(events, 1), 4),
+            **prediction_metrics(next_success_labels, next_success_predictions),
+        })
+
+    return rows
+
+
+def policy_observation(
+    step: int,
+    ability: float,
+    preferred_variant: str,
+    previous_variant: str | None,
+) -> dict:
+    base_score = 2.5 + step * 0.45 + ability * 2.2
+    action_bonus = 0.0
+
+    if previous_variant:
+        if previous_variant == preferred_variant:
+            action_bonus = 1.25
+        elif {previous_variant, preferred_variant} == {"support", "stretch"}:
+            action_bonus = -0.55
+        else:
+            action_bonus = 0.25
+
+    score = min(8.8, max(1.5, base_score + action_bonus))
+    is_success = score >= 6.0
+    return {
+        "correctness": {"is_correct": is_success, "score": score / 10.0},
+        "tags": [
+            _tag("model evaluation", score, 1.0, True, 0.88),
+            _tag("metrics", max(2.0, score - 0.7), 0.8, True, 0.82),
+            _tag("cross validation", max(2.0, score - 1.0), 0.7, step > 2, 0.78),
+        ],
+    }
+
+
+def ranked_structural_neighbors(
+    main_skill: str,
+    user_progress: dict,
+    limit: int,
+    user_id: str | None = None,
+) -> list[dict]:
+    graph = (
+        USER_COMPETENCY_GRAPHS[str(user_id)]
+        if user_id is not None
+        else COMPETENCY_GRAPH
+    )
+    typed_graph = (
+        USER_TYPED_COMPETENCY_GRAPHS[str(user_id)]
+        if user_id is not None
+        else TYPED_COMPETENCY_GRAPH
+    )
     rows = []
     for skill, state in user_progress.get("skills", {}).items():
         if skill == main_skill:
             continue
-        graph_weight = COMPETENCY_GRAPH[main_skill].get(skill, 0.0)
-        typed_weight = typed_relation_weight(main_skill, skill)
+        graph_weight = graph[main_skill].get(skill, 0.0)
+        typed_weight = typed_relation_weight(
+            main_skill,
+            skill,
+            typed_graph=typed_graph,
+        )
         relation_weight = round(graph_weight + typed_weight, 4)
         rows.append({
             "skill": skill,
@@ -475,12 +725,18 @@ def choose_policy_action(
     context_id: str,
     candidates: list[dict],
     user_progress: dict,
+    user_id: str | None = None,
 ) -> dict | None:
     if not candidates:
         return None
 
     if config["policy"] == "linucb":
-        return choose_task_parameters(context_id, candidates, user_progress)
+        return choose_task_parameters(
+            context_id,
+            candidates,
+            user_progress,
+            user_id=user_id,
+        )
 
     if config["policy"] == "random":
         return random.choice(candidates)
@@ -584,10 +840,19 @@ def typed_edge_precision(config: dict) -> float | None:
     return round(correct_edges / typed_edges, 4)
 
 
-def structural_deficit_hit_at_3(config: dict, user_progress: dict) -> float | None:
+def structural_deficit_hit_at_3(
+    config: dict,
+    user_progress: dict,
+    user_id: str | None = None,
+) -> float | None:
     if not config["typed_graph"]:
         return None
 
+    typed_graph = (
+        USER_TYPED_COMPETENCY_GRAPHS[str(user_id)]
+        if user_id is not None
+        else TYPED_COMPETENCY_GRAPH
+    )
     checks = {
         "recursion": {"functions", "conditionals", "base_case", "call_stack"},
         "dynamic_programming": {"recursion", "arrays"},
@@ -596,7 +861,11 @@ def structural_deficit_hit_at_3(config: dict, user_progress: dict) -> float | No
     for skill, expected_related in checks.items():
         ranked = sorted(
             user_progress.get("skills", {}).keys(),
-            key=lambda candidate: typed_relation_weight(skill, candidate),
+            key=lambda candidate: typed_relation_weight(
+                skill,
+                candidate,
+                typed_graph=typed_graph,
+            ),
             reverse=True,
         )
         top_3 = set([item for item in ranked if item != skill][:3])
@@ -620,6 +889,74 @@ def evidence_observation(evidence: dict) -> float:
     if not evidence.get("applied", False):
         score *= 0.3
     return max(0.0, min(score, 1.0))
+
+
+def skill_gain(state_before: dict, state_after: dict, skill: str) -> float:
+    before = state_before.get(skill, {}).get("mastery", 0.0)
+    after = state_after.get(skill, {}).get("mastery", 0.0)
+    return round(max(0.0, after - before), 4)
+
+
+def average_skill_gain(state_before: dict, state_after: dict, skills: list[str]) -> float:
+    if not skills:
+        return 0.0
+
+    return round(mean(skill_gain(state_before, state_after, skill) for skill in skills), 4)
+
+
+def skill_deficit_reduction(state_before: dict, state_after: dict, skill: str) -> float:
+    before = state_before.get(skill, {}).get("deficit", 1.0)
+    after = state_after.get(skill, {}).get("deficit", 1.0)
+    return round(max(0.0, before - after), 4)
+
+
+def predict_task_success(task_parameters: dict, user_progress_before: dict) -> float:
+    skills = user_progress_before.get("skills", {})
+    tags = task_parameters.get("tags", [])
+    if not tags:
+        return 0.5
+
+    weighted_mastery = 0.0
+    total_weight = 0.0
+    for tag in tags:
+        skill = tag["name"]
+        required_level = float(tag.get("required_level", 0.5))
+        state = skills.get(skill, {})
+        mastery = float(state.get("bkt_mastery", state.get("mastery", 0.2)))
+        weight = max(required_level, 0.1)
+        weighted_mastery += mastery * weight
+        total_weight += weight
+
+    mastery_score = weighted_mastery / max(total_weight, 1e-9)
+    difficulty = float(task_parameters.get("difficulty", 0.5))
+    raw_probability = 0.5 + 0.75 * (mastery_score - difficulty)
+    return round(max(0.01, min(raw_probability, 0.99)), 4)
+
+
+def prediction_metrics(labels: list[int], predictions: list[float]) -> dict:
+    if not labels:
+        return {
+            "next_success_samples": 0,
+            "next_success_auc": None,
+            "next_success_accuracy": None,
+            "next_success_log_loss": None,
+            "next_success_brier": None,
+        }
+
+    rounded_predictions = [1 if prediction >= 0.5 else 0 for prediction in predictions]
+    metrics = {
+        "next_success_samples": len(labels),
+        "next_success_accuracy": round(accuracy_score(labels, rounded_predictions), 4),
+        "next_success_log_loss": round(log_loss(labels, predictions, labels=[0, 1]), 4),
+        "next_success_brier": round(brier_score_loss(labels, predictions), 4),
+    }
+
+    if len(set(labels)) > 1:
+        metrics["next_success_auc"] = round(roc_auc_score(labels, predictions), 4)
+    else:
+        metrics["next_success_auc"] = None
+
+    return metrics
 
 
 def mae(predictions: list[float], observations: list[float]) -> float | None:
@@ -647,6 +984,9 @@ def reset_runtime_state() -> None:
     SKILL_ALIASES.clear()
     SKILL_REGISTRY.clear()
     USER_BANDIT_STATS.clear()
+    USER_COMPETENCY_GRAPHS.clear()
+    USER_TYPED_COMPETENCY_GRAPHS.clear()
+    USER_SKILL_RELATION_STATS.clear()
 
 
 def write_json(path: Path, value) -> None:

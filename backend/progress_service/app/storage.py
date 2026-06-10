@@ -8,6 +8,7 @@ from typing import Any
 
 import numpy as np
 
+from app.domain.skill_ontology import normalize_skill_state
 from app.state import (
     ACTIVE_MODULES,
     COMPETENCY_GRAPH,
@@ -16,11 +17,16 @@ from app.state import (
     RAW_ANALYSIS,
     RECOMMENDATION_HISTORY,
     SKILL_ALIASES,
+    SKILL_HIERARCHY,
     SKILL_REGISTRY,
+    SKILL_RELATION_STATS,
     TYPED_COMPETENCY_GRAPH,
     USER_BANDIT_STATS,
+    USER_COMPETENCY_GRAPHS,
     USER_PROGRESS,
     USER_RECOMMENDATIONS,
+    USER_SKILL_RELATION_STATS,
+    USER_TYPED_COMPETENCY_GRAPHS,
 )
 
 
@@ -38,11 +44,16 @@ STATE_KEYS = {
     "raw_analysis": RAW_ANALYSIS,
     "recommendation_history": RECOMMENDATION_HISTORY,
     "skill_aliases": SKILL_ALIASES,
+    "skill_hierarchy": SKILL_HIERARCHY,
     "skill_registry": SKILL_REGISTRY,
+    "skill_relation_stats": SKILL_RELATION_STATS,
     "typed_competency_graph": TYPED_COMPETENCY_GRAPH,
     "user_bandit_stats": USER_BANDIT_STATS,
+    "user_competency_graphs": USER_COMPETENCY_GRAPHS,
     "user_progress": USER_PROGRESS,
     "user_recommendations": USER_RECOMMENDATIONS,
+    "user_skill_relation_stats": USER_SKILL_RELATION_STATS,
+    "user_typed_competency_graphs": USER_TYPED_COMPETENCY_GRAPHS,
 }
 
 
@@ -103,7 +114,12 @@ def load_runtime_state(db_path: Path | str = DEFAULT_DB_PATH) -> None:
     _replace_dict(PENDING_ACTIONS, loaded.get("pending_actions", {}))
     _replace_dict(ACTIVE_MODULES, loaded.get("active_modules", {}))
     _replace_dict(SKILL_ALIASES, loaded.get("skill_aliases", {}))
+    _replace_dict(SKILL_HIERARCHY, loaded.get("skill_hierarchy", {}))
     _replace_dict(SKILL_REGISTRY, loaded.get("skill_registry", {}))
+
+    SKILL_RELATION_STATS.clear()
+    for source, targets in loaded.get("skill_relation_stats", {}).items():
+        SKILL_RELATION_STATS[source] = defaultdict(dict, targets)
 
     RECOMMENDATION_HISTORY.clear()
     for user_id, history in loaded.get("recommendation_history", {}).items():
@@ -119,6 +135,33 @@ def load_runtime_state(db_path: Path | str = DEFAULT_DB_PATH) -> None:
         for target, relations in targets.items():
             TYPED_COMPETENCY_GRAPH[source][target] = defaultdict(float, relations)
 
+    USER_COMPETENCY_GRAPHS.clear()
+    for user_id, graph in loaded.get("user_competency_graphs", {}).items():
+        USER_COMPETENCY_GRAPHS[user_id] = defaultdict(lambda: defaultdict(float))
+        for source, edges in graph.items():
+            USER_COMPETENCY_GRAPHS[user_id][source] = defaultdict(float, edges)
+
+    USER_TYPED_COMPETENCY_GRAPHS.clear()
+    for user_id, graph in loaded.get("user_typed_competency_graphs", {}).items():
+        USER_TYPED_COMPETENCY_GRAPHS[user_id] = defaultdict(
+            lambda: defaultdict(lambda: defaultdict(float))
+        )
+        for source, targets in graph.items():
+            USER_TYPED_COMPETENCY_GRAPHS[user_id][source] = defaultdict(
+                lambda: defaultdict(float)
+            )
+            for target, relations in targets.items():
+                USER_TYPED_COMPETENCY_GRAPHS[user_id][source][target] = defaultdict(
+                    float,
+                    relations,
+                )
+
+    USER_SKILL_RELATION_STATS.clear()
+    for user_id, graph in loaded.get("user_skill_relation_stats", {}).items():
+        USER_SKILL_RELATION_STATS[user_id] = defaultdict(lambda: defaultdict(dict))
+        for source, targets in graph.items():
+            USER_SKILL_RELATION_STATS[user_id][source] = defaultdict(dict, targets)
+
     USER_BANDIT_STATS.clear()
     for context_id, actions in loaded.get("user_bandit_stats", {}).items():
         USER_BANDIT_STATS[context_id] = {}
@@ -129,6 +172,9 @@ def load_runtime_state(db_path: Path | str = DEFAULT_DB_PATH) -> None:
                 "count": int(stats.get("count", 0)),
                 "value": float(stats.get("value", 0.0)),
             }
+
+    for progress in USER_PROGRESS.values():
+        normalize_skill_state(progress.get("skills", {}))
 
 
 def persist_runtime_state(db_path: Path | str = DEFAULT_DB_PATH) -> None:

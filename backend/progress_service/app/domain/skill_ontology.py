@@ -3,20 +3,31 @@ import re
 from datetime import datetime
 from difflib import SequenceMatcher
 
+import numpy as np
+from sklearn.cluster import AgglomerativeClustering
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics.pairwise import cosine_distances, cosine_similarity
 
 from app.state import (
     COMPETENCY_GRAPH,
     SKILL_ALIASES,
+    SKILL_HIERARCHY,
     SKILL_REGISTRY,
+    SKILL_RELATION_STATS,
     TYPED_COMPETENCY_GRAPH,
+    USER_COMPETENCY_GRAPHS,
+    USER_SKILL_RELATION_STATS,
+    USER_TYPED_COMPETENCY_GRAPHS,
 )
 
 
 MERGE_SIMILARITY_THRESHOLD = 0.86
 FUZZY_SIMILARITY_THRESHOLD = 0.92
 MIN_PARENT_CONFIDENCE = 0.72
+MIN_PREREQUISITE_CONFIDENCE = 0.68
+MIN_RELATED_CONFIDENCE = 0.45
+HIERARCHY_DISTANCE_THRESHOLD = 0.72
+HIERARCHY_MIN_CLUSTER_SIZE = 2
 
 RELATION_REINFORCEMENT = {
     "same_as": 1.0,
@@ -53,28 +64,18 @@ _TOKEN_ALIASES = {
     "algoritmy": "algorithms",
     "usloviya": "conditionals",
 }
-
-_STATIC_PARENTS = {
-    "algorithms": {"recursion", "sorting", "search", "dynamic_programming"},
-    "programming": {
-        "loops",
-        "functions",
-        "conditionals",
-        "recursion",
-        "variables",
-        "data_structures",
-    },
-    "math": {"algebra", "calculus", "statistics", "probability", "discrete_math"},
-    "discrete_math": {"recursion", "graphs", "combinatorics"},
-    "functions": {"recursion"},
-}
-
-_STATIC_PREREQUISITES = {
-    "recursion": {"functions", "conditionals", "call_stack", "base_case"},
-    "loops": {"variables", "conditionals"},
-    "dynamic_programming": {"recursion", "arrays"},
-}
-
+_TOKEN_ALIASES.update({
+    "циклы": "loops",
+    "цикл": "loops",
+    "рекурсия": "recursion",
+    "рекурсивные": "recursion",
+    "функции": "functions",
+    "функция": "functions",
+    "математика": "math",
+    "mathematics": "math",
+    "алгоритмы": "algorithms",
+    "условия": "conditionals",
+})
 
 def canonicalize_evidence_list(evidence_list: list[dict], user_progress: dict) -> list[dict]:
     canonicalized = []
@@ -107,13 +108,18 @@ def canonicalize_skill(raw_name: str) -> tuple[str, float, str]:
         return raw_name, 0.0, "empty"
 
     if normalized in SKILL_ALIASES:
-        return SKILL_ALIASES[normalized], 1.0, "alias"
+        canonical = normalize_skill_name(SKILL_ALIASES[normalized])
+        return canonical or SKILL_ALIASES[normalized], 1.0, "alias"
 
     canonical_by_rule = _canonical_by_rule(normalized)
     if canonical_by_rule:
         return canonical_by_rule, 0.98, "rule"
 
-    candidates = list(SKILL_REGISTRY.keys())
+    candidates = sorted({
+        normalize_skill_name(candidate)
+        for candidate in SKILL_REGISTRY.keys()
+        if normalize_skill_name(candidate)
+    })
     if not candidates:
         return normalized, 1.0, "new"
 
@@ -135,6 +141,7 @@ def register_skill_alias(
     method: str,
 ) -> None:
     raw_normalized = normalize_skill_name(raw_name)
+    canonical = normalize_skill_name(canonical) or canonical
     SKILL_ALIASES[raw_normalized] = canonical
     SKILL_ALIASES[canonical] = canonical
 
@@ -162,13 +169,25 @@ def register_skill_alias(
     })
 
 
+def normalize_skill_state(skills_state: dict) -> None:
+    for raw_name in list(skills_state.keys()):
+        canonical, confidence, method = canonicalize_skill(raw_name)
+        merge_skill_state(skills_state, raw_name, canonical)
+        register_skill_alias(raw_name, canonical, confidence, method)
+
+
 def merge_skill_state(skills_state: dict, raw_name: str, canonical: str) -> None:
     raw_normalized = normalize_skill_name(raw_name)
-    if raw_normalized == canonical:
+    if raw_name == canonical and raw_normalized == canonical:
         return
 
+    source_candidates = []
+    for key in (raw_name, raw_normalized):
+        if key not in source_candidates:
+            source_candidates.append(key)
+
     source_keys = [
-        key for key in (raw_name, raw_normalized)
+        key for key in source_candidates
         if key in skills_state and key != canonical
     ]
 
@@ -189,30 +208,58 @@ def merge_graph_nodes(source: str, target: str) -> None:
     if not source or source == target:
         return
 
-    if source in COMPETENCY_GRAPH:
-        for neighbor, weight in list(COMPETENCY_GRAPH[source].items()):
+    _merge_untyped_graph_nodes(COMPETENCY_GRAPH, source, target)
+    _merge_typed_graph_nodes(TYPED_COMPETENCY_GRAPH, SKILL_RELATION_STATS, source, target)
+
+    for user_graph in USER_COMPETENCY_GRAPHS.values():
+        _merge_untyped_graph_nodes(user_graph, source, target)
+
+    for user_id, user_typed_graph in USER_TYPED_COMPETENCY_GRAPHS.items():
+        _merge_typed_graph_nodes(
+            user_typed_graph,
+            USER_SKILL_RELATION_STATS[user_id],
+            source,
+            target,
+        )
+
+
+def _merge_untyped_graph_nodes(graph: dict, source: str, target: str) -> None:
+    if source in graph:
+        for neighbor, weight in list(graph[source].items()):
             if neighbor != target:
-                COMPETENCY_GRAPH[target][neighbor] = max(
-                    COMPETENCY_GRAPH[target].get(neighbor, 0.0),
+                graph[target][neighbor] = max(
+                    graph[target].get(neighbor, 0.0),
                     weight,
                 )
-        del COMPETENCY_GRAPH[source]
+        del graph[source]
 
-    for node, edges in list(COMPETENCY_GRAPH.items()):
+    for node, edges in list(graph.items()):
         if source in edges:
             weight = edges.pop(source)
             if node != target:
                 edges[target] = max(edges.get(target, 0.0), weight)
 
-    if target in COMPETENCY_GRAPH:
-        COMPETENCY_GRAPH[target][target] = 1.0
-
-    _merge_typed_graph_nodes(source, target)
+    if target in graph:
+        graph[target][target] = 1.0
 
 
-def update_typed_relations(evidence_list: list[dict]) -> None:
+def update_typed_relations(
+    evidence_list: list[dict],
+    typed_graph: dict | None = None,
+    relation_stats: dict | None = None,
+    progress_before: dict | None = None,
+    progress_after: dict | None = None,
+) -> None:
+    typed_graph = typed_graph if typed_graph is not None else TYPED_COMPETENCY_GRAPH
+    relation_stats = relation_stats if relation_stats is not None else SKILL_RELATION_STATS
     active_skills = {
         evidence["competency"]
+        for evidence in evidence_list
+        if evidence.get("competency")
+    }
+    _rebuild_embedding_hierarchy(active_skills)
+    evidence_by_skill = {
+        evidence["competency"]: evidence
         for evidence in evidence_list
         if evidence.get("competency")
     }
@@ -225,46 +272,117 @@ def update_typed_relations(evidence_list: list[dict]) -> None:
             continue
 
         if raw and normalize_skill_name(raw) != source:
-            _add_typed_edge(source, normalize_skill_name(raw), "same_as", confidence)
-            _add_typed_edge(normalize_skill_name(raw), source, "same_as", confidence)
+            _add_typed_edge(
+                source,
+                normalize_skill_name(raw),
+                "same_as",
+                confidence,
+                typed_graph=typed_graph,
+            )
+            _add_typed_edge(
+                normalize_skill_name(raw),
+                source,
+                "same_as",
+                confidence,
+                typed_graph=typed_graph,
+            )
 
         for target in active_skills:
             if target == source:
                 continue
 
-            relation, relation_confidence = infer_relation(source, target)
+            pair_stats = _update_pair_stats(
+                source=source,
+                target=target,
+                source_evidence=evidence,
+                target_evidence=evidence_by_skill[target],
+                relation_stats=relation_stats,
+                progress_before=progress_before,
+                progress_after=progress_after,
+            )
+            relation, relation_confidence = infer_relation(source, target, pair_stats)
             reinforcement = confidence * relation_confidence
-            _add_typed_edge(source, target, relation, reinforcement)
+            _add_typed_edge(
+                source,
+                target,
+                relation,
+                reinforcement,
+                typed_graph=typed_graph,
+            )
 
 
-def infer_relation(source: str, target: str) -> tuple[str, float]:
+def infer_relation(source: str, target: str, pair_stats: dict | None = None) -> tuple[str, float]:
     if source == target:
         return "same_as", 1.0
 
-    if _is_parent(source, target):
-        return "parent_of", 0.9
-
-    if _is_parent(target, source):
-        return "child_of", 0.9
-
-    if target in _STATIC_PREREQUISITES.get(source, set()):
-        return "prerequisite_of", 0.82
-
-    if source in _STATIC_PREREQUISITES.get(target, set()):
-        return "supports", 0.72
-
+    pair_stats = pair_stats or SKILL_RELATION_STATS.get(source, {}).get(target, {})
+    semantic_similarity = _semantic_similarity(source, target)
     source_tokens = set(source.split("_"))
     target_tokens = set(target.split("_"))
-    if source_tokens and target_tokens and source_tokens < target_tokens:
-        return "parent_of", MIN_PARENT_CONFIDENCE
-    if source_tokens and target_tokens and target_tokens < source_tokens:
-        return "child_of", MIN_PARENT_CONFIDENCE
+    source_generality = _generality_score(source)
+    target_generality = _generality_score(target)
+    temporal_score = float(pair_stats.get("temporal_support", 0.0))
+    reverse_temporal_score = float(pair_stats.get("reverse_temporal_support", 0.0))
+    cooccurrence_confidence = _cooccurrence_confidence(pair_stats)
+
+    if semantic_similarity >= MERGE_SIMILARITY_THRESHOLD:
+        return "same_as", semantic_similarity
+
+    if (
+        source_tokens
+        and target_tokens
+        and source_tokens < target_tokens
+        and semantic_similarity >= 0.35
+    ):
+        return "parent_of", max(MIN_PARENT_CONFIDENCE, semantic_similarity)
+
+    if (
+        source_tokens
+        and target_tokens
+        and target_tokens < source_tokens
+        and semantic_similarity >= 0.35
+    ):
+        return "child_of", max(MIN_PARENT_CONFIDENCE, semantic_similarity)
+
+    hierarchy_relation = _hierarchy_relation(source, target)
+    if hierarchy_relation:
+        return hierarchy_relation
+
+    if (
+        source_generality > target_generality + 0.25
+        and semantic_similarity >= 0.42
+        and cooccurrence_confidence >= 0.35
+    ):
+        return "parent_of", max(MIN_PARENT_CONFIDENCE, semantic_similarity)
+
+    if (
+        target_generality > source_generality + 0.25
+        and semantic_similarity >= 0.42
+        and cooccurrence_confidence >= 0.35
+    ):
+        return "child_of", max(MIN_PARENT_CONFIDENCE, semantic_similarity)
+
+    if temporal_score >= MIN_PREREQUISITE_CONFIDENCE:
+        return "prerequisite_of", temporal_score
+
+    if reverse_temporal_score >= MIN_PREREQUISITE_CONFIDENCE:
+        return "supports", reverse_temporal_score
+
+    related_confidence = max(cooccurrence_confidence, semantic_similarity * 0.65)
+    if related_confidence >= MIN_RELATED_CONFIDENCE:
+        return "related_to", related_confidence
 
     return "related_to", 0.6
 
 
-def typed_relation_weight(source: str, target: str, relation_types: set[str] | None = None) -> float:
-    relations = TYPED_COMPETENCY_GRAPH.get(source, {}).get(target, {})
+def typed_relation_weight(
+    source: str,
+    target: str,
+    relation_types: set[str] | None = None,
+    typed_graph: dict | None = None,
+) -> float:
+    graph = typed_graph if typed_graph is not None else TYPED_COMPETENCY_GRAPH
+    relations = graph.get(source, {}).get(target, {})
     if not relations:
         return 0.0
 
@@ -371,29 +489,327 @@ def _merge_progress_states(target: dict | None, source: dict) -> dict:
     return merged
 
 
-def _merge_typed_graph_nodes(source: str, target: str) -> None:
-    if source in TYPED_COMPETENCY_GRAPH:
-        for neighbor, relations in list(TYPED_COMPETENCY_GRAPH[source].items()):
+def _merge_typed_graph_nodes(
+    typed_graph: dict,
+    relation_stats: dict,
+    source: str,
+    target: str,
+) -> None:
+    if source in typed_graph:
+        for neighbor, relations in list(typed_graph[source].items()):
             if neighbor != target:
                 for relation, weight in relations.items():
-                    _add_typed_edge(target, neighbor, relation, weight)
-        del TYPED_COMPETENCY_GRAPH[source]
+                    _add_typed_edge(
+                        target,
+                        neighbor,
+                        relation,
+                        weight,
+                        typed_graph=typed_graph,
+                    )
+        del typed_graph[source]
 
-    for node, edges in list(TYPED_COMPETENCY_GRAPH.items()):
+    for node, edges in list(typed_graph.items()):
         if source in edges:
             relations = edges.pop(source)
             if node != target:
                 for relation, weight in relations.items():
-                    _add_typed_edge(node, target, relation, weight)
+                    _add_typed_edge(
+                        node,
+                        target,
+                        relation,
+                        weight,
+                        typed_graph=typed_graph,
+                    )
+
+    if source in relation_stats:
+        for neighbor, stats in list(relation_stats[source].items()):
+            if neighbor != target:
+                _merge_pair_stats(target, neighbor, stats, relation_stats=relation_stats)
+        del relation_stats[source]
+
+    for node, edges in list(relation_stats.items()):
+        if source in edges:
+            stats = edges.pop(source)
+            if node != target:
+                _merge_pair_stats(node, target, stats, relation_stats=relation_stats)
 
 
-def _add_typed_edge(source: str, target: str, relation: str, confidence: float) -> None:
+def _add_typed_edge(
+    source: str,
+    target: str,
+    relation: str,
+    confidence: float,
+    typed_graph: dict | None = None,
+) -> None:
     if not source or not target:
         return
 
+    graph = typed_graph if typed_graph is not None else TYPED_COMPETENCY_GRAPH
     increment = RELATION_REINFORCEMENT.get(relation, 0.25) * max(0.0, min(confidence, 1.0))
-    current = TYPED_COMPETENCY_GRAPH[source][target].get(relation, 0.0)
-    TYPED_COMPETENCY_GRAPH[source][target][relation] = min(1.0, current + increment)
+    current = graph[source][target].get(relation, 0.0)
+    graph[source][target][relation] = min(1.0, current + increment)
+
+
+def _rebuild_embedding_hierarchy(active_skills: set[str]) -> None:
+    skills = sorted(set(SKILL_REGISTRY.keys()) | set(active_skills))
+    if len(skills) < HIERARCHY_MIN_CLUSTER_SIZE:
+        SKILL_HIERARCHY.clear()
+        SKILL_HIERARCHY.update({
+            "clusters": [],
+            "edges": [],
+            "updated_at": datetime.utcnow().isoformat(),
+            "source": "embedding_hierarchy",
+        })
+        return
+
+    try:
+        vectorizer = TfidfVectorizer(analyzer="char_wb", ngram_range=(3, 5))
+        matrix = vectorizer.fit_transform(_skill_documents(skills))
+    except ValueError:
+        return
+
+    distance_matrix = cosine_distances(matrix)
+    try:
+        clustering = AgglomerativeClustering(
+            n_clusters=None,
+            metric="precomputed",
+            linkage="average",
+            distance_threshold=HIERARCHY_DISTANCE_THRESHOLD,
+        )
+    except TypeError:
+        clustering = AgglomerativeClustering(
+            n_clusters=None,
+            affinity="precomputed",
+            linkage="average",
+            distance_threshold=HIERARCHY_DISTANCE_THRESHOLD,
+        )
+    labels = clustering.fit_predict(distance_matrix)
+    clusters = []
+    hierarchy_edges = []
+
+    for label in sorted(set(labels)):
+        members = [
+            skill
+            for skill, member_label in zip(skills, labels)
+            if member_label == label
+        ]
+        if len(members) < HIERARCHY_MIN_CLUSTER_SIZE:
+            continue
+
+        parent = _select_cluster_parent(members, distance_matrix, skills)
+        children = [member for member in members if member != parent]
+        cohesion = _cluster_cohesion(members, distance_matrix, skills)
+        clusters.append({
+            "id": f"cluster_{label}",
+            "parent": parent,
+            "children": children,
+            "members": members,
+            "cohesion": round(cohesion, 4),
+        })
+
+        for child in children:
+            confidence = max(MIN_PARENT_CONFIDENCE, min(1.0, cohesion))
+            hierarchy_edges.append({
+                "source": parent,
+                "target": child,
+                "relation": "parent_of",
+                "confidence": round(confidence, 4),
+            })
+            _add_typed_edge(parent, child, "parent_of", confidence)
+            _add_typed_edge(child, parent, "child_of", confidence)
+            _merge_pair_stats(parent, child, {
+                "cooccurrences": 0,
+                "evidence_strength": 0.0,
+                "semantic_similarity": confidence,
+                "temporal_support": 0.0,
+                "reverse_temporal_support": 0.0,
+            })
+
+    SKILL_HIERARCHY.clear()
+    SKILL_HIERARCHY.update({
+        "clusters": clusters,
+        "edges": hierarchy_edges,
+        "updated_at": datetime.utcnow().isoformat(),
+        "source": "embedding_hierarchy",
+        "distance_threshold": HIERARCHY_DISTANCE_THRESHOLD,
+    })
+
+
+def _hierarchy_relation(source: str, target: str) -> tuple[str, float] | None:
+    for edge in SKILL_HIERARCHY.get("edges", []):
+        if edge["source"] == source and edge["target"] == target:
+            return "parent_of", float(edge.get("confidence", MIN_PARENT_CONFIDENCE))
+
+        if edge["source"] == target and edge["target"] == source:
+            return "child_of", float(edge.get("confidence", MIN_PARENT_CONFIDENCE))
+
+    return None
+
+
+def _skill_documents(skills: list[str]) -> list[str]:
+    documents = []
+    for skill in skills:
+        aliases = SKILL_REGISTRY.get(skill, {}).get("aliases", [])
+        documents.append(" ".join([skill, *aliases]).replace("_", " "))
+    return documents
+
+
+def _select_cluster_parent(
+    members: list[str],
+    distance_matrix: np.ndarray,
+    all_skills: list[str],
+) -> str:
+    member_indexes = [all_skills.index(member) for member in members]
+    scored = []
+    for member, member_index in zip(members, member_indexes):
+        mean_distance = float(np.mean([
+            distance_matrix[member_index][other_index]
+            for other_index in member_indexes
+            if other_index != member_index
+        ] or [0.0]))
+        centrality = 1.0 - mean_distance
+        scored.append((
+            member,
+            0.55 * centrality + 0.45 * _generality_score(member),
+        ))
+
+    return max(scored, key=lambda item: item[1])[0]
+
+
+def _cluster_cohesion(
+    members: list[str],
+    distance_matrix: np.ndarray,
+    all_skills: list[str],
+) -> float:
+    member_indexes = [all_skills.index(member) for member in members]
+    similarities = []
+    for index, left in enumerate(member_indexes):
+        for right in member_indexes[index + 1:]:
+            similarities.append(1.0 - float(distance_matrix[left][right]))
+
+    return max(0.0, min(float(np.mean(similarities)), 1.0)) if similarities else 0.0
+
+
+def _update_pair_stats(
+    source: str,
+    target: str,
+    source_evidence: dict,
+    target_evidence: dict,
+    relation_stats: dict | None,
+    progress_before: dict | None,
+    progress_after: dict | None,
+) -> dict:
+    stats_store = relation_stats if relation_stats is not None else SKILL_RELATION_STATS
+    stats = stats_store[source][target]
+    stats["cooccurrences"] = int(stats.get("cooccurrences", 0)) + 1
+    stats["evidence_strength"] = round(
+        float(stats.get("evidence_strength", 0.0))
+        + _evidence_confidence(source_evidence) * _evidence_confidence(target_evidence),
+        4,
+    )
+    stats["semantic_similarity"] = round(_semantic_similarity(source, target), 4)
+    stats["updated_at"] = datetime.utcnow().isoformat()
+
+    source_before = _skill_mastery(progress_before, source)
+    target_before = _skill_mastery(progress_before, target)
+    source_after = _skill_mastery(progress_after, source)
+    target_after = _skill_mastery(progress_after, target)
+    source_gain = max(0.0, source_after - source_before)
+    target_gain = max(0.0, target_after - target_before)
+
+    if source_gain > 0 and target_before < 0.7:
+        stats["temporal_support"] = round(
+            0.8 * float(stats.get("temporal_support", 0.0))
+            + 0.2 * min(1.0, source_gain + max(0.0, 0.7 - target_before)),
+            4,
+        )
+
+    if target_gain > 0 and source_before < 0.7:
+        stats["reverse_temporal_support"] = round(
+            0.8 * float(stats.get("reverse_temporal_support", 0.0))
+            + 0.2 * min(1.0, target_gain + max(0.0, 0.7 - source_before)),
+            4,
+        )
+
+    return stats
+
+
+def _merge_pair_stats(
+    source: str,
+    target: str,
+    incoming: dict,
+    relation_stats: dict | None = None,
+) -> None:
+    stats_store = relation_stats if relation_stats is not None else SKILL_RELATION_STATS
+    current = stats_store[source][target]
+    current["cooccurrences"] = int(current.get("cooccurrences", 0)) + int(
+        incoming.get("cooccurrences", 0)
+    )
+    current["evidence_strength"] = round(
+        float(current.get("evidence_strength", 0.0))
+        + float(incoming.get("evidence_strength", 0.0)),
+        4,
+    )
+    for key in ("semantic_similarity", "temporal_support", "reverse_temporal_support"):
+        current[key] = max(float(current.get(key, 0.0)), float(incoming.get(key, 0.0)))
+    current["updated_at"] = datetime.utcnow().isoformat()
+
+
+def _cooccurrence_confidence(stats: dict) -> float:
+    cooccurrences = int(stats.get("cooccurrences", 0))
+    evidence_strength = float(stats.get("evidence_strength", 0.0))
+    if cooccurrences <= 0:
+        return 0.0
+
+    frequency_confidence = min(cooccurrences / 4.0, 1.0)
+    strength_confidence = min(evidence_strength / max(cooccurrences, 1), 1.0)
+    return round(0.55 * frequency_confidence + 0.45 * strength_confidence, 4)
+
+
+def _semantic_similarity(source: str, target: str) -> float:
+    if source == target:
+        return 1.0
+
+    return max(
+        SequenceMatcher(None, source, target).ratio(),
+        _embedding_similarity(source, target),
+    )
+
+
+def _embedding_similarity(source: str, target: str) -> float:
+    try:
+        vectorizer = TfidfVectorizer(analyzer="char_wb", ngram_range=(3, 5))
+        matrix = vectorizer.fit_transform([source, target])
+    except ValueError:
+        return 0.0
+
+    return float(cosine_similarity(matrix[0], matrix[1]).flatten()[0])
+
+
+def _generality_score(skill: str) -> float:
+    tokens = [token for token in skill.split("_") if token]
+    if not tokens:
+        return 0.0
+
+    length_score = 1.0 / len(tokens)
+    abstraction_score = max(
+        (
+            1.0
+            for token in tokens
+            if token in {"model", "data", "evaluation", "learning", "analysis", "quality"}
+        ),
+        default=0.0,
+    )
+    return 0.7 * length_score + 0.3 * abstraction_score
+
+
+def _skill_mastery(progress: dict | None, skill: str) -> float:
+    if not progress:
+        return 0.0
+
+    skills = progress.get("skills", progress)
+    state = skills.get(skill, {})
+    return float(state.get("bkt_mastery", state.get("mastery", 0.0)))
 
 
 def _best_fuzzy_match(name: str, candidates: list[str]) -> tuple[str, float]:
@@ -447,10 +863,6 @@ def _normalize_token(token: str) -> str:
     elif token.endswith("s") and len(token) > 4 and not token.endswith("ss"):
         token = token[:-1]
     return token
-
-
-def _is_parent(parent: str, child: str) -> bool:
-    return child in _STATIC_PARENTS.get(parent, set())
 
 
 def _evidence_confidence(evidence: dict) -> float:

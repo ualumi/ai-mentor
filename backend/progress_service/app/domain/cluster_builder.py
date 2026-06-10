@@ -1,9 +1,14 @@
 from collections import defaultdict
 
-from app.state import COMPETENCY_GRAPH
+from app.state import COMPETENCY_GRAPH, USER_COMPETENCY_GRAPHS
 
 
-def update_clusters(user_progress: dict):
+def update_clusters(user_progress: dict, user_id: str | None = None):
+    graph = (
+        USER_COMPETENCY_GRAPHS[str(user_id)]
+        if user_id is not None
+        else COMPETENCY_GRAPH
+    )
     skills = user_progress["skills"]
     membership = {}
     cluster_signals = defaultdict(float)
@@ -15,7 +20,7 @@ def update_clusters(user_progress: dict):
             if other_skill == skill:
                 continue
 
-            relation = COMPETENCY_GRAPH[skill].get(other_skill, 0.0)
+            relation = graph[skill].get(other_skill, 0.0)
             related_deficit = other_state.get("deficit", 1.0)
             score = relation * related_deficit
 

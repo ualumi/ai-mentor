@@ -15,10 +15,15 @@ from app.redis_client import redis
 from app.redis_listener import redis_listener
 from app.state import (
     SKILL_ALIASES,
+    SKILL_HIERARCHY,
     SKILL_REGISTRY,
+    SKILL_RELATION_STATS,
     TYPED_COMPETENCY_GRAPH,
+    USER_COMPETENCY_GRAPHS,
     USER_PROGRESS,
     USER_RECOMMENDATIONS,
+    USER_SKILL_RELATION_STATS,
+    USER_TYPED_COMPETENCY_GRAPHS,
 )
 from app.storage import DEFAULT_EVENT_LOG_PATH, load_runtime_state
 
@@ -98,7 +103,9 @@ async def ml_evaluation(limit: int = 1000):
 async def skill_ontology():
     return {
         "aliases": SKILL_ALIASES,
+        "hierarchy": SKILL_HIERARCHY,
         "registry": SKILL_REGISTRY,
+        "relation_stats": _plain_dict(SKILL_RELATION_STATS),
         "typed_graph": _plain_dict(TYPED_COMPETENCY_GRAPH),
         "model_versions": MODEL_VERSIONS,
     }
@@ -122,6 +129,11 @@ async def get_progress(token: str):
 
     return {
         "progress": progress,
+        "personal_deficit_model": {
+            "competency_graph": _plain_dict(USER_COMPETENCY_GRAPHS[user_id]),
+            "typed_competency_graph": _plain_dict(USER_TYPED_COMPETENCY_GRAPHS[user_id]),
+            "relation_stats": _plain_dict(USER_SKILL_RELATION_STATS[user_id]),
+        },
         "recommendations": USER_RECOMMENDATIONS.get(user_id, []),
         "model_versions": MODEL_VERSIONS,
     }
