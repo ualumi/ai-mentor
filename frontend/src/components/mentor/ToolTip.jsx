@@ -1,3 +1,133 @@
+/*const ToolTip = ({
+  continuous,
+  index,
+  step,
+  backProps,
+  primaryProps,
+  skipProps,
+  tooltipProps,
+}) => {
+  return (
+    <div {...tooltipProps} className="joyride-tooltip">
+      
+      <div className="joyride-content">
+        {step.content}
+      </div>
+
+      <div className="joyride-footer">
+        
+        {index > 0 && (
+          <button {...backProps} className="joyride-btn joyride-back">
+            Назад
+          </button>
+        )}
+
+        {continuous && (
+          <button {...primaryProps} className="joyride-btn joyride-next">
+            Далее
+          </button>
+        )}
+
+        <button {...skipProps} className="joyride-btn joyride-skip">
+          Пропустить
+        </button>
+
+      </div>
+    </div>
+  );
+};
+
+export default ToolTip;*/
+
+/*import { useEffect, useState } from "react";
+
+const ToolTip = ({
+  continuous,
+  index,
+  step,
+  backProps,
+  primaryProps,
+  skipProps,
+  tooltipProps,
+}) => {
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    // если это НЕ нужный шаг — кнопка всегда активна
+    if (index !== 3) {
+      setIsReady(true);
+      return;
+    }
+
+    // проверка сразу (если элемент уже есть)
+    const check = () => {
+      const el = document.querySelector(".recomendation-item-active");
+      if (el) {
+        setIsReady(true);
+        return true;
+      }
+      return false;
+    };
+
+    if (check()) return;
+
+    // 🔥 наблюдаем за DOM
+    const observer = new MutationObserver(() => {
+      if (check()) {
+        observer.disconnect();
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+    });
+
+    return () => observer.disconnect();
+  }, [index]);
+
+  const isBlocked = index === 3 && !isReady;
+
+  return (
+    <div {...tooltipProps} className="joyride-tooltip">
+      
+      <div className="joyride-content">
+        {step.content}
+      </div>
+
+      <div className="joyride-footer">
+        
+        {index > 0 && (
+          <button {...backProps} className="joyride-btn joyride-back">
+            Назад
+          </button>
+        )}
+
+        {continuous && (
+          <button
+            {...primaryProps}
+            className="joyride-btn joyride-next"
+            disabled={isBlocked}
+            style={{
+              opacity: isBlocked ? 0.5 : 1,
+              pointerEvents: isBlocked ? "none" : "auto",
+            }}
+          >
+            Далее
+          </button>
+        )}
+
+        <button {...skipProps} className="joyride-btn joyride-skip">
+          Пропустить
+        </button>
+
+      </div>
+    </div>
+  );
+};
+
+export default ToolTip;*/
+
 import { useEffect, useState } from "react";
 
 const ToolTip = ({

@@ -11,7 +11,7 @@ app = FastAPI(title="Attempts Service")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:5173"],
     allow_methods=["*"],
     allow_headers=["*"],
     allow_credentials=True
@@ -222,47 +222,6 @@ async def get_user_activity(
 
 from sqlalchemy import func, distinct
 
-'''@app.get("/attempts/total")
-async def get_attempts_total(token: str, db=Depends(get_session)):
-
-    # 🔐 Декодируем токен
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        user_id = str(payload["sub"])
-    except jwt.ExpiredSignatureError:
-        raise HTTPException(status_code=401, detail="Token expired")
-    except jwt.InvalidTokenError:
-        raise HTTPException(status_code=401, detail="Invalid token")
-
-    # 📊 1. Общее количество попыток
-    #total_attempts_result = await db.execute(
-    #    select(func.count()).where(Attempt.user_id == user_id)
-    #)
-
-    res = await db.execute(
-    select(AttemptAlias).where(AttemptAlias.user_id == user_id)
-    )
-    total_attempts =  len(res.scalars().all())
-    #total_attempts = total_attempts_result.scalar() or 0
-
-    # 📊 2. Количество уникальных learning_session_id (исключаем NULL)
-    total_sessions_result = await db.execute(
-        select(func.count(distinct(Attempt.learning_session_id)))
-        .where(Attempt.user_id == user_id)
-        .where(Attempt.learning_session_id.isnot(None))
-    )
-    total_sessions = total_sessions_result.scalar() or 0
-    print("total_attempts", total_attempts, "total_learning_sessions", total_sessions)
-    return {
-        "total_attempts": total_attempts,
-        "total_learning_sessions": total_sessions
-    }'''
-
-from fastapi import Depends, HTTPException
-from sqlalchemy import select, func, distinct
-from sqlalchemy.ext.asyncio import AsyncSession
-import jwt
-
 @app.get("/attempts/total/{token}")
 async def get_attempts_total(token: str, db=Depends(get_session)):
     # Декодируем токен
@@ -299,3 +258,18 @@ async def get_attempts_total(token: str, db=Depends(get_session)):
         "total_learning_sessions": total_sessions
     }
 
+'''@app.get("/episodes/{session_id}")
+async def get_episodes(session_id: str, db=Depends(get_session)):
+    res = await db.execute(
+        select(Episode).where(Episode.session_id == session_id)
+    )
+    return res.scalars().all()
+    
+
+@app.get("/attempt/{attempt_id}")
+async def get_attempt(attempt_id: str, db=Depends(get_session)):
+    res = await db.execute(
+        select(Attempt).where(Attempt.attempt_id == attempt_id)
+    )
+    return res.scalars().first()
+'''

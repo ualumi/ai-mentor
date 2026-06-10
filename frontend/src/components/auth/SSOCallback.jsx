@@ -17,7 +17,7 @@ export function SSOCallback() {
 
     const ssoLogin = async () => {
       try {
-        /*const res = await fetch(`http://localhost:8012/api/integration/sso?token=${token}`, {
+        /*const res = await fetch(`/api/integration/sso?token=${token}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token }),

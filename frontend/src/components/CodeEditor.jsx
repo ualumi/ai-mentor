@@ -5,10 +5,12 @@ import { useState, useRef, useEffect } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
 import "./ai.css";
 
-const defaultCode = `#напишите свой код здесь
-a=10
-if a:
-print("Hello World")`;
+const defaultCode = `def factorial(n):
+if n == 0:
+return 1
+return n * factorial(n - 1)
+result = factorial(5)
+print(result)`;
 
 export default function CodeEditor({
   analysis = [],
@@ -56,9 +58,6 @@ export default function CodeEditor({
     return () => observer.disconnect();
   }, []);
 
-  // -----------------------------
-  // 🔥 РЕАКЦИЯ НА САЙДБАР
-  // -----------------------------
 
 
   // -----------------------------
@@ -155,7 +154,6 @@ export default function CodeEditor({
     </div>
   );
 }*/}
-
 
 import { useCode } from './CodeContext';
 import { useState, useRef, useEffect } from "react";
@@ -384,7 +382,7 @@ export default function CodeEditor({
   // 🔹 Render
   // -----------------------------
   return (
-    <div className="editor-wrapper" style={{marginTop:10}}>
+    <div className="editor-wrapper">
       <div ref={containerRef} className="editor-container">
         <Editor
           height="100%"
@@ -408,4 +406,3 @@ export default function CodeEditor({
     </div>
   );
 }
-

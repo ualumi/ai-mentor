@@ -240,7 +240,7 @@ import { wsService } from "../../services/websocket"; // 🔥 ДОБАВИЛ
 
 export default function History({mode, name, attempt, restoredState, code, titletask, isSidebarOpen,selectedAttemptId, conditionHistory, taskDescription}) {
   console.log(conditionHistory)
-  
+  console.log("taskDescription", taskDescription)
   const [selectedAttempt, setSelectedAttempt] = useState(null);
 
   const handleSelectAttempt = (attemptId) => {
@@ -316,11 +316,11 @@ export default function History({mode, name, attempt, restoredState, code, title
   console.log(restoredState)
   return (
     <div className="">
-       {/* 🔥 HEADER 
+      {/* 🔥 HEADER 
       {mode === "free" && }*/}
       {mode === "free" && (
           titletask 
-              ? <div id="progress" className={s["progress"]}><h1 className={s["section-caption"]} style={{margin: 0}}>Задача: {titletask}</h1>
+              ? <div  id="progress" className={s["progress"]}><h1 className={s["section-caption"]} style={{margin: 0}}>Задача: {titletask}</h1>
                 <p className="weak-case-item" style={{margin: 0, fontSize:11.5}}>{taskDescription}</p>
               </div>
               : <h1 className={s["section-caption"]}>Самостоятельная практика</h1>

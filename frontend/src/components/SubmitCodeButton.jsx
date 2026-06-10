@@ -49,7 +49,7 @@ export default function SubmitCodeButton({
   );
 }*/
 
-{/*import { useExecuteCode } from '../hooks/useCodeExecution';
+/*import { useExecuteCode } from '../hooks/useCodeExecution';
 import { useCode } from './CodeContext';
 import { Loader, Sparkles  } from 'lucide-react';
 import "../App.css"
@@ -98,7 +98,7 @@ export default function SubmitCodeButton({
       <span className="tooltip-text">{children}</span>
     </div>
   );
-}*/}
+}*/
 
 import { useExecuteCode } from '../hooks/useCodeExecution';
 import { useCode } from './CodeContext';
@@ -174,4 +174,3 @@ export default function SubmitCodeButton({
     </div>
   );
 }
-

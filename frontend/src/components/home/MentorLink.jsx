@@ -7,7 +7,7 @@ export default function MentorLink () {
                 <p className="home-summary-block-label-text">Самостоятельная практика с ИИ-ментором</p>
                 <p className="home-summary-block-label-link mentor-link">Позволяет работать с кодом в свободном формате, <br></br>без привязки к конкретным заданиям.</p>
                 <button className="module-button mentor-button">
-                    <NavLink className={"mintor-link"} to={"/mentor"}>
+                    <NavLink className={"mintor-link"} to={"/mentor"} style={{borderRadius:10}}>
                     Перейти
                     </NavLink>
                 </button>

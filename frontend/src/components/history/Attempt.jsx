@@ -28,13 +28,13 @@ export default function Attempt({ attempt, mode }) {
           selectedAttemptId: attempt.attempt_id
         }
       });*/
+
     if (mode === "module") {
       navigate(`/module/${attempt.learning_session_id}/${attempt.attempt_id}`, {
         state: {
           selectedAttemptId: attempt.attempt_id
         }
       });
-
     } else {
       navigate(`/mentor/attempt/${attempt.attempt_id}`);
     }

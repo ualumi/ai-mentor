@@ -4,7 +4,7 @@ from app.application.services.external_client import ExternalClient
 client = ExternalClient()
 
 
-# mock
+# 🔹 временно используем тот же mock
 def mock_external_progress():
     return [
 {
@@ -18,46 +18,179 @@ def mock_external_progress():
 },
 "cases": [
 {
-"case_id": 7,
-"title": "Сумма двух чисел",
-"description": "Даны два числа, выведите их сумму.",
-"attempts_count": 4,
-"last_submission_at": "2026-02-02T17:40:10.000000",
-"submissions": [
-{
-"submission_id": 101,
-"language": "python",
-"code": "a, b = map(int, input().split())\nprint(a + b)",
-"verdict": "wrong_answer",
-"total_time_ms": 12,
-"created_at": "2026-02-02T17:35:10.000000",
-"tests": [
-{
-"test_case_id": 9001,
-"status": "failed",
-"time_ms": 5,
-"actual_text": "3",
-"passed": False
-}
+    "case_id": 7,
+    "title": "Сумма двух чисел",
+    "description": "Даны два числа, выведите их сумму.",
+    "attempts_count": 4,
+    "last_submission_at": "2026-02-02T17:40:10.000000",
+    "submissions": [
+    {
+        "submission_id": 101,
+        "language": "python",
+        "code": "a, b = map(int, input().split())\nprint(a + b)",
+        "verdict": "wrong_answer",
+        "total_time_ms": 12,
+        "created_at": "2026-02-02T17:35:10.000000",
+        "tests": [
+            {
+            "test_case_id": 9001,
+            "status": "failed",
+            "time_ms": 5,
+            "actual_text": "3",
+            "passed": False
+            },
+        ]
+    },
+    {
+        "submission_id": 102,
+        "language": "python",
+        "code": "a, b = map(int, input().split())\nprint(a + b)",
+        "verdict": "accepted",
+        "total_time_ms": 9,
+        "created_at": "2026-02-02T17:40:10.000000",
+        "tests": [
+            {
+            "test_case_id": 9001,
+            "status": "passed",
+            "time_ms": 3,
+            "actual_text": "4",
+            "passed": True
+            }
+        ]
+    },
+    
 ]
 },
 {
-"submission_id": 102,
-"language": "python",
-"code": "a, b = map(int, input().split())\nprint(a + b)",
-"verdict": "accepted",
-"total_time_ms": 9,
-"created_at": "2026-02-02T17:40:10.000000",
-"tests": [
-{
-"test_case_id": 9001,
-"status": "passed",
-"time_ms": 3,
-"actual_text": "4",
-"passed": True
-}
+    "case_id": 8,
+    "title": "Сумма nht[] чисел",
+    "description": "Даны два числа, выведите их сумму.",
+    "attempts_count": 4,
+    "last_submission_at": "2026-02-02T17:40:10.000000",
+    "submissions": [
+    {
+        "submission_id": 101,
+        "language": "python",
+        "code": "a, b = map(int, input().split())\nprint(a + b)",
+        "verdict": "wrong_answer",
+        "total_time_ms": 12,
+        "created_at": "2026-02-02T17:35:10.000000",
+        "tests": [
+            {
+            "test_case_id": 9001,
+            "status": "failed",
+            "time_ms": 5,
+            "actual_text": "3",
+            "passed": False
+            },
+        ]
+    },
+    {
+        "submission_id": 102,
+        "language": "python",
+        "code": "a, b = map(int, input().split())\nprint(a + b)",
+        "verdict": "accepted",
+        "total_time_ms": 9,
+        "created_at": "2026-02-02T17:40:10.000000",
+        "tests": [
+            {
+            "test_case_id": 9001,
+            "status": "passed",
+            "time_ms": 3,
+            "actual_text": "4",
+            "passed": False
+            }
+        ]
+    },
+    
 ]
-}
+},
+{
+    "case_id": 9,
+    "title": "Сумма 4 чисел",
+    "description": "Даны два числа, выведите их сумму.",
+    "attempts_count": 4,
+    "last_submission_at": "2026-02-02T17:40:10.000000",
+    "submissions": [
+    {
+        "submission_id": 101,
+        "language": "python",
+        "code": "a, b = map(int, input().split())\nprint(a + b)",
+        "verdict": "wrong_answer",
+        "total_time_ms": 12,
+        "created_at": "2026-02-02T17:35:10.000000",
+        "tests": [
+            {
+            "test_case_id": 9001,
+            "status": "failed",
+            "time_ms": 5,
+            "actual_text": "3",
+            "passed": False
+            },
+        ]
+    },
+    {
+        "submission_id": 102,
+        "language": "python",
+        "code": "a, b = map(int, input().split())\nprint(a + b)",
+        "verdict": "wrong_answer",
+        "total_time_ms": 9,
+        "created_at": "2026-02-02T17:40:10.000000",
+        "tests": [
+            {
+            "test_case_id": 9001,
+            "status": "passed",
+            "time_ms": 3,
+            "actual_text": "4",
+            "passed": False
+            }
+        ]
+    },
+    
+]
+},
+{
+    "case_id": 10,
+    "title": "Сумма 2 чисел",
+    "description": "Даны два числа, выведите их сумму.",
+    "attempts_count": 4,
+    "last_submission_at": "2026-02-02T17:40:10.000000",
+    "submissions": [
+    {
+        "submission_id": 101,
+        "language": "python",
+        "code": "a, b = map(int, input().split())\nprint(a + b)",
+        "verdict": "wrong_answer",
+        "total_time_ms": 12,
+        "created_at": "2026-02-02T17:35:10.000000",
+        "tests": [
+            {
+            "test_case_id": 9001,
+            "status": "failed",
+            "time_ms": 5,
+            "actual_text": "3",
+            "passed": False
+            },
+        ]
+    },
+    {
+        "submission_id": 102,
+        "language": "python",
+        "code": "a, b = map(int, input().split())\nprint(a + b)",
+        "verdict": "wrong_answer",
+        "total_time_ms": 9,
+        "created_at": "2026-02-02T17:40:10.000000",
+        "tests": [
+            {
+            "test_case_id": 9001,
+            "status": "passed",
+            "time_ms": 3,
+            "actual_text": "4",
+            "passed": False
+            }
+        ]
+    },
+    
 ]
 }
 ],
@@ -102,16 +235,22 @@ def mock_external_progress():
 }
 ]
 }
-] 
+]  # можешь переиспользовать свой мок
 
 
 async def get_weak_cases(email: str):
+    '''identity = await get_external_identity_by_internal(email)
 
-    # реальный вызов:
-    progress = await client.get_user_progress(email)
+    if not identity:
+        return {"status": "no_external_account"}
 
-    # мок:
-    #progress = mock_external_progress()
+    external_user_id = identity["external_user_id"]'''
+
+    # 🔹 либо реальный вызов:
+    #progress = await client.get_user_progress(email)
+
+    # 🔹 пока мок:
+    progress = mock_external_progress()
 
     weak_cases = extract_weak_cases(progress)
 
@@ -130,16 +269,15 @@ def extract_weak_cases(progress_data):
             attempts = case.get("attempts_count", 0)
             submissions = case.get("submissions", [])
             description = case.get("description", "")
-
             accepted = any(sub.get("verdict") == "accepted" for sub in submissions)
 
             # 🔥 критерии "слабости"
             if not accepted:
                 weak_cases.append({
                     "title": title,
+                    "description": description,
                     "reason": "no_success",
                     "attempts": attempts,
-                    "description": description,
                     "last_code": submissions[-1]["code"] if submissions else None
                 })
 

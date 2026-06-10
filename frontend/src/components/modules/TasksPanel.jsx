@@ -162,9 +162,6 @@ export default function TasksPanel({ restoredState }) {
 
   return (
     <div className="taskspanel">
-      {/*<div className="sidebar-label">
-        <h2 className="menu-caption">Текущая задача</h2>
-      </div>*/}
 
       {isAttemptView && (
         <button className="item back-button" onClick={handleBackToModule}>
@@ -172,7 +169,7 @@ export default function TasksPanel({ restoredState }) {
         </button>
       )}
 
-      {/*{!isAttemptView && <ModuleTask restoredState={localRestoredState} />}*/}
+  
 
       <div className="module-session">
         {!attempts.length && (
@@ -184,18 +181,7 @@ export default function TasksPanel({ restoredState }) {
         <div className="modiles-reversed">
           {Object.entries(conditionsToRender).map(([condition, conditionAttempts]) => (
             <div key={condition} className="condition-block">
-              {/*<div
-                className={`item item-light module-task-item-history ${
-                  condition === activeCondition ? "active-condition" : ""
-                }`}
-                onClick={() => {
-                  if (isAttemptView) return;
-                  setOpenCondition(prev => (prev === condition ? null : condition));
-                }}
-                style={{ cursor: "pointer" }}
-              >
-                <p>{condition}</p>
-              </div>*/}
+
 
               <div
                 className={`item item-light module-task-item-history ${
@@ -203,7 +189,7 @@ export default function TasksPanel({ restoredState }) {
                 }`}
                 style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
               >
-                {/* 🔥 ИКОНКА */}
+
                 <ChevronDown
                   size={18}
                   style={{
@@ -225,8 +211,7 @@ export default function TasksPanel({ restoredState }) {
                 
               </div>
 
-              {/*{(isAttemptView || openCondition === condition) && (
-                <div className="attempts-list">*/}
+
                 <div
                   className="attempts-list"
                   style={{
@@ -248,7 +233,7 @@ export default function TasksPanel({ restoredState }) {
                     );
                   })}
                 </div>
-              {/*)}*/}
+
             </div>
           ))}
         </div>

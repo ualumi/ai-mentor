@@ -504,6 +504,12 @@ input:focus::placeholder {
     display: flex;
     flex-direction: column;
     flex: 1;
+    /*min-height: 700px;
+    overflow-y: scroll;*/
+}
+
+.recomendation-content {
+    min-height: 0;
 }
 
 .recomendation-item-active .progress-bar-fill {
@@ -514,6 +520,7 @@ input:focus::placeholder {
     display: flex;
     flex-direction: column;
     width: 100%;
+    min-height: fit-content;
 }
 
 .reco-content .recommendation-list {
@@ -522,6 +529,9 @@ input:focus::placeholder {
     overflow-y: scroll;
 }
 
+.recommendation-list {
+min-height: 20px;
+}
 .module-button {
     background: #3B68FF;
     box-shadow: inset 0px -10px 40px -20px #FFFFFF;

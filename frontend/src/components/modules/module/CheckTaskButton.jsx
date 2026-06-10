@@ -48,7 +48,6 @@ export default function CheckTaskButton({
   );
 }*/}
 
-
 import { useExecuteCode } from '../../../hooks/useCodeExecution';
 import { useCode } from '../../CodeContext';
 import { Loader } from 'lucide-react';
@@ -97,10 +96,10 @@ export default function CheckTaskButton({
       setWaitingForResult(false);
     };
 
-    wsService.on("analytics_response", handler);
+    wsService.on("user_progress", handler);
 
     return () => {
-      wsService.off("analytics_response", handler);
+      wsService.off("user_progress", handler);
     };
   }, []);
 

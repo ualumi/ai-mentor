@@ -33,6 +33,7 @@ async def analitics_worker():
             learning_session_id = payload.get("learning_session_id")
             step_id = payload.get("step_id")
             condition_description = payload.get("condition")
+            mode = payload.get("mode")
             condition = None
             if condition_description:
                 condition = condition_description.get("description")
@@ -59,7 +60,8 @@ async def analitics_worker():
                 "learning_session_id": learning_session_id,
                 "step_id": step_id,
                 "code": code,
-                "condition": condition
+                "condition": condition,
+                "mode": mode
             }
 
             # 🔥 Публикуем ТОЛЬКО в канал пользователя

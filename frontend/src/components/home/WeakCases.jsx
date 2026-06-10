@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const INTEGRATION_SERVICE = "http://94.26.225.13:8012/api/integration";
+const INTEGRATION_SERVICE = "/api/integration";
 
 export default function WeakCases() {
   const { token, isSSO } = useAuth();
@@ -107,7 +107,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const INTEGRATION_SERVICE = "/api/integration/api/integration";
+const INTEGRATION_SERVICE = "/api/integration";
 
 export default function WeakCases() {
   const { token, isSSO } = useAuth();

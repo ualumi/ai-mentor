@@ -1,70 +1,124 @@
 import json
-import random
-
 import re
-from app.model import model, tokenizer
+
 from app.inference import generate_bugfix_task
+from app.model import model, tokenizer
 
-SYSTEM_PROMPT = (
-    "Ты генерируешь новую ML bugfix-задачу строго в формате объектов из датасета. "
-    "Верни только один JSON-объект без Markdown и без пояснений. "
-    "Порядок полей должен быть ровно таким: "
-    "`title`, `difficulty`, `topic_tags`, `task_context`, `tests`, "
-    "`expected_output`, `input_example`, `output_example`, `requirements`, "
-    "`constraints`, `broken_code`. "
-    "`tests`, `requirements` и `constraints` должны быть массивами строк. "
-    "`broken_code` должен быть одной строкой с полным Python-кодом и символами `\\n`. "
-    "Не добавляй лишние поля и не обрывай JSON."
-)
-
-TASK_POOL = {
-    "loops": [
-        "Напишите цикл, который выводит числа от 1 до 10",
-        "Посчитайте сумму элементов списка используя цикл",
-        "Найдите максимальный элемент массива через цикл"
-    ],
-    "pandas": [
-        "Загрузите CSV файл используя pandas",
-        "Посчитайте среднее значение столбца",
-        "Отфильтруйте строки по условию"
-    ]
-}
+SYSTEM_PROMPT = """
+Ты генерируешь учебные ML/Python bugfix-задачи.
+Верни только JSON без markdown и пояснений вокруг.
+JSON должен содержать:
+- title: короткое название задачи;
+- broken_code: Python-код с одной содержательной ошибкой;
+- task_context: объяснение контекста задачи и того, что нужно исправить;
+- tests: массив строк с pytest/assert проверками.
+Задача должна соответствовать difficulty и topic_tags из payload.
+"""
 
 
-def generate_condition(competency: str, attempts: list):
+def generate_condition(competency, task, attempts: list):
+    payload = _build_generation_payload(competency, task, attempts)
+    print(f"Task generation payload: {payload}")
 
-    payload = {
-        "difficulty": "easy",
-        "topic_tags": {competency:0.3, competency:0.3, competency:0.4},
-    }
-    print(payload)
     result = generate_bugfix_task(
         model=model,
         tokenizer=tokenizer,
         system_prompt=SYSTEM_PROMPT,
         payload=payload,
     )
-
     print(result)
 
-    data = json.loads(result)
-    title = data["title"]
-    broken_code = data["broken_code"].replace('\\n', '\n')  # Простой способ
+    data = _parse_generation_result(result)
+    if not data:
+        return _fallback_condition(payload)
 
-    # Удаляем всё после "ВОТ ТУТ НУЖНО ИСПРАВИТЬ КОД:" до конца строки
-    broken_code = re.sub(r'ВОТ ТУТ НУЖНО ИСПРАВИТЬ КОД.*$', r'ВОТ ТУТ НУЖНО ИСПРАВИТЬ КОД', broken_code, flags=re.MULTILINE)
-    #tasks = TASK_POOL.get(competency, [])
-    #cse= random.randint(1, 100)
-    if title and broken_code and data.get("task_context"):
-        return {
+    title = data.get("title") or data.get("description")
+    broken_code = _normalize_code(data.get("broken_code"))
+    task_context = data.get("task_context") or data.get("context")
+
+    if title and broken_code and task_context:
+        condition = {
             "description": title,
             "broken_code": broken_code,
-            "task_context": data["task_context"]
+            "task_context": task_context,
         }
 
-    return {
-            "description": f"Пример задачи {competency} с параметром",
-            "broken_code": "def mean_row_count_of_values_below_train_mean_per_column_detailed(train_matrix, val_matrix):\\n    baselines = [sum(column) / len(column) for column in zip(*val_matrix)]\\n\\n    values = []\\n    for row in val_matrix:\\n        current = 0\\n        for value, baseline in zip(row, baselines):\\n            if value >= baseline:\\n                current += 1\\n        values.append(current)\\n\\n    return sum(values) / len(values)",
-            "task_context": "Для обучения простых rule-of-thumb можно сравнивать validation значения не с global baseline, а с train mean своего столбца. Число значений ниже этого baseline показывает, насколько validation строка лежит ниже train центра. В текущем коде baseline считается по validation, а условие перевёрнуто."
+        tests = data.get("tests")
+        if isinstance(tests, list):
+            condition["tests"] = [str(test) for test in tests]
 
+        return condition
+
+    return _fallback_condition(payload)
+
+
+def _build_generation_payload(competency, task, attempts: list) -> dict:
+    if isinstance(task, dict) and task:
+        payload = dict(task)
+    else:
+        payload = {}
+
+    topic_tags = payload.get("topic_tags")
+    if not isinstance(topic_tags, dict) or not topic_tags:
+        topic_tags = {str(competency or "python"): 1.0}
+
+    payload["topic_tags"] = topic_tags
+    payload["difficulty"] = payload.get("difficulty", 0.4)
+    payload["competency"] = competency
+    payload["attempts"] = attempts or []
+
+    return payload
+
+
+def _parse_generation_result(result: str) -> dict | None:
+    if not result:
+        return None
+
+    try:
+        return json.loads(result)
+    except json.JSONDecodeError:
+        pass
+
+    match = re.search(r"\{.*\}", result, flags=re.DOTALL)
+    if not match:
+        return None
+
+    try:
+        return json.loads(match.group(0))
+    except json.JSONDecodeError:
+        return None
+
+
+def _normalize_code(code) -> str | None:
+    if not isinstance(code, str) or not code.strip():
+        return None
+
+    return code.replace("\\n", "\n").strip()
+
+
+def _fallback_condition(payload: dict) -> dict:
+    tags = ", ".join(payload.get("topic_tags", {}).keys()) or payload.get("competency") or "python"
+
+    return {
+        "description": f"Задача по теме: {tags}",
+        "broken_code": (
+            "def mean_row_count_of_values_below_train_mean_per_column_detailed(train_matrix, val_matrix):\n"
+            "    baselines = [sum(column) / len(column) for column in zip(*val_matrix)]\n\n"
+            "    values = []\n"
+            "    for row in val_matrix:\n"
+            "        current = 0\n"
+            "        for value, baseline in zip(row, baselines):\n"
+            "            if value >= baseline:\n"
+            "                current += 1\n"
+            "        values.append(current)\n\n"
+            "    return sum(values) / len(values)"
+        ),
+        "task_context": (
+            "Генератор не вернул валидный JSON, поэтому выдана резервная задача. "
+            "Исправьте расчет baseline и направление сравнения."
+        ),
+        "tests": [
+            "value = mean_row_count_of_values_below_train_mean_per_column_detailed([['a', 1.0], ['b', 3.0]], [['x', 2.0], ['y', 0.0], ['z', 1.0]])",
+            "assert abs(value - 1.0) < 1e-12",
+        ],
     }

@@ -1,21 +1,3 @@
-import logging
-from logging.handlers import RotatingFileHandler
-import os
-
-os.makedirs("logs", exist_ok=True)
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    handlers=[
-        RotatingFileHandler(
-            "logs/app.log",
-            maxBytes=5_000_000,
-            backupCount=3
-        ),
-        logging.StreamHandler()
-    ],
-)
 import json
 import uuid
 import asyncio
@@ -27,10 +9,6 @@ from jose import jwt, JWTError
 import os
 import httpx
 
-import logging
-
-logger = logging.getLogger(__name__)
-
 app = FastAPI()
 SECRET_KEY = os.getenv("SECRET_KEY", "default_secret")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
@@ -40,6 +18,7 @@ manager = ConnectionManager()
 # Храним состояние пользователя
 USER_STATE = {}
 PENDING_TASKS = {}
+TASK_STATE = {}
 # -----------------------------
 # Redis listeners
 # -----------------------------
@@ -68,7 +47,7 @@ async def listen_user_channels(user_id: str):
             "source": channel,
             "data": data
         })
-        logger.info(f"source: {channel}, value: {data}")
+
 
 
 async def listen_task_condition(user_id: str):
@@ -105,16 +84,76 @@ async def listen_task_condition(user_id: str):
                     "condition": condition,
                     "module_ready": True
                 })
+                TASK_STATE[user_id] = {
+                    "learning_session_id": learning_session_id,
+                    "next_step_available": False,
+                    "status": "pending",
+                }
                 print("condition for user", user_id, ":", condition)
                 # отправляем через websocket
                 await manager.send_to_user(user_id, {
                     "type": "task_condition",
-                    "condition": condition
+                    "condition": condition,
+                    "learning_session_id": learning_session_id,
+                    "next_step_available": False,
                 })
                 print(f"Sent task condition to user {user_id} for session {learning_session_id}")
                 # отмечаем последнее сообщение
                 last_id = message_id
 #получает одно тупое сообщение и валится
+
+async def listen_task_correctness(user_id: str):
+    pubsub = redis_client.pubsub()
+
+    await pubsub.subscribe(f"tasks_correctness")
+
+    async for message in pubsub.listen():
+        print("tasks_correctness", message)
+        if message["type"] != "message":
+            continue
+
+        data = json.loads(message["data"])
+        event = data["event"]
+        print(event, "event task_correctness")
+        if str(data.get("user_id")) != str(user_id):
+            continue
+
+        current_session_id = USER_STATE.get(user_id, {}).get("learning_session_id")
+        event_session_id = data.get("learning_session_id")
+        if event_session_id and current_session_id and str(event_session_id) != str(current_session_id):
+            continue
+
+        task_state = TASK_STATE.get(user_id, {})
+
+        if event == "task_completed":
+            task_state.update({
+                "learning_session_id": event_session_id or current_session_id,
+                "next_step_available": True,
+                "status": "completed",
+            })
+            TASK_STATE[user_id] = task_state
+
+            await manager.send_to_user(user_id, {
+                "type": "task_completed",
+                "attempt_id": data["attempt_id"],
+                "learning_session_id": event_session_id,
+                "next_step_available": True
+            })
+
+        elif event == "task_not_completed":
+            task_state.update({
+                "learning_session_id": event_session_id or current_session_id,
+                "next_step_available": False,
+                "status": "failed",
+            })
+            TASK_STATE[user_id] = task_state
+
+            await manager.send_to_user(user_id, {
+                "type": "task_failed",
+                "attempt_id": data["attempt_id"],
+                "learning_session_id": event_session_id,
+                "next_step_available": False
+            })
 
 
 # -----------------------------
@@ -154,17 +193,30 @@ async def websocket_endpoint(websocket: WebSocket):
 
     asyncio.create_task(listen_user_channels(user_id))
     asyncio.create_task(listen_task_condition(user_id))
+    asyncio.create_task(listen_task_correctness(user_id))
 
     try:
         while True:
             raw = await websocket.receive_text()
             data = FrontendMessage(**json.loads(raw))
             if data.type == "next_step":
+                task_state = TASK_STATE.get(user_id, {})
+
+                if not task_state.get("next_step_available"):
+                    await manager.send_to_user(user_id, {
+                        "type": "error",
+                        "error": "Next step is not available yet",
+                        "next_step_available": False,
+                    })
+                    continue
 
                 state = USER_STATE[user_id]
+                task_state["next_step_available"] = False
+                task_state["status"] = "requested"
+                TASK_STATE[user_id] = task_state
 
                 await redis_client.publish(
-                    "scaffolding.next_step",
+                    "learning.next_step",
                     json.dumps({
                         "user_id": user_id,
                         "learning_session_id": state["learning_session_id"]
@@ -191,6 +243,11 @@ async def websocket_endpoint(websocket: WebSocket):
             '''if data.type == "set_session":
                 USER_STATE[user_id]["learning_session_id"] = data.learning_session_id
                 USER_STATE[user_id]["module_ready"] = True
+                TASK_STATE[user_id] = {
+                    "learning_session_id": data.learning_session_id,
+                    "next_step_available": False,
+                    "status": "pending",
+                }
                 # ❗ сбрасываем condition
                 state["condition"] = None
                 #state["module_ready"] = False
@@ -200,6 +257,11 @@ async def websocket_endpoint(websocket: WebSocket):
             if data.type == "set_session":
                 USER_STATE[user_id]["learning_session_id"] = data.learning_session_id
                 USER_STATE[user_id]["module_ready"] = True
+                TASK_STATE[user_id] = {
+                    "learning_session_id": data.learning_session_id,
+                    "next_step_available": False,
+                    "status": "pending",
+                }
 
                 # ❗ сбрасываем condition
                 state["condition"] = None
@@ -276,7 +338,8 @@ async def websocket_endpoint(websocket: WebSocket):
                 base_payload = {
                     "user_id": user_id,
                     "attempt_id": attempt_id,
-                    "code": data.code
+                    "code": data.code,
+                    "mode": state["mode"]
                 }
 
                 if state["mode"] == "module":

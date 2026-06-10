@@ -10,6 +10,34 @@ import json
 router = APIRouter(prefix="/learning", tags=["learning"])
 
 
+def _normalize_skill_name(name: str | None) -> str:
+    return str(name or "").strip().lower().replace("-", "_").replace("/", "_").replace(" ", "_")
+
+
+def _find_skill_progress(progress: dict, competency: str | None) -> dict:
+    skills = progress.get("skills", {}) if isinstance(progress, dict) else {}
+    if not isinstance(skills, dict):
+        return {}
+
+    normalized_competency = _normalize_skill_name(competency)
+    if normalized_competency and isinstance(skills.get(normalized_competency), dict):
+        return skills[normalized_competency]
+
+    for skill_name, skill_progress in skills.items():
+        if _normalize_skill_name(skill_name) == normalized_competency and isinstance(skill_progress, dict):
+            return skill_progress
+
+    return {}
+
+
+def _progress_value(skill_progress: dict) -> float:
+    for key in ("bkt_mastery", "mastery", "ema_mastery", "ema", "progress"):
+        value = skill_progress.get(key)
+        if isinstance(value, (int, float)):
+            return value
+    return 0
+
+
 @router.post("/start")
 async def start_learning_session(
     data: StartSessionRequest,
@@ -47,18 +75,19 @@ async def get_session_state(
 
     # 🔹 прогресс (можно хранить в redis или дергать progress_service)
     #progress = await redis_client.get(f"user_progress:{session['user_id']}")
-    progress_raw = await redis_client.get(f"user_progress:{session['user_id']}")
+    progress_raw = await redis_client.get(f"all_user_progress:{session['user_id']}")
     progress = json.loads(progress_raw) if progress_raw else {}
+    skill_progress = _find_skill_progress(progress, session.get("competency"))
 
     print({
-        "session": session,
-        "attempts": attempts,
-        "progress": progress.get('ema', {})
+        #"session": session,
+        #"attempts": attempts,
+        "progress": skill_progress
     })
     return {
         "session": session,
         "attempts": attempts,
-        "progress": progress.get('ema', {}),
+        "progress": _progress_value(skill_progress),
         "current_condition": json.loads(session.get("current_condition", "null")),
     }
 
@@ -118,11 +147,15 @@ async def get_my_sessions(
 
     for s in sessions:
         competency = s.get("competency")
-        progress_raw = await redis_client.get(f"user_progress:{s['session_id']}")
+        progress_raw = await redis_client.get(f"all_user_progress:{s['user_id']}")
+        print('progress_raw', progress_raw)
         progress = json.loads(progress_raw) if progress_raw else {}
+        skill_progress = _find_skill_progress(progress, competency)
+        print(skill_progress)
         enriched.append({
             **s,
-            "progress": progress.get('ema', {})
+            #"progress": progress_raw.get('ema', {})
+            "progress": _progress_value(skill_progress),
         })
 
     return enriched

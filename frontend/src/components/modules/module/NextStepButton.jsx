@@ -1,91 +1,3 @@
-/*import { useEffect, useState } from "react";
-import { wsService } from "../../../services/websocket";
-
-export default function NextStepButton({ onNext }) {
-  const [isEnabled, setIsEnabled] = useState(false);
-
-  useEffect(() => {
-    const handler = (data) => {
-      if (!data.source?.startsWith("user_progress")) return;
-
-      const score = data.data?.score?.score || data.data?.score;
-
-      console.log("📊 score received:", score);
-
-      if (score >= 9) {
-        setIsEnabled(true);
-      }
-    };
-
-    wsService.on("user_progress", handler);
-
-    return () => {
-      wsService.off("user_progress", handler);
-    };
-  }, []);
-
-  const handleClick = () => {
-    if (!isEnabled) return;
-    onNext();
-  };
-
-  return (
-    <button
-      className={`module-next-button module-button ${
-        isEnabled ? "" : "disabled"
-      }`}
-      onClick={handleClick}
-    >
-      Следующий шаг
-    </button>
-  );
-}*/
-
-{/*import { useEffect, useState } from "react";
-import { wsService } from "../../../services/websocket";
-
-export default function NextStepButton({ onNext }) {
-  const [isEnabled, setIsEnabled] = useState(false);
-
-  useEffect(() => {
-    const handler = (data) => {
-      if (!data.source?.startsWith("user_progress")) return;
-
-      const score = data.data?.score?.score || data.data?.score;
-
-      if (score >= 9) {
-        setIsEnabled(true);
-      }
-    };
-
-    wsService.on("user_progress", handler);
-
-    return () => {
-      wsService.off("user_progress", handler);
-    };
-  }, []);
-
-  const handleClick = () => {
-    if (!isEnabled) return;
-
-    onNext();
-
-    // 🔥 сразу блокируем кнопку для нового шага
-    setIsEnabled(false);
-  };
-
-  return (
-    <button
-      className={`module-next-button module-button ${
-        isEnabled ? "" : "disabled"
-      }`}
-      onClick={handleClick}
-    >
-      Следующий шаг
-    </button>
-  );
-}*/}
-
 import { useEffect, useState } from "react";
 import { wsService } from "../../../services/websocket";
 
@@ -93,38 +5,42 @@ export default function NextStepButton({ onNext }) {
   const [isEnabled, setIsEnabled] = useState(false);
   const [waitingForCondition, setWaitingForCondition] = useState(false);
 
-  // 🔥 слушаем прогресс (разрешаем кнопку)
   useEffect(() => {
-    const handler = (data) => {
-      if (!data?.source?.startsWith("user_progress")) return;
-
-      const score = data.data?.score?.score || data.data?.score;
-
-      if (score >= 8) {
-        setIsEnabled(true);
+    const completedHandler = (data) => {
+      setIsEnabled(data?.next_step_available === true);
+    };
+    const unavailableHandler = () => {
+      setIsEnabled(false);
+    };
+    const errorHandler = (data) => {
+      if (data?.next_step_available === false) {
+        setIsEnabled(false);
       }
     };
 
-    wsService.on("user_progress", handler);
+    wsService.on("task_completed", completedHandler);
+    wsService.on("task_failed", unavailableHandler);
+    wsService.on("error", errorHandler);
 
     return () => {
-      wsService.off("user_progress", handler);
+      wsService.off("task_completed", completedHandler);
+      wsService.off("task_failed", unavailableHandler);
+      wsService.off("error", errorHandler);
     };
   }, []);
 
-  // 🔥 слушаем новое условие (разблокируем после next step)
   useEffect(() => {
-    const handler = (data) => {
+    const conditionHandler = (data) => {
       if (!data?.condition) return;
 
-      // пришёл новый шаг → можно снова нажимать
+      setIsEnabled(data?.next_step_available === true);
       setWaitingForCondition(false);
     };
 
-    wsService.on("task_condition", handler);
+    wsService.on("task_condition", conditionHandler);
 
     return () => {
-      wsService.off("task_condition", handler);
+      wsService.off("task_condition", conditionHandler);
     };
   }, []);
 
@@ -132,8 +48,6 @@ export default function NextStepButton({ onNext }) {
     if (!isEnabled || waitingForCondition) return;
 
     onNext();
-
-    // 🔥 блокируем кнопку до прихода нового condition
     setIsEnabled(false);
     setWaitingForCondition(true);
   };
@@ -143,7 +57,7 @@ export default function NextStepButton({ onNext }) {
   return (
     <button
       className={`module-next-button module-button ${
-        (!isEnabled || isLoading) ? "disabled" : ""
+        !isEnabled || isLoading ? "disabled" : ""
       }`}
       onClick={handleClick}
       disabled={!isEnabled || isLoading}

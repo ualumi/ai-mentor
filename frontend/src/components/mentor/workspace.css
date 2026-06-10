@@ -344,6 +344,8 @@
 }
 
 
+
+
 .tooltip-wrapper {
   position: relative;
   display: inline-block;
@@ -400,7 +402,6 @@
   }
 }
 
-
 .intro-modal {
   position: fixed;
   inset: 0;
@@ -451,6 +452,7 @@
   opacity: 1
 }
 
+
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -468,6 +470,7 @@
   flex:1;
 
 }
+
 
 .module-next-button-hint {
   position: absolute;
@@ -489,8 +492,6 @@
 .module-next-button-wrapper:focus-within .module-next-button-hint {
   opacity: 1;
 }
-
-
 
 .item.end {
   justify-self: end;
