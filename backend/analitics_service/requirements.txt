@@ -7,9 +7,9 @@ asyncio
 aiohttp
 requests
 
-#transformers>=4.39.0
-#tokenizers>=0.15.2
-#huggingface_hub>=0.21.0
-#accelerate
-#sentencepiece
-#safetensors
+transformers>=4.39.0
+tokenizers>=0.15.2
+huggingface_hub>=0.21.0
+accelerate
+sentencepiece
+safetensors
