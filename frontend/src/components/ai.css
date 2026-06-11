@@ -228,10 +228,10 @@
 }*/
 
 .editor-wrapper {
-  flex: 1;
+  flex: 1 !important;
   min-height: 200px;
   min-width: 0;
-  display: flex;
+  display: flex !important;
   margin-top: 10px;
 }
 
@@ -244,11 +244,3 @@
   overflow: hidden;
 }
 
-.free .editor-wrapper {
-  /*min-height: 55vh;*/
-}
-
-.module .editor-wrapper, 
-.module .editor-container {
-  /*min-height: 40vh;*/
-}

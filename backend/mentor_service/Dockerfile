@@ -33,7 +33,7 @@ RUN pip install \
 RUN pip install \
     --no-cache-dir \
     --default-timeout=600 \
-    -r requirements.txt
+    -r requirements.no_torch.txt
 
 COPY . .
 
