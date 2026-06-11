@@ -46,12 +46,20 @@ async def _handle_mentor_message(message):
 
 async def mentor_worker():
     while True:
-        pubsub = redis.pubsub()
+        pubsub = redis.pubsub(ignore_subscribe_messages=True)
         try:
             await pubsub.psubscribe(REQUEST_PATTERN)
             print("Mentor AI listening mentor_request:*")
 
-            async for message in pubsub.listen():
+            while True:
+                try:
+                    message = await pubsub.get_message(timeout=1.0)
+                except redis_exceptions.TimeoutError:
+                    continue
+
+                if message is None:
+                    continue
+
                 if message["type"] != "pmessage":
                     continue
 

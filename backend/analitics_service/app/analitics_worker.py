@@ -65,12 +65,20 @@ async def _handle_analytics_message(message):
 
 async def analitics_worker():
     while True:
-        pubsub = redis.pubsub()
+        pubsub = redis.pubsub(ignore_subscribe_messages=True)
         try:
             await pubsub.psubscribe(REQUEST_PATTERN)
             print("Analytics service listening analytics_request:*")
 
-            async for message in pubsub.listen():
+            while True:
+                try:
+                    message = await pubsub.get_message(timeout=1.0)
+                except redis_exceptions.TimeoutError:
+                    continue
+
+                if message is None:
+                    continue
+
                 if message["type"] != "pmessage":
                     continue
 
