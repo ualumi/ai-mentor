@@ -164,8 +164,6 @@ services:
       - redis
     networks:
       - mentor-net
-    volumes:
-      - ./logs/progress_service:/app/logs
 
   attempts_service:
     build:
