@@ -11,6 +11,7 @@ async def analitics_worker():
     print("📊 Analytics service listening analytics_request:*")
 
     async for message in pubsub.listen():
+        print(message)
         if message["type"] != "pmessage":
             continue
 
