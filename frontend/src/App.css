@@ -402,6 +402,17 @@
     height: min-content;
     color: var(--text-color);
     background-color: transparent;
+    opacity: 0.5;
+     border: none;
+     outline: none;
+     transition: color 0.3s ease;
+     padding-inline: 10px;
+}
+
+.toggle-button:focus, .toggle-button:hover {
+    color: #fff;
+    border: none;
+     outline: none;
 }
 
 .terminal {

@@ -21,6 +21,10 @@ export default function Modules({ mode }) {
     setActiveTab(isSSO ? "recommended" : "active");
   }, [isSSO]);
 
+  useEffect(() => {
+    cleanupRecommendedModulesStorage();
+  }, []);
+
   const activeSessionsQuery = useSessionsQuery(token, "active");
   const completedSessionsQuery = useSessionsQuery(token, "completed");
   const importedSkillsQuery = useImportedSkillsQuery(isSSO);
@@ -67,10 +71,13 @@ export default function Modules({ mode }) {
   const recommendedFromSso = ssoEntries.filter(
     ([name]) => !startedNames.has(normalizeName(name))
   );
-  const recommendedFromLocal = localRecommended.filter((name) => {
-    const normalized = normalizeName(name);
-    return !startedNames.has(normalized) && !ssoNames.has(normalized);
-  });
+  const recommendedFromLocal = localRecommended
+    .map(normalizeStoredRecommendation)
+    .filter(Boolean)
+    .filter((recommendation) => {
+      const normalized = normalizeName(recommendation.competency);
+      return !startedNames.has(normalized) && !ssoNames.has(normalized);
+    });
 
   return (
     <div className={`modules-block ${isSSO ? "modules-block-sso" : "modules-block-default"}`}>
@@ -117,10 +124,11 @@ export default function Modules({ mode }) {
                 />
               ))}
 
-              {recommendedFromLocal.map((name, idx) => (
+              {recommendedFromLocal.map((recommendation, idx) => (
                 <Module
-                  key={`local-${normalizeName(name)}-${idx}`}
-                  competency={name}
+                  key={`local-${normalizeName(recommendation.competency)}-${idx}`}
+                  competency={recommendation.competency}
+                  explainGoal={recommendation.explainGoal}
                   progress={0}
                   mode="recommended"
                 />
@@ -137,6 +145,7 @@ export default function Modules({ mode }) {
                   session={session}
                   mode={mode}
                   progress={session.progress}
+                  progressBaseline={session.progress_baseline}
                 />
               ))}
             </ModuleList>
@@ -151,6 +160,7 @@ export default function Modules({ mode }) {
                   session={session}
                   mode={mode}
                   progress={session.progress ?? 1}
+                  progressBaseline={session.progress_baseline}
                 />
               ))}
             </ModuleList>
@@ -215,4 +225,47 @@ function normalizeName(name) {
     .trim()
     .toLowerCase()
     .replace(/[-/\s]+/g, "_");
+}
+
+function normalizeStoredRecommendation(recommendation) {
+  if (typeof recommendation === "string") {
+    return null;
+  }
+
+  if (!recommendation || typeof recommendation !== "object") return null;
+
+  const competency =
+    recommendation.competency ||
+    recommendation.main_competency ||
+    recommendation.module?.main_competency;
+
+  if (!competency) return null;
+
+  return {
+    competency,
+    explainGoal:
+      recommendation.explainGoal ||
+      recommendation.explain_goal ||
+      recommendation.explanation?.module_reason ||
+      recommendation.explanation?.reason ||
+      null,
+  };
+}
+
+function cleanupRecommendedModulesStorage() {
+  try {
+    const stored = JSON.parse(localStorage.getItem("recommended_modules") || "[]");
+    if (!Array.isArray(stored)) {
+      localStorage.setItem("recommended_modules", "[]");
+      return;
+    }
+
+    const cleaned = stored
+      .map(normalizeStoredRecommendation)
+      .filter(Boolean);
+
+    localStorage.setItem("recommended_modules", JSON.stringify(cleaned));
+  } catch {
+    localStorage.setItem("recommended_modules", "[]");
+  }
 }

@@ -346,6 +346,7 @@ export default function History({mode, name, attempt, restoredState, code, title
                   competency={moduleName}
                   mode={'listen'}
                   progress={progress}
+                  progressBaseline={restoredState?.progress_baseline}
                 />
               </div>
             </div>

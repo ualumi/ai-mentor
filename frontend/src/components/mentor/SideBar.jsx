@@ -95,6 +95,14 @@ export default function SideBar({ mode = "", isOpen, toggleSidebar, openAuth }) 
   }, [mode]);
   const { token, user } = useAuth();
   const location = useLocation();
+  const username = user?.username || user?.email || "User";
+  const userInitial = username[0]?.toUpperCase() || "?";
+
+  const openSidebarFromProfile = () => {
+    if (!isOpen) {
+      toggleSidebar(true);
+    }
+  };
   //{ type:"input_item", text:"Поиск", icon:<Search strokeWidth={1} size={20}/> },
   //{ type:"button_item", text:"Прогресс", icon:<Activity strokeWidth={1} size={20}/>, link:"/progress" }
   const items = [
@@ -171,15 +179,31 @@ export default function SideBar({ mode = "", isOpen, toggleSidebar, openAuth }) 
       </div>
 
       {/*{isOpen && <ProfileItem name="User" email="test@gmail.com"/>}*/}
-      {isOpen && (
-        token
-          ? <ProfileItem name={user.username} email={user.email} />
-          : <button 
-              className="auth-open-button" 
-              onClick={openAuth}
-            >
-              Личный кабинет
-            </button>
+      {token && user && (
+        isOpen ? (
+          <ProfileItem name={user.username} email={user.email} />
+        ) : (
+          <button
+            type="button"
+            className="profile-collapsed-button"
+            onClick={openSidebarFromProfile}
+            aria-label="Открыть профиль"
+            title={username}
+          >
+            <span className="profile-ava profile-ava-collapsed">
+              {userInitial}
+            </span>
+          </button>
+        )
+      )}
+
+      {isOpen && !token && (
+        <button 
+          className="auth-open-button" 
+          onClick={openAuth}
+        >
+          Личный кабинет
+        </button>
       )}
 
     </div>

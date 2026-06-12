@@ -15,8 +15,10 @@ const queryClient = new QueryClient();
 export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   
-      const toggleSidebar = () => {
-          setIsSidebarOpen(!isSidebarOpen);
+      const toggleSidebar = (nextState) => {
+          setIsSidebarOpen((current) =>
+              typeof nextState === "boolean" ? nextState : !current
+          );
       };
 
   const { token } = useAuth();

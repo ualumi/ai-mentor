@@ -9,10 +9,11 @@ function ProgressBar({
   color = "#3B68FF",
   mode,
   competency,
+  progressBaseline,
 }) {
   const useLiveProgress = mode === "listen";
   const [liveProgress, setLiveProgress] = useState(() =>
-    chooseProgressValue(progress, competency, useLiveProgress)
+    chooseProgressValue(progress, competency, useLiveProgress, progressBaseline)
   );
 
   const normalizedCompetency = useMemo(
@@ -21,8 +22,10 @@ function ProgressBar({
   );
 
   useEffect(() => {
-    setLiveProgress(chooseProgressValue(progress, competency, useLiveProgress));
-  }, [progress, competency, useLiveProgress]);
+    setLiveProgress(
+      chooseProgressValue(progress, competency, useLiveProgress, progressBaseline)
+    );
+  }, [progress, competency, useLiveProgress, progressBaseline]);
 
   useEffect(() => {
     if (!competency || !useLiveProgress) return;
@@ -33,7 +36,10 @@ function ProgressBar({
 
       cacheProgressEvent(event);
 
-      const nextProgress = resolveProgressValue(event, competency);
+      const nextProgress = applyProgressBaseline(
+        resolveProgressValue(event, competency),
+        progressBaseline
+      );
       if (nextProgress === null || nextProgress === undefined) return;
 
       setLiveProgress(nextProgress);
@@ -44,7 +50,7 @@ function ProgressBar({
     return () => {
       wsService.off("user_progress", handler);
     };
-  }, [competency, normalizedCompetency, useLiveProgress]);
+  }, [competency, normalizedCompetency, useLiveProgress, progressBaseline]);
 
   const progressValue = toPercent(liveProgress);
   const isIndeterminate = progressValue === null;
@@ -105,11 +111,22 @@ function resolveProgressValue(source, competency) {
   return null;
 }
 
-function chooseProgressValue(progress, competency, useLiveProgress = false) {
+function chooseProgressValue(
+  progress,
+  competency,
+  useLiveProgress = false,
+  progressBaseline
+) {
   const propProgress = resolveProgressValue(progress, competency);
+  const hasBaseline = isFiniteProgress(progressBaseline);
+
   if (!useLiveProgress) return propProgress;
 
   const cachedProgress = readCachedProgress(competency);
+
+  if (hasBaseline) {
+    return propProgress ?? applyProgressBaseline(cachedProgress, progressBaseline);
+  }
 
   if (cachedProgress !== null && (propProgress === null || propProgress === 0)) {
     return cachedProgress;
@@ -226,6 +243,29 @@ function readCachedProgress(competency) {
   } catch {
     return null;
   }
+}
+
+function applyProgressBaseline(currentProgress, progressBaseline) {
+  if (!isFiniteProgress(progressBaseline)) return currentProgress;
+  if (!isFiniteProgress(currentProgress)) return null;
+
+  const current = clampProgress(Number(currentProgress));
+  const baseline = clampProgress(Number(progressBaseline));
+
+  if (current <= baseline) return 0;
+
+  const remaining = 1 - baseline;
+  if (remaining <= 0) return 0;
+
+  return clampProgress((current - baseline) / remaining);
+}
+
+function isFiniteProgress(value) {
+  return Number.isFinite(Number(value));
+}
+
+function clampProgress(value) {
+  return Math.min(1, Math.max(0, value));
 }
 
 function toPercent(value) {

@@ -132,7 +132,44 @@
 .profile-ava {
     background-color: #444547;
     border-radius: 500px;
-    padding: 15px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 40px;
+    font-family: "Stolz regular";
+    font-size: 14px;
+    line-height: 1;
     /*border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: inset 0px -10px 40px -20px rgba(255, 255, 255, 0.08);*/
+}
+
+.profile-collapsed-button {
+  width: 100%;
+  margin-bottom: 16px;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text-color);
+  display: flex;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.profile-collapsed-button:focus,
+.profile-collapsed-button:hover {
+  outline: none;
+}
+
+.profile-collapsed-button:focus-visible .profile-ava-collapsed,
+.profile-collapsed-button:hover .profile-ava-collapsed {
+  background-color: #55575A;
+}
+
+.profile-ava-collapsed {
+  transition: background-color 0.2s ease;
 }

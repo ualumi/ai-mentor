@@ -148,6 +148,14 @@
     padding: 0;
 }
 
+.module-explain-goal {
+    margin: -6px 0 0;
+    color: rgba(255, 255, 255, 0.58);
+    font-size: 11px;
+    line-height: 1.35;
+    white-space: normal;
+}
+
 .disabled {
     background-color: #2F3032;
     box-shadow: none;

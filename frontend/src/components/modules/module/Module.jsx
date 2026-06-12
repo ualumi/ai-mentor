@@ -3,7 +3,13 @@ import icon3 from "../../../assets/module-icons/Layers.svg";
 import ProgressBar from "./ProgressBar";
 import { useStartModule } from "../../../hooks/useStartModule";
 
-export default function Module({ competency, session, mode, progress }) {
+export default function Module({
+  competency,
+  mode,
+  progress,
+  progressBaseline,
+  explainGoal,
+}) {
   const navigate = useNavigate();
   const { mutateAsync, isPending } = useStartModule();
 
@@ -43,15 +49,21 @@ export default function Module({ competency, session, mode, progress }) {
           <span className="modules-item-text home-summary-block-label-text">
             {competency}
           </span>
+          {explainGoal && (
+            <p className="modules-item-p module-explain-goal">{explainGoal}</p>
+          )}
 
           <div className="jol">
             <p className="modules-item-p">Пройдено:</p>
             <ProgressBar
               progress={progress}
+              progressBaseline={progressBaseline}
               mode={mode}
               competency={competency}
             />
           </div>
+
+          
         </div>
       </div>
     </div>

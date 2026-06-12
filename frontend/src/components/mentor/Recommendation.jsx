@@ -7,7 +7,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { wsService } from '../../services/websocket';
 import "../../App.css";
-import StartModuleButton from "../modules/StartModuleButton";
 import Module from '../modules/module/Module';
 
 export default function Recommendation({ mode, attempt }) {
@@ -526,11 +525,13 @@ import { MessageCircleCode, BookMarked, ChevronDown, ChevronUp } from 'lucide-re
 import { useEffect, useState, useRef } from 'react';
 import { wsService } from '../../services/websocket';
 import "../../App.css";
-import StartModuleButton from "../modules/StartModuleButton";
 import Module from '../modules/module/Module';
 
+const GLOBAL_RECOMMENDATION_EXPLANATION =
+  "Пока данных о вашем прогрессе мало, поэтому рекомендован часто востребованный модуль.";
+
 const getActiveRecommendationCompetency = (recommendation) => {
-  if (typeof recommendation === "string") return recommendation;
+  if (!isModuleRecommendation(recommendation)) return null;
 
   return (
     recommendation?.main_competency ||
@@ -540,11 +541,109 @@ const getActiveRecommendationCompetency = (recommendation) => {
   );
 };
 
-const getActiveRecommendationNames = (message) => {
+const isModuleRecommendation = (recommendation) => {
+  if (!recommendation || typeof recommendation !== "object") return false;
+
+  const type = recommendation.type;
+  const hasModuleShape =
+    Boolean(recommendation.main_competency) ||
+    Boolean(recommendation.module?.main_competency) ||
+    Array.isArray(recommendation.tags) ||
+    Boolean(recommendation.goal) ||
+    Boolean(recommendation.explain_goal) ||
+    Boolean(recommendation.explanation?.module_reason);
+
+  return (
+    type === "educational_module" ||
+    type === "module_task_parameters" ||
+    hasModuleShape
+  );
+};
+
+const getRecommendationExplanation = (recommendation) => {
+  if (!recommendation || typeof recommendation === "string") return null;
+
+  const selectionSource =
+    recommendation.selection_source ||
+    recommendation.selectionContext?.source ||
+    recommendation.selection_context?.source ||
+    recommendation.explanation?.selection_source ||
+    recommendation.explanation?.selection_context?.source;
+
+  if (selectionSource === "global") {
+    return GLOBAL_RECOMMENDATION_EXPLANATION;
+  }
+
+  return (
+    recommendation.explain_goal ||
+    recommendation.explanation?.explain_goal ||
+    recommendation.explanation?.module_reason ||
+    recommendation.module?.explain_goal ||
+    recommendation.module?.explanation?.reason ||
+    recommendation.explanation?.reason ||
+    null
+  );
+};
+
+const normalizeRecommendation = (recommendation) => {
+  const competency = getActiveRecommendationCompetency(recommendation);
+  if (!competency) return null;
+
+  return {
+    competency,
+    explainGoal: getRecommendationExplanation(recommendation),
+  };
+};
+
+const getRecommendationKey = (recommendation) =>
+  String(recommendation?.competency || "")
+    .trim()
+    .toLowerCase();
+
+const mergeStoredRecommendations = (stored, incoming) => {
+  const unique = new Map();
+
+  [...stored, ...incoming]
+    .map(normalizeStoredRecommendation)
+    .filter(Boolean)
+    .forEach((recommendation) => {
+      const key = getRecommendationKey(recommendation);
+      const existing = unique.get(key);
+
+      if (!existing || (!existing.explainGoal && recommendation.explainGoal)) {
+        unique.set(key, recommendation);
+      }
+    });
+
+  return Array.from(unique.values());
+};
+
+const normalizeStoredRecommendation = (recommendation) => {
+  if (typeof recommendation === "string") {
+    return null;
+  }
+
+  if (!recommendation || typeof recommendation !== "object") return null;
+
+  return {
+    competency: recommendation.competency || getActiveRecommendationCompetency(recommendation),
+    explainGoal:
+      recommendation.explainGoal ||
+      recommendation.explain_goal ||
+      getRecommendationExplanation(recommendation),
+  };
+};
+
+const getActiveRecommendationItems = (message) => {
   const payload = message?.data || message || {};
   const candidates = [];
+  const hasModuleRecommendationSource =
+    Array.isArray(payload.module_recommendations) ||
+    Array.isArray(payload.progress?.module_recommendations) ||
+    Boolean(payload.task_parameters) ||
+    Boolean(payload.progress?.task_parameters);
 
-  if (Array.isArray(payload.recommendations)) {
+  if (hasModuleRecommendationSource && Array.isArray(payload.recommendations)) {
     candidates.push(...payload.recommendations);
   }
 
@@ -552,7 +651,10 @@ const getActiveRecommendationNames = (message) => {
     candidates.push(...payload.module_recommendations);
   }
 
-  if (Array.isArray(payload.progress?.recommendations)) {
+  if (
+    hasModuleRecommendationSource &&
+    Array.isArray(payload.progress?.recommendations)
+  ) {
     candidates.push(...payload.progress.recommendations);
   }
 
@@ -568,11 +670,21 @@ const getActiveRecommendationNames = (message) => {
     candidates.push(payload.progress.task_parameters);
   }
 
-  return [...new Set(
-    candidates
-      .map(getActiveRecommendationCompetency)
-      .filter(Boolean)
-  )];
+  const unique = new Map();
+
+  candidates
+    .map(normalizeRecommendation)
+    .filter(Boolean)
+    .forEach((recommendation) => {
+      const key = getRecommendationKey(recommendation);
+      const existing = unique.get(key);
+
+      if (!existing || (!existing.explainGoal && recommendation.explainGoal)) {
+        unique.set(key, recommendation);
+      }
+    });
+
+  return Array.from(unique.values());
 };
 
 export default function Recommendation({ mode, attempt }) {
@@ -615,7 +727,7 @@ export default function Recommendation({ mode, attempt }) {
     const handler = (data) => {
       console.log("📡 WS EVENT RECEIVED:", data);
 
-      const unique = getActiveRecommendationNames(data);
+      const unique = getActiveRecommendationItems(data);
       const payload = data?.data || data || {};
       const isUserProgressEvent =
         data.source?.startsWith("user_progress") ||
@@ -630,7 +742,8 @@ export default function Recommendation({ mode, attempt }) {
           wsRecommendationRef.current = true;
 
           setRecommendations(prev => {
-            const newOnes = unique.filter(r => !prev.includes(r));
+            const existing = new Set(prev.map(getRecommendationKey));
+            const newOnes = unique.filter(r => !existing.has(getRecommendationKey(r)));
             return newOnes.length ? [...prev, ...newOnes] : prev;
           });
 
@@ -678,7 +791,7 @@ export default function Recommendation({ mode, attempt }) {
     if (mode === "history" && attempt?.analysis) {
       const recs = attempt.analysis.recommendations || [];
       const normalizedRecs = recs
-        .map(getActiveRecommendationCompetency)
+        .map(normalizeRecommendation)
         .filter(Boolean);
 
       if (normalizedRecs.length > 0) {
@@ -728,7 +841,7 @@ export default function Recommendation({ mode, attempt }) {
 
     try {
       const existing = JSON.parse(localStorage.getItem("recommended_modules") || "[]");
-      const merged = Array.from(new Set([...existing, ...recommendations]));
+      const merged = mergeStoredRecommendations(existing, recommendations);
       localStorage.setItem("recommended_modules", JSON.stringify(merged));
       wsRecommendationRef.current = false;
     } catch (e) {
@@ -780,7 +893,10 @@ export default function Recommendation({ mode, attempt }) {
 
                 {recommendations.map((r, i) => (
                   <div key={i}>
-                    <Module competency={r} />
+                    <Module
+                      competency={r.competency}
+                      explainGoal={r.explainGoal}
+                    />
                   </div>
                 ))}
 
