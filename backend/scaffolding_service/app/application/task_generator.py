@@ -1,6 +1,6 @@
 import random
-#from app.model import get_model
-#from app.inference import generate_bugfix_task
+from app.model import get_model
+from app.inference import generate_bugfix_task
 import json
 
 SYSTEM_PROMPT = (
@@ -32,7 +32,7 @@ TASK_POOL = {
 def generate_condition( competency, task, attempts: list):
 
     print(task)
-    '''model, tokenizer = get_model()
+    model, tokenizer = get_model()
 
     result = generate_bugfix_task(
         model=model,
@@ -55,7 +55,7 @@ def generate_condition( competency, task, attempts: list):
             "broken_code": broken_code,
             "task_context": data.get("task_context", ""),
             "tests": data.get("tests", []),
-        }'''
+        }
 
     return {
             "description": f"Пример задачи {competency} с параметром",

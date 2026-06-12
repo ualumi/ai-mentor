@@ -4,3 +4,9 @@ uvicorn
 httpx
 asyncio
 aiohttp
+
+accelerate
+peft
+trl
+bitsandbytes
+unsloth[kaggle-new]
