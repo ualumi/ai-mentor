@@ -71,7 +71,7 @@
 }
 
 .sidebar {
-    padding-inline: 15px;
+    padding-inline: 10px;
     height: calc(100% - 20px);
     display: flex;
     flex-direction: column;

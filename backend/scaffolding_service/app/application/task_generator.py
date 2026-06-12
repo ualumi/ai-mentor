@@ -1,5 +1,19 @@
 import random
+from app.model import get_model
+from app.inference import generate_bugfix_task
+import json
 
+SYSTEM_PROMPT = (
+    "Ты генерируешь новую ML bugfix-задачу строго в формате объектов из датасета. "
+    "Верни только один JSON-объект без Markdown и без пояснений. "
+    "Порядок полей должен быть ровно таким: "
+    "`title`, `difficulty`, `topic_tags`, `task_context`, `tests`, "
+    "`expected_output`, `input_example`, `output_example`, `requirements`, "
+    "`constraints`, `broken_code`. "
+    "`tests`, `requirements` и `constraints` должны быть массивами строк. "
+    "`broken_code` должен быть одной строкой с полным Python-кодом и символами `\\n`. "
+    "Не добавляй лишние поля и не обрывай JSON."
+)
 
 TASK_POOL = {
     "loops": [
@@ -16,7 +30,38 @@ TASK_POOL = {
 
 
 def generate_condition( competency, task, attempts: list):
-    print(f"Task: {task}")
+
+    print(task)
+    model, tokenizer = get_model()
+
+    result = generate_bugfix_task(
+        model=model,
+        tokenizer=tokenizer,
+        system_prompt=SYSTEM_PROMPT,
+        payload=task,
+    )
+
+    print(result)
+
+    data = json.loads(result)
+    title = data["title"]
+    broken_code = data["broken_code"].replace('\\n', '\n')  # Простой способ
+
+    #tasks = TASK_POOL.get(competency, [])
+    #cse= random.randint(1, 100)
+    if title and broken_code:
+        return {
+            "description": title,
+            "broken_code": broken_code,
+            "task_context": data.get("task_context", ""),
+            "tests": data.get("tests", []),
+        }
+
+    return {
+            "description": f"Пример задачи {competency} с параметром",
+            "broken_code": "def mean_row_count_of_values_below_train_mean_per_column_detailed(train_matrix, val_matrix):\\n    baselines = [sum(column) / len(column) for column in zip(*val_matrix)]\\n\\n    values = []\\n    for row in val_matrix:\\n        current = 0\\n        for value, baseline in zip(row, baselines):\\n            if value >= baseline:\\n                current += 1\\n        values.append(current)\\n\\n    return sum(values) / len(values)"
+    }
+    '''print(f"Task: {task}")
     if task == {}:
         task = competency
     tasks = TASK_POOL.get(competency, [])
@@ -36,4 +81,5 @@ def generate_condition( competency, task, attempts: list):
 
     return {
         "description": random.choice(tasks)
-    }
+    }'''
+    
