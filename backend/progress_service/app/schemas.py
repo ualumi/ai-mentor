@@ -30,4 +30,5 @@ class ModuleRecommendation(BaseModel):
     tags: list[GeneratorTagRequirement]
     goal: str
     priority: float = Field(ge=0.0)
+    explain_goal: str | None = None
     explanation: dict[str, Any]

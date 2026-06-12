@@ -66,6 +66,14 @@ async def start_session(
         if progress_raw
         else {}
     )
+    progress_baseline = _progress_value(
+        _find_skill_progress(progress, competency)
+    )
+    await redis_client.hset(
+        key,
+        "progress_baseline",
+        progress_baseline,
+    )
     print(progress, "in_start_session")
     task = await build_adaptive_task_payload(
         competency=competency,
@@ -100,7 +108,10 @@ async def start_session(
     #await generate_next_task(session.id)
 
     return  {
-        "session": session.to_dict(),
+        "session": {
+            **session.to_dict(),
+            "progress_baseline": progress_baseline,
+        },
         "is_existing": False
     }
 
@@ -111,3 +122,34 @@ def _active_session_key(user_id: int, competency: str) -> str:
 
 def _normalize_skill_name(name) -> str:
     return str(name or "").strip().lower().replace("-", "_").replace("/", "_").replace(" ", "_")
+
+
+def _find_skill_progress(progress: dict, competency: str | None) -> dict:
+    skills = progress.get("skills", {}) if isinstance(progress, dict) else {}
+    if not isinstance(skills, dict):
+        return {}
+
+    normalized_competency = _normalize_skill_name(competency)
+    if normalized_competency and isinstance(skills.get(normalized_competency), dict):
+        return skills[normalized_competency]
+
+    for skill_name, skill_progress in skills.items():
+        if (
+            _normalize_skill_name(skill_name) == normalized_competency
+            and isinstance(skill_progress, dict)
+        ):
+            return skill_progress
+
+    return {}
+
+
+def _progress_value(skill_progress: dict) -> float:
+    for key in ("bkt_mastery", "mastery", "ema_mastery", "ema", "progress"):
+        value = skill_progress.get(key)
+        if isinstance(value, (int, float)):
+            return _clamp_progress(value)
+    return 0
+
+
+def _clamp_progress(value: float) -> float:
+    return max(0.0, min(float(value), 1.0))

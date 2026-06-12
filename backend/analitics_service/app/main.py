@@ -2,7 +2,7 @@ from fastapi import FastAPI
 import asyncio
 from app.analitics_worker import analitics_worker
 from app.core.redis_client import redis
-from app.core.model_client import load_model
+#from app.core.model_client import load_model
 
 app = FastAPI(title="Analitics AI Service")
 
@@ -12,7 +12,7 @@ async def startup_event():
     print("🔥 STARTUP WORKS")
     await redis.ping()
     asyncio.create_task(analitics_worker())
-    load_model()
+    #load_model()
 
 
 @app.on_event("shutdown")

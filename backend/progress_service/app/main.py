@@ -4,7 +4,7 @@ import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-import torch
+#import torch
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from jose import JWTError, jwt
@@ -49,8 +49,8 @@ def setup_logging() -> None:
         force=True,
     )
 
-torch.set_num_threads(1)
-torch.set_num_interop_threads(1)
+#torch.set_num_threads(1)
+#torch.set_num_interop_threads(1)
 
 
 @asynccontextmanager

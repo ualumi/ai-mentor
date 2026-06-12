@@ -27,7 +27,7 @@ import asyncio
 from fastapi import FastAPI
 #from app.api.scaffolding import router
 from app.application.redis_listener import redis_listener
-from app.model import load_model
+#from app.model import load_model
 import json
 from app.infrastructure.redis import redis_client
 
@@ -37,7 +37,7 @@ app = FastAPI(title="Scaffolding Service")
 
 @app.on_event("startup")
 async def startup():
-    load_model()
+    #load_model()
     asyncio.create_task(redis_listener())
 
 

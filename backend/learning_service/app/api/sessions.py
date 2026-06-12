@@ -34,8 +34,33 @@ def _progress_value(skill_progress: dict) -> float:
     for key in ("bkt_mastery", "mastery", "ema_mastery", "ema", "progress"):
         value = skill_progress.get(key)
         if isinstance(value, (int, float)):
-            return value
+            return _clamp_progress(value)
     return 0
+
+
+def _module_progress_value(current_progress: float, baseline_progress) -> float:
+    baseline = _coerce_progress(baseline_progress)
+    current = _clamp_progress(current_progress)
+
+    if current <= baseline:
+        return 0
+
+    remaining = 1 - baseline
+    if remaining <= 0:
+        return 0
+
+    return _clamp_progress((current - baseline) / remaining)
+
+
+def _coerce_progress(value) -> float:
+    try:
+        return _clamp_progress(float(value))
+    except (TypeError, ValueError):
+        return 0
+
+
+def _clamp_progress(value: float) -> float:
+    return max(0.0, min(float(value), 1.0))
 
 
 @router.post("/start")
@@ -78,6 +103,8 @@ async def get_session_state(
     progress_raw = await redis_client.get(f"all_user_progress:{session['user_id']}")
     progress = json.loads(progress_raw) if progress_raw else {}
     skill_progress = _find_skill_progress(progress, session.get("competency"))
+    current_progress = _progress_value(skill_progress)
+    progress_baseline = session.get("progress_baseline", 0)
 
     print({
         #"session": session,
@@ -87,7 +114,9 @@ async def get_session_state(
     return {
         "session": session,
         "attempts": attempts,
-        "progress": _progress_value(skill_progress),
+        "progress": _module_progress_value(current_progress, progress_baseline),
+        "progress_baseline": _coerce_progress(progress_baseline),
+        "competency_progress": current_progress,
         "current_condition": json.loads(session.get("current_condition", "null")),
     }
 
@@ -151,11 +180,15 @@ async def get_my_sessions(
         print('progress_raw', progress_raw)
         progress = json.loads(progress_raw) if progress_raw else {}
         skill_progress = _find_skill_progress(progress, competency)
+        current_progress = _progress_value(skill_progress)
+        progress_baseline = s.get("progress_baseline", 0)
         print(skill_progress)
         enriched.append({
             **s,
             #"progress": progress_raw.get('ema', {})
-            "progress": _progress_value(skill_progress),
+            "progress": _module_progress_value(current_progress, progress_baseline),
+            "progress_baseline": _coerce_progress(progress_baseline),
+            "competency_progress": current_progress,
         })
 
     return enriched

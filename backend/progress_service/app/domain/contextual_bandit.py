@@ -33,6 +33,8 @@ def choose_task_parameters(
         )
         personal_score = _ucb_score(bandit_context_id, action_key, features)
         global_score = _ucb_score(GLOBAL_CONTEXT_ID, action_key, features)
+        personal_stats = _get_stats(bandit_context_id, action_key)
+        global_stats = _get_stats(GLOBAL_CONTEXT_ID, action_key)
         score = (
             PERSONAL_SCORE_WEIGHT * personal_score
             + GLOBAL_SCORE_WEIGHT * global_score
@@ -40,7 +42,13 @@ def choose_task_parameters(
 
         if score > best_score:
             best_score = score
-            best_candidate = candidate
+            best_candidate = _with_selection_context(
+                candidate,
+                personal_score=personal_score,
+                global_score=global_score,
+                personal_count=personal_stats["count"],
+                global_count=global_stats["count"],
+            )
 
     return best_candidate
 
@@ -90,3 +98,60 @@ def _get_stats(bandit_context_id: str, action_key: str) -> dict:
         }
 
     return USER_BANDIT_STATS[bandit_context_id][action_key]
+
+
+def _with_selection_context(
+    candidate: dict,
+    *,
+    personal_score: float,
+    global_score: float,
+    personal_count: int,
+    global_count: int,
+) -> dict:
+    selected = dict(candidate)
+    selection_source = _selection_source(
+        personal_score=personal_score,
+        global_score=global_score,
+        personal_count=personal_count,
+        global_count=global_count,
+    )
+    selected["selection_source"] = selection_source
+    selected["selection_context"] = {
+        "source": selection_source,
+        "personal_score": round(personal_score, 4),
+        "global_score": round(global_score, 4),
+        "personal_count": personal_count,
+        "global_count": global_count,
+    }
+
+    explanation = dict(selected.get("explanation", {}))
+    explanation["selection_source"] = selection_source
+    explanation["selection_context"] = selected["selection_context"]
+    selected["explanation"] = explanation
+
+    if selection_source == "global":
+        selected["explain_goal"] = (
+            "Пока данных о вашем прогрессе мало, поэтому рекомендован "
+            "часто востребованный модуль."
+        )
+
+    return selected
+
+
+def _selection_source(
+    *,
+    personal_score: float,
+    global_score: float,
+    personal_count: int,
+    global_count: int,
+) -> str:
+    if personal_count < 2 and global_count > personal_count:
+        return "global"
+
+    personal_contribution = PERSONAL_SCORE_WEIGHT * personal_score
+    global_contribution = GLOBAL_SCORE_WEIGHT * global_score
+
+    if global_count > 0 and global_contribution >= personal_contribution:
+        return "global"
+
+    return "personal"

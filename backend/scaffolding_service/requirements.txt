@@ -6,7 +6,3 @@ pydantic
 requests
 websockets
 aiohttp
-
-torch
-transformers
-accelerate

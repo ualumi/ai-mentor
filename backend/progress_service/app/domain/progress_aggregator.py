@@ -3,7 +3,7 @@ from datetime import datetime
 
 ALPHA = 0.35
 DECAY = 0.995
-MASTERY_THRESHOLD = 0.8
+MASTERY_THRESHOLD = 0.99
 BKT_PRIOR = 0.2
 BKT_LEARN = 0.12
 BKT_GUESS = 0.2

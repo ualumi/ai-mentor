@@ -75,6 +75,7 @@ def build_module_candidate(
         "tags": tags[:3],
         "goal": goal,
         "priority": round(priority, 3),
+        "explain_goal": _explain_goal(goal, main_skill),
         "explanation": {
             "reason": _explain_goal(goal, main_skill),
             "signals": {
@@ -126,6 +127,8 @@ def build_task_parameter_candidates(
             "tags": tags,
             "goal": module.get("goal", _choose_goal(main_state)),
             "priority": module.get("priority", 0.0),
+            "explain_goal": module.get("explain_goal")
+            or module.get("explanation", {}).get("reason"),
             "module": {
                 "main_competency": main_skill,
                 "goal": module.get("goal"),

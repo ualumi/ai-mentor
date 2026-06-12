@@ -289,8 +289,9 @@ def _get_active_module(
             ],
             "goal": "initial_practice",
             "priority": 0.0,
+            "explain_goal": "Пока данных о вашем прогрессе мало, поэтому рекомендован часто востребованный модуль.",
             "explanation": {
-                "reason": "Fallback module selected because no skill evidence is available yet.",
+                "reason": "Пока данных о вашем прогрессе мало, поэтому рекомендован часто востребованный модуль.",
                 "signals": {},
             },
         }
@@ -326,6 +327,11 @@ def _enrich_module_from_recommendations(
         "module_reason": recommendation.get("explanation", {}).get("reason"),
         "signals": recommendation.get("explanation", {}).get("signals", {}),
     }
+    enriched["explain_goal"] = (
+        enriched.get("explain_goal")
+        or recommendation.get("explain_goal")
+        or recommendation.get("explanation", {}).get("reason")
+    )
     return enriched
 
 

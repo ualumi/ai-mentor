@@ -25,10 +25,10 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # CPU torch
-RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
+#RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
 
 # PyG
-RUN pip install torch-geometric
+#RUN pip install torch-geometric
 
 # rest
 COPY requirements.txt .
