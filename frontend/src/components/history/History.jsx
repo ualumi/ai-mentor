@@ -390,9 +390,9 @@ export default function History({mode, name, attempt, restoredState, code, title
             });
             
             // Ждем пока завершится навигация
-            setTimeout(() => {
-              window.location.reload();
-            }, 0);
+            //setTimeout(() => {
+            //  window.location.reload();
+            //}, 0);
           }}
             style={{ cursor: "pointer" }}
           >

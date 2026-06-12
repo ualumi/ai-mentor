@@ -136,6 +136,9 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
   const [reviewData, setReviewData] = useState([]);
   const [activeTab, setActiveTab] = useState("code");
   const [stableRestoredState, setStableRestoredState] = useState(null);
+  const sessionIdForWs = stableRestoredState?.session?.session_id || (
+    mode === "module" ? id : null
+  );
 
   const hasReview = reviewData.length > 0;
 
@@ -153,21 +156,21 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
   const [wsReady, setWsReady] = useState(false);
 
   useEffect(() => {
-    if (!stableRestoredState?.session?.session_id) return;
+    if (!sessionIdForWs) return;
 
     const initSession = async () => {
       await wsService.connect(token); // ⬅️ гарантируем соединение
-      console.log("type set_session", stableRestoredState.session.session_id)
-      wsService.send({
+      console.log("type set_session", sessionIdForWs)
+      await wsService.send({
         type: "set_session",
-        learning_session_id: stableRestoredState.session.session_id
+        learning_session_id: sessionIdForWs
       });
 
       setWsReady(true);
     };
 
     initSession();
-  }, [stableRestoredState, token]);
+  }, [sessionIdForWs, token]);
   
 
   // -----------------------------

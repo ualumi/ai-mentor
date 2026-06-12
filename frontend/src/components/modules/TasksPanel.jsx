@@ -53,7 +53,7 @@ export default function TasksPanel({ mode, restoredState }) {
                 }
                 style={{ cursor: "pointer" }}
               >
-                <p>{condition}</p>
+                <p>{formatConditionTitle(condition)}</p>
               </div>
 
 
@@ -83,6 +83,25 @@ import Attempt from "../history/Attempt";
 import { getLearningState } from "../../api/learningService";
 import { useAuth } from "../../context/AuthContext";
 import { ChevronDown } from "lucide-react";
+
+const LOADING_CONDITION_KEY = "__loading_condition__";
+
+function getConditionKey(condition) {
+  if (
+    condition === null ||
+    condition === undefined ||
+    String(condition).trim() === "" ||
+    String(condition).trim().toLowerCase() === "null"
+  ) {
+    return LOADING_CONDITION_KEY;
+  }
+
+  return String(condition);
+}
+
+function formatConditionTitle(condition) {
+  return condition === LOADING_CONDITION_KEY ? "загрузка..." : condition;
+}
 
 export default function TasksPanel({ restoredState }) {
   const { token } = useAuth();
@@ -122,7 +141,7 @@ export default function TasksPanel({ restoredState }) {
   const groupedAttempts = useMemo(() => {
     if (!attempts.length) return {};
     return attempts.reduce((acc, attempt) => {
-      const condition = attempt.condition;
+      const condition = getConditionKey(attempt.condition);
       if (!acc[condition]) acc[condition] = [];
       acc[condition].push(attempt);
       return acc;
@@ -130,7 +149,9 @@ export default function TasksPanel({ restoredState }) {
   }, [attempts]);
 
   const selectedAttempt = attempts.find(a => a.attempt_id === selectedAttemptId);
-  const activeCondition = selectedAttempt?.condition;
+  const activeCondition = selectedAttempt
+    ? getConditionKey(selectedAttempt.condition)
+    : null;
 
   // 🔹 если просмотр attempt, автоматически раскрываем условие
   useEffect(() => {
@@ -206,7 +227,7 @@ export default function TasksPanel({ restoredState }) {
                     );
                   }}
                 />
-                <p>{condition}</p>
+                <p>{formatConditionTitle(condition)}</p>
 
                 
               </div>

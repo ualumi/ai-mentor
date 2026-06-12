@@ -46,8 +46,8 @@ export default function Module({
         </div>
 
         <div className="modules-description">
-          <span className="modules-item-text home-summary-block-label-text">
-            {competency}
+          <span className="modules-item-text home-summary-block-label-text module-title">
+            {formatModuleTitle(competency)}
           </span>
           {explainGoal && (
             <p className="modules-item-p module-explain-goal">{explainGoal}</p>
@@ -68,4 +68,17 @@ export default function Module({
       </div>
     </div>
   );
+}
+
+function formatModuleTitle(title) {
+  return String(title || "")
+    .split(/(\s+)/)
+    .map((part) => {
+      if (/^\s+$/.test(part) || part.length <= 12) {
+        return part;
+      }
+
+      return part.match(/.{1,10}/g).join("\u00AD");
+    })
+    .join("");
 }

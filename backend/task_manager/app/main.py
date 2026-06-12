@@ -343,10 +343,17 @@ async def websocket_endpoint(websocket: WebSocket):
                 }
 
                 if state["mode"] == "module":
-                    print("🔥 USING SESSION:", state["learning_session_id"])
+                    learning_session_id = state.get("learning_session_id") or data.learning_session_id
+                    if not learning_session_id:
+                        await manager.send_to_user(user_id, {
+                            "type": "error",
+                            "error": "Module session is not initialized yet",
+                        })
+                        continue
+                    print("USING SESSION:", learning_session_id)
                     base_payload.update({
-                        "learning_session_id": state["learning_session_id"],
-                        "condition": state["condition"],
+                        "learning_session_id": learning_session_id,
+                        "condition": state.get("condition"),
                     })
 
                 # -----------------
@@ -374,3 +381,4 @@ async def websocket_endpoint(websocket: WebSocket):
     except WebSocketDisconnect:
         manager.disconnect(user_id)
         USER_STATE.pop(user_id, None)
+

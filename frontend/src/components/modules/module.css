@@ -101,6 +101,7 @@
     gap: 10px;
     align-items: center;
     flex: 1;
+    min-width: 0;
 }
 
 .modules-description {
@@ -108,6 +109,7 @@
     flex-direction: column;
     gap: 15px;
     flex: 1;
+    min-width: 0;
 }
 
 .jol {
@@ -135,6 +137,16 @@
     font-size: 13px;
     color: #ffff;
     opacity: 1;
+}
+
+.module-title {
+    display: block;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    hyphens: manual;
+    line-height: 1.25;
 }
 
 .menu-item-processflag {
