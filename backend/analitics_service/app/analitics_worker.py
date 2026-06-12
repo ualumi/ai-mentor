@@ -26,6 +26,7 @@ async def _handle_analytics_message(message):
     step_id = payload.get("step_id")
     condition_description = payload.get("condition")
     mode = payload.get("mode")
+    source = payload.get("source")
 
     condition = None
     if condition_description:
@@ -53,6 +54,9 @@ async def _handle_analytics_message(message):
         "code": code,
         "condition": condition,
         "mode": mode,
+        "source": source,
+        "import_request_id": payload.get("import_request_id"),
+        "import_case_index": payload.get("import_case_index"),
     }
 
     await redis.publish(
