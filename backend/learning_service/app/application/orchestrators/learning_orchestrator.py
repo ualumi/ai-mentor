@@ -216,8 +216,13 @@ def _explicit_mastery_reached(progress: dict) -> bool:
 
 def _is_correct_score(score) -> bool:
     if isinstance(score, dict):
+        numeric_score = score.get("score")
+        if isinstance(numeric_score, (int, float)):
+            return numeric_score >= 7
         return score.get("is_correct") is True
 
+    if isinstance(score, (int, float)):
+        return score >= 7
     return score is True
 
 
