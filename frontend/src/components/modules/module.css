@@ -176,6 +176,10 @@
     display: flex;
 }
 
+.taskspanel .module-task-item-history {
+    flex-direction: row-reverse;
+}
+
 .attempts-list {
     overflow: hidden;
 
