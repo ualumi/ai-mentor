@@ -11,6 +11,7 @@ async def listen_progress_events():
     await pubsub.psubscribe("user_progress:*")
 
     async for msg in pubsub.listen():
+        print("Received message on channel:", msg.get("channel"), "with data:", msg.get("data"))
 
         if msg["type"] != "pmessage":
             continue
