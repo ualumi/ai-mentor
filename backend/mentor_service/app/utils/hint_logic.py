@@ -1,47 +1,26 @@
 import re
-import aiohttp
-from app.core.model_client import get_llm_hint
-import random;
-
-lst = ["ответ модели", "модель не подключена"]
-
-HINTS = {
-    "SyntaxError": "Проверь синтаксис: возможно, пропущена скобка или отступ.",
-    "IndexError": "Проверь индекс — возможно, выход за пределы списка.",
-    "ZeroDivisionError": "Деление на ноль невозможно.",
-}
-
-async def generate_hint(code: str) -> str:
-    # Пример: простая логика + возможный вызов LLM
-    for error_type, hint in HINTS.items():
-        if re.search(error_type, code, re.IGNORECASE):
-            return hint
-    return random.choice(lst); #get_llm_hint(code_snippet=code)
-
-"""import re
 from app.core.model_client import get_llm_hint
 
 MIN_CODE_LENGTH = 10
 
 QUICK_HINTS = {
-    r"ZeroDivisionError":   "Подумай, в каком случае знаменатель может оказаться равен нулю?",
-    r"RecursionError":      "Есть ли в твоей рекурсии условие выхода? Что происходит на каждом шаге?",
-    r"import\s+\*":         "Почему использование `import *` может быть проблемой в большом проекте?",
+    r"SyntaxError": "Проверь синтаксис: возможно, где-то пропущена скобка, двоеточие или отступ.",
+    r"IndexError": "Посмотри, не выходишь ли ты за границы списка или строки.",
+    r"ZeroDivisionError": "Подумай, в каком случае знаменатель может оказаться равен нулю.",
+    r"RecursionError": "Есть ли в рекурсии условие выхода и меняется ли состояние на каждом шаге?",
+    r"import\s+\*": "Почему `import *` может мешать читать и поддерживать код?",
 }
 
 
 async def generate_hint(code: str) -> str:
     if not code or not isinstance(code, str):
-        return "Пришли свой код — посмотрим вместе."
+        return "Пришли свой код, и посмотрим вместе."
 
     code = code.strip()
     if len(code) < MIN_CODE_LENGTH:
-        return "Код слишком короткий. Напиши больше — тогда смогу помочь разобраться."
+        return "Код слишком короткий. Пришли больше контекста, и я дам полезную подсказку."
 
-    # быстрые паттерны - ответ без LLM
     for pattern, hint in QUICK_HINTS.items():
         if re.search(pattern, code, re.IGNORECASE):
             return hint
-    # основной путь
-    return await get_llm_hint(code_snippet=code)"""
-
+    return await get_llm_hint(code_snippet=code)
