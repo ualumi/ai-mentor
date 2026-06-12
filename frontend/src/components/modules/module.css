@@ -155,6 +155,10 @@
     opacity: 0.5;
 }
 
+.disabled:hover {
+    background-color: #2F3032;
+}
+
 .buttons-module {
     display: flex;
     gap: 5px;

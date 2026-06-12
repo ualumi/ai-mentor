@@ -46,7 +46,7 @@ export default function Progress() {
     datasets: [
       {
         data: rows.map((row) => row.value),
-        backgroundColor: "#3B68FF",
+        backgroundColor: "linear-gradient(90deg, #3b68ff, #6f90ff)",
         borderRadius: 8,
         borderSkipped: false,
         barThickness: 10,
