@@ -3,8 +3,8 @@ import "../../App.css";
 import "./module.css";
 import { useEffect, useMemo, useState } from "react";
 
-const LEARNING_SERVICE = "http://localhost:8001";
-const INTEGRATION_SERVICE = "http://localhost:8012/api/integration";
+const LEARNING_SERVICE = "/api/learning";
+const INTEGRATION_SERVICE = "/api/integration";
 
 import Module from "./module/Module";
 import { useAuth } from "../../context/AuthContext";

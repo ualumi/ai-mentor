@@ -17,7 +17,7 @@ import NextStepButton from "../modules/module/NextStepButton";
 import { Joyride } from 'react-joyride';
 import ToolTip from "./ToolTip";
 
-const ATTEMPTS_SERVICE = "http://localhost:8009";
+const ATTEMPTS_SERVICE = "/api/attempts";
 
 export default function WorkSpace({ mode, isSidebarOpen }) {
   const [showIntroModal, setShowIntroModal] = useState(() => {
