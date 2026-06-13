@@ -112,6 +112,10 @@
     min-width: 0;
 }
 
+.progress-info .modules-description {
+    gap: 15px;
+}
+
 .jol {
     display: flex;
     flex-direction: column;

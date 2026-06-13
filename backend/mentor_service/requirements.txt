@@ -8,5 +8,6 @@ aiohttp
 accelerate
 peft
 trl
-bitsandbytes==0.43.3
-unsloth[kaggle-new]
+transformers
+safetensors
+sentencepiece

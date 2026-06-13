@@ -40,6 +40,8 @@ COPY . .
 ENV PYTHONUNBUFFERED=1 \
     REDIS_HOST=redis \
     REDIS_PORT=6379 \
-    REDIS_DB=0
+    REDIS_DB=0 \
+    MENTOR_USE_UNSLOTH=false \
+    MENTOR_LOAD_IN_4BIT=false
 
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8006"]

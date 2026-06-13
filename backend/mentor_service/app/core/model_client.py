@@ -1,13 +1,16 @@
 import asyncio
 import os
 
+MODEL_UNAVAILABLE_MESSAGE = "модель не подключена"
+
 MODEL_NAME = os.getenv("MENTOR_MODEL_ID", "disemenova/qwen2.5-7b-ai-mentor")
 MAX_SEQ_LENGTH = int(os.getenv("MENTOR_MAX_SEQ_LENGTH", "1024"))
 MAX_NEW_TOKENS = int(os.getenv("MENTOR_MAX_NEW_TOKENS", "256"))
 TEMPERATURE = float(os.getenv("MENTOR_TEMPERATURE", "0.7"))
 REPETITION_PENALTY = float(os.getenv("MENTOR_REPETITION_PENALTY", "1.1"))
-LOAD_IN_4BIT = os.getenv("MENTOR_LOAD_IN_4BIT", "true").lower() == "true"
+LOAD_IN_4BIT = os.getenv("MENTOR_LOAD_IN_4BIT", "false").lower() == "true"
 FALLBACK_WITHOUT_4BIT = os.getenv("MENTOR_FALLBACK_WITHOUT_4BIT", "true").lower() == "true"
+USE_UNSLOTH = os.getenv("MENTOR_USE_UNSLOTH", "false").lower() == "true"
 
 SYSTEM_PROMPT = (
     "Ты - ИИ-ментор для обучения программированию. "
@@ -41,56 +44,25 @@ async def load_model() -> None:
         try:
             import torch
         except Exception as exc:
-            raise RuntimeError("Не удалось импортировать torch для mentor_service.") from exc
+            raise RuntimeError("Could not import torch for mentor_service.") from exc
 
         if not torch.cuda.is_available():
-            raise RuntimeError("CUDA недоступна для mentor_service.")
+            raise RuntimeError("CUDA is not available for mentor_service.")
 
         print(f"Loading mentor model: {MODEL_NAME}")
 
-        loaded_model = None
-        loaded_tokenizer = None
-
-        try:
-            from unsloth import FastLanguageModel
-
+        if USE_UNSLOTH:
             try:
-                loaded_model, loaded_tokenizer = _load_fast_language_model(
-                    FastLanguageModel,
-                    torch,
-                    load_in_4bit=LOAD_IN_4BIT,
-                )
+                loaded_model, loaded_tokenizer = _load_unsloth_model(torch)
+                _inference_adapter = "unsloth"
             except Exception as exc:
-                if not (
-                    LOAD_IN_4BIT
-                    and FALLBACK_WITHOUT_4BIT
-                    and _is_bitsandbytes_cuda_error(exc)
-                ):
-                    raise
-
                 print(
-                    "bitsandbytes/CUDA 4-bit load failed. "
-                    "Retrying mentor model without 4-bit quantization..."
+                    "Unsloth model load failed. "
+                    f"Falling back to transformers. Reason: {exc}"
                 )
-                loaded_model, loaded_tokenizer = _load_fast_language_model(
-                    FastLanguageModel,
-                    torch,
-                    load_in_4bit=False,
-                )
-
-            FastLanguageModel.for_inference(loaded_model)
-            _inference_adapter = "unsloth"
-
-        except Exception as exc:
-            if not _is_bitsandbytes_cuda_error(exc):
-                raise RuntimeError(
-                    "Не удалось импортировать зависимости модели mentor_service."
-                ) from exc
-
-            print(
-                "Unsloth/bitsandbytes import failed. "
-                "Loading mentor model with transformers instead..."
-            )
+                loaded_model, loaded_tokenizer = _load_transformers_model(torch)
+                _inference_adapter = "transformers"
+        else:
             loaded_model, loaded_tokenizer = _load_transformers_model(torch)
             _inference_adapter = "transformers"
 
@@ -104,13 +76,29 @@ async def load_model() -> None:
         )
 
 
-def _load_fast_language_model(FastLanguageModel, torch, *, load_in_4bit: bool):
-    return FastLanguageModel.from_pretrained(
-        model_name=MODEL_NAME,
-        max_seq_length=MAX_SEQ_LENGTH,
-        dtype=torch.float16,
-        load_in_4bit=load_in_4bit,
-    )
+def _load_unsloth_model(torch):
+    from unsloth import FastLanguageModel
+
+    try:
+        loaded_model, loaded_tokenizer = FastLanguageModel.from_pretrained(
+            model_name=MODEL_NAME,
+            max_seq_length=MAX_SEQ_LENGTH,
+            dtype=torch.float16,
+            load_in_4bit=LOAD_IN_4BIT,
+        )
+    except Exception:
+        if not (LOAD_IN_4BIT and FALLBACK_WITHOUT_4BIT):
+            raise
+
+        loaded_model, loaded_tokenizer = FastLanguageModel.from_pretrained(
+            model_name=MODEL_NAME,
+            max_seq_length=MAX_SEQ_LENGTH,
+            dtype=torch.float16,
+            load_in_4bit=False,
+        )
+
+    FastLanguageModel.for_inference(loaded_model)
+    return loaded_model, loaded_tokenizer
 
 
 def _load_transformers_model(torch):
@@ -130,18 +118,6 @@ def _load_transformers_model(torch):
     return loaded_model, loaded_tokenizer
 
 
-def _is_bitsandbytes_cuda_error(exc: Exception) -> bool:
-    message = str(exc).lower()
-    return (
-        "bitsandbytes" in message
-        or "libbitsandbytes" in message
-        or "libnvjitlink" in message
-        or "cuda setup error" in message
-        or "cuda runtime libraries" in message
-        or "compiled without gpu support" in message
-    )
-
-
 def _generate_response(code_snippet: str) -> str:
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
@@ -153,7 +129,6 @@ def _generate_response(code_snippet: str) -> str:
         tokenize=False,
         add_generation_prompt=True,
     )
-
     inputs = tokenizer(text, return_tensors="pt").to(model.device)
 
     with _torch.no_grad():
@@ -169,24 +144,17 @@ def _generate_response(code_snippet: str) -> str:
     new_tokens = output_ids[0][inputs["input_ids"].shape[1]:]
     response = tokenizer.decode(new_tokens, skip_special_tokens=True).strip()
 
-    return response or "Не удалось сгенерировать подсказку."
+    return response or MODEL_UNAVAILABLE_MESSAGE
 
 
 async def get_llm_hint(code_snippet: str) -> str:
     if not code_snippet or not code_snippet.strip():
-        return "Пришли свой код, и я помогу разобраться."
+        return MODEL_UNAVAILABLE_MESSAGE
 
     try:
         await load_model()
         async with _model_lock:
             return _generate_response(code_snippet)
     except Exception as exc:
-        if _is_bitsandbytes_cuda_error(exc):
-            return (
-                "Не удалось запустить 4-bit модель ментора из-за несовместимости "
-                "bitsandbytes и CUDA runtime. Перезапустите mentor_service с "
-                "MENTOR_LOAD_IN_4BIT=false или пересоберите образ с совместимой "
-                "версией bitsandbytes."
-            )
-
-        return f"Ошибка генерации подсказки: {exc}"
+        print(f"Mentor model unavailable: {exc}")
+        return MODEL_UNAVAILABLE_MESSAGE
