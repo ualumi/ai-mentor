@@ -19,6 +19,7 @@ SYSTEM_PROMPT = (
 model = None
 tokenizer = None
 _torch = None
+_inference_adapter = None
 _model_lock = asyncio.Lock()
 _load_lock = asyncio.Lock()
 
@@ -28,7 +29,7 @@ def _format_user_message(code_snippet: str, lang: str = "python") -> str:
 
 
 async def load_model() -> None:
-    global model, tokenizer, _torch
+    global model, tokenizer, _torch, _inference_adapter
 
     if model is not None and tokenizer is not None:
         return
@@ -39,47 +40,68 @@ async def load_model() -> None:
 
         try:
             import torch
-            from unsloth import FastLanguageModel
         except Exception as exc:
-            raise RuntimeError(
-                "Не удалось импортировать зависимости модели. "
-                "Установите torch/unsloth и связанные пакеты для mentor_service."
-            ) from exc
+            raise RuntimeError("Не удалось импортировать torch для mentor_service.") from exc
 
         if not torch.cuda.is_available():
-            raise RuntimeError(
-                "Куды нетy."
-            )
+            raise RuntimeError("CUDA недоступна для mentor_service.")
 
         print(f"Loading mentor model: {MODEL_NAME}")
 
+        loaded_model = None
+        loaded_tokenizer = None
+
         try:
-            loaded_model, loaded_tokenizer = _load_fast_language_model(
-                FastLanguageModel,
-                torch,
-                load_in_4bit=LOAD_IN_4BIT,
-            )
+            from unsloth import FastLanguageModel
+
+            try:
+                loaded_model, loaded_tokenizer = _load_fast_language_model(
+                    FastLanguageModel,
+                    torch,
+                    load_in_4bit=LOAD_IN_4BIT,
+                )
+            except Exception as exc:
+                if not (
+                    LOAD_IN_4BIT
+                    and FALLBACK_WITHOUT_4BIT
+                    and _is_bitsandbytes_cuda_error(exc)
+                ):
+                    raise
+
+                print(
+                    "bitsandbytes/CUDA 4-bit load failed. "
+                    "Retrying mentor model without 4-bit quantization..."
+                )
+                loaded_model, loaded_tokenizer = _load_fast_language_model(
+                    FastLanguageModel,
+                    torch,
+                    load_in_4bit=False,
+                )
+
+            FastLanguageModel.for_inference(loaded_model)
+            _inference_adapter = "unsloth"
+
         except Exception as exc:
-            if not (LOAD_IN_4BIT and FALLBACK_WITHOUT_4BIT and _is_bitsandbytes_cuda_error(exc)):
-                raise
+            if not _is_bitsandbytes_cuda_error(exc):
+                raise RuntimeError(
+                    "Не удалось импортировать зависимости модели mentor_service."
+                ) from exc
 
             print(
-                "bitsandbytes/CUDA 4-bit load failed. "
-                "Retrying mentor model without 4-bit quantization..."
+                "Unsloth/bitsandbytes import failed. "
+                "Loading mentor model with transformers instead..."
             )
-            loaded_model, loaded_tokenizer = _load_fast_language_model(
-                FastLanguageModel,
-                torch,
-                load_in_4bit=False,
-            )
-
-        FastLanguageModel.for_inference(loaded_model)
+            loaded_model, loaded_tokenizer = _load_transformers_model(torch)
+            _inference_adapter = "transformers"
 
         model = loaded_model
         tokenizer = loaded_tokenizer
         _torch = torch
 
-        print(f"Mentor model loaded successfully on device: {model.device}")
+        print(
+            f"Mentor model loaded successfully on device: {model.device} "
+            f"via {_inference_adapter}"
+        )
 
 
 def _load_fast_language_model(FastLanguageModel, torch, *, load_in_4bit: bool):
@@ -91,15 +113,33 @@ def _load_fast_language_model(FastLanguageModel, torch, *, load_in_4bit: bool):
     )
 
 
+def _load_transformers_model(torch):
+    from transformers import AutoModelForCausalLM, AutoTokenizer
+
+    loaded_tokenizer = AutoTokenizer.from_pretrained(
+        MODEL_NAME,
+        trust_remote_code=True,
+    )
+    loaded_model = AutoModelForCausalLM.from_pretrained(
+        MODEL_NAME,
+        torch_dtype=torch.float16,
+        trust_remote_code=True,
+    ).to("cuda:0")
+    loaded_model.eval()
+
+    return loaded_model, loaded_tokenizer
+
+
 def _is_bitsandbytes_cuda_error(exc: Exception) -> bool:
     message = str(exc).lower()
     return (
         "bitsandbytes" in message
+        or "libbitsandbytes" in message
         or "libnvjitlink" in message
         or "cuda setup error" in message
         or "cuda runtime libraries" in message
+        or "compiled without gpu support" in message
     )
-
 
 
 def _generate_response(code_snippet: str) -> str:

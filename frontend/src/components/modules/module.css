@@ -107,7 +107,7 @@
 .modules-description {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
     flex: 1;
     min-width: 0;
 }
@@ -137,6 +137,7 @@
     font-size: 13px;
     color: #ffff;
     opacity: 1;
+    padding-bottom: 10px;
 }
 
 .module-title {
@@ -166,6 +167,7 @@
     font-size: 11px;
     line-height: 1.35;
     white-space: normal;
+    opacity: 0.5;
 }
 
 .disabled {
