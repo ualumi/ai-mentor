@@ -8,5 +8,5 @@ aiohttp
 accelerate
 peft
 trl
-bitsandbytes
+bitsandbytes==0.43.3
 unsloth[kaggle-new]

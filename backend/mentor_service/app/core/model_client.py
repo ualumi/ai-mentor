@@ -7,6 +7,7 @@ MAX_NEW_TOKENS = int(os.getenv("MENTOR_MAX_NEW_TOKENS", "256"))
 TEMPERATURE = float(os.getenv("MENTOR_TEMPERATURE", "0.7"))
 REPETITION_PENALTY = float(os.getenv("MENTOR_REPETITION_PENALTY", "1.1"))
 LOAD_IN_4BIT = os.getenv("MENTOR_LOAD_IN_4BIT", "true").lower() == "true"
+FALLBACK_WITHOUT_4BIT = os.getenv("MENTOR_FALLBACK_WITHOUT_4BIT", "true").lower() == "true"
 
 SYSTEM_PROMPT = (
     "Ты - ИИ-ментор для обучения программированию. "
@@ -52,12 +53,25 @@ async def load_model() -> None:
 
         print(f"Loading mentor model: {MODEL_NAME}")
 
-        loaded_model, loaded_tokenizer = FastLanguageModel.from_pretrained(
-            model_name=MODEL_NAME,
-            max_seq_length=MAX_SEQ_LENGTH,
-            dtype=torch.float16,
-            load_in_4bit=LOAD_IN_4BIT,
-        )
+        try:
+            loaded_model, loaded_tokenizer = _load_fast_language_model(
+                FastLanguageModel,
+                torch,
+                load_in_4bit=LOAD_IN_4BIT,
+            )
+        except Exception as exc:
+            if not (LOAD_IN_4BIT and FALLBACK_WITHOUT_4BIT and _is_bitsandbytes_cuda_error(exc)):
+                raise
+
+            print(
+                "bitsandbytes/CUDA 4-bit load failed. "
+                "Retrying mentor model without 4-bit quantization..."
+            )
+            loaded_model, loaded_tokenizer = _load_fast_language_model(
+                FastLanguageModel,
+                torch,
+                load_in_4bit=False,
+            )
 
         FastLanguageModel.for_inference(loaded_model)
 
@@ -66,6 +80,25 @@ async def load_model() -> None:
         _torch = torch
 
         print(f"Mentor model loaded successfully on device: {model.device}")
+
+
+def _load_fast_language_model(FastLanguageModel, torch, *, load_in_4bit: bool):
+    return FastLanguageModel.from_pretrained(
+        model_name=MODEL_NAME,
+        max_seq_length=MAX_SEQ_LENGTH,
+        dtype=torch.float16,
+        load_in_4bit=load_in_4bit,
+    )
+
+
+def _is_bitsandbytes_cuda_error(exc: Exception) -> bool:
+    message = str(exc).lower()
+    return (
+        "bitsandbytes" in message
+        or "libnvjitlink" in message
+        or "cuda setup error" in message
+        or "cuda runtime libraries" in message
+    )
 
 
 
@@ -108,4 +141,12 @@ async def get_llm_hint(code_snippet: str) -> str:
         async with _model_lock:
             return _generate_response(code_snippet)
     except Exception as exc:
+        if _is_bitsandbytes_cuda_error(exc):
+            return (
+                "Не удалось запустить 4-bit модель ментора из-за несовместимости "
+                "bitsandbytes и CUDA runtime. Перезапустите mentor_service с "
+                "MENTOR_LOAD_IN_4BIT=false или пересоберите образ с совместимой "
+                "версией bitsandbytes."
+            )
+
         return f"Ошибка генерации подсказки: {exc}"

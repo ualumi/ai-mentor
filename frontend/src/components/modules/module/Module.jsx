@@ -47,12 +47,15 @@ export default function Module({
         </div>
 
         <div className="modules-description">
-          <span className="modules-item-text home-summary-block-label-text module-title">
-            {formatModuleTitle(competency)}
-          </span>
-          {explainGoal && (
-            <p className="modules-item-p module-explain-goal">{explainGoal}</p>
-          )}
+          <div>
+            <span className="modules-item-text home-summary-block-label-text module-title">
+              {formatModuleTitle(competency)}
+            </span>
+            {explainGoal && (
+              <p className="modules-item-p module-explain-goal">{explainGoal}</p>
+            )}
+          </div>
+          
 
           <div className="jol">
             <p className="modules-item-p">Пройдено:</p>

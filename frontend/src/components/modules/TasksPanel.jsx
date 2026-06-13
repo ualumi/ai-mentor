@@ -86,17 +86,51 @@ import { ChevronDown } from "lucide-react";
 
 const LOADING_CONDITION_KEY = "__loading_condition__";
 
-function getConditionKey(condition) {
-  if (
-    condition === null ||
-    condition === undefined ||
-    String(condition).trim() === "" ||
-    String(condition).trim().toLowerCase() === "null"
-  ) {
-    return LOADING_CONDITION_KEY;
+
+
+function getConditionTitle(condition) {
+  if (condition === null || condition === undefined) return null;
+
+  if (typeof condition === "object") {
+    const description = condition.description;
+    const title = typeof description === "object"
+      ? description?.title || description?.description
+      : description;
+
+    return normalizeConditionTitle(
+      title || condition.title || condition.task_title || condition.name
+    );
   }
 
-  return String(condition);
+  const raw = String(condition).trim();
+  if (!raw || raw.toLowerCase() === "null") return null;
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === "object") {
+      return getConditionTitle(parsed);
+    }
+  } catch {
+    // condition can be plain text from analytics_response
+  }
+
+  return normalizeConditionTitle(raw);
+}
+
+function normalizeConditionTitle(value) {
+  if (!value) return null;
+
+  const firstLine = String(value)
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .find(Boolean);
+
+  return firstLine || null;
+}
+
+function getConditionKey(condition) {
+  const title = getConditionTitle(condition);
+  return title || LOADING_CONDITION_KEY;
 }
 
 function formatConditionTitle(condition) {
@@ -212,6 +246,7 @@ export default function TasksPanel({ restoredState }) {
               >
 
                 <ChevronDown
+                  className="condition-toggle"
                   size={18}
                   style={{
                     cursor: "pointer",
@@ -227,7 +262,7 @@ export default function TasksPanel({ restoredState }) {
                     );
                   }}
                 />
-                <p>{formatConditionTitle(condition)}</p>
+                <p className="condition-title">{formatConditionTitle(condition)}</p>
 
                 
               </div>
