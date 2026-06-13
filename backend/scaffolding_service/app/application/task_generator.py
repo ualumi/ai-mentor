@@ -29,6 +29,25 @@ TASK_POOL = {
 }
 
 
+FIX_MARKER = "ВОТ ТУТ НУЖНО ИСПРАВИТЬ КОД"
+
+
+def sanitize_broken_code(code: str) -> str:
+    if not code:
+        return code
+
+    cleaned_lines = []
+
+    for line in code.splitlines():
+        marker_index = line.find(FIX_MARKER)
+        if marker_index >= 0:
+            line = line[:marker_index + len(FIX_MARKER)]
+        cleaned_lines.append(line)
+
+    trailing_newline = "\n" if code.endswith("\n") else ""
+    return "\n".join(cleaned_lines) + trailing_newline
+
+
 def generate_condition( competency, task, attempts: list):
 
     print(task)
@@ -46,6 +65,7 @@ def generate_condition( competency, task, attempts: list):
     data = json.loads(result)
     title = data["title"]
     broken_code = data["broken_code"].replace('\\n', '\n')  # Простой способ
+    broken_code = sanitize_broken_code(broken_code)
 
     #tasks = TASK_POOL.get(competency, [])
     #cse= random.randint(1, 100)

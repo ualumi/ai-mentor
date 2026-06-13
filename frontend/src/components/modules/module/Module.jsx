@@ -8,6 +8,7 @@ export default function Module({
   mode,
   progress,
   progressBaseline,
+  fallbackAttempts,
   explainGoal,
 }) {
   const navigate = useNavigate();
@@ -58,6 +59,7 @@ export default function Module({
             <ProgressBar
               progress={progress}
               progressBaseline={progressBaseline}
+              fallbackAttempts={fallbackAttempts}
               mode={mode}
               competency={competency}
             />

@@ -38,18 +38,42 @@ def _progress_value(skill_progress: dict) -> float:
     return 0
 
 
-def _module_progress_value(current_progress: float, baseline_progress) -> float:
+FALLBACK_PROGRESS_PER_ATTEMPT = 0.03
+FALLBACK_PROGRESS_LIMIT = 0.15
+
+
+def _module_progress_value(
+    current_progress: float,
+    baseline_progress,
+    attempts_count: int = 0,
+    skill_found: bool = True,
+) -> float:
     baseline = _coerce_progress(baseline_progress)
     current = _clamp_progress(current_progress)
+    fallback_progress = _attempt_fallback_progress(attempts_count)
 
-    if current <= baseline:
-        return 0
+    if not skill_found or current <= baseline:
+        return fallback_progress
 
     remaining = 1 - baseline
     if remaining <= 0:
-        return 0
+        return fallback_progress
 
     return _clamp_progress((current - baseline) / remaining)
+
+
+def _attempt_fallback_progress(attempts_count: int) -> float:
+    try:
+        attempts_count = int(attempts_count)
+    except (TypeError, ValueError):
+        attempts_count = 0
+
+    if attempts_count <= 0:
+        return 0
+
+    return _clamp_progress(
+        min(attempts_count * FALLBACK_PROGRESS_PER_ATTEMPT, FALLBACK_PROGRESS_LIMIT)
+    )
 
 
 def _coerce_progress(value) -> float:
@@ -114,7 +138,12 @@ async def get_session_state(
     return {
         "session": session,
         "attempts": attempts,
-        "progress": _module_progress_value(current_progress, progress_baseline),
+        "progress": _module_progress_value(
+            current_progress,
+            progress_baseline,
+            attempts_count=len(attempts),
+            skill_found=bool(skill_progress),
+        ),
         "progress_baseline": _coerce_progress(progress_baseline),
         "competency_progress": current_progress,
         "current_condition": json.loads(session.get("current_condition", "null")),
@@ -176,6 +205,7 @@ async def get_my_sessions(
 
     for s in sessions:
         competency = s.get("competency")
+        attempts = await get_session_attempts(s["user_id"], s["session_id"])
         progress_raw = await redis_client.get(f"all_user_progress:{s['user_id']}")
         print('progress_raw', progress_raw)
         progress = json.loads(progress_raw) if progress_raw else {}
@@ -186,9 +216,15 @@ async def get_my_sessions(
         enriched.append({
             **s,
             #"progress": progress_raw.get('ema', {})
-            "progress": _module_progress_value(current_progress, progress_baseline),
+            "progress": _module_progress_value(
+                current_progress,
+                progress_baseline,
+                attempts_count=len(attempts),
+                skill_found=bool(skill_progress),
+            ),
             "progress_baseline": _coerce_progress(progress_baseline),
             "competency_progress": current_progress,
+            "attempts_count": len(attempts),
         })
 
     return enriched

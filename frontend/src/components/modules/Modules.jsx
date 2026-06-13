@@ -62,14 +62,16 @@ export default function Modules({ mode }) {
     ...completedSessions.map((session) => normalizeName(session.competency)),
   ]);
 
-  const ssoEntries =
-    importedSkills?.status === "imported" && importedSkills.skills
-      ? Object.entries(importedSkills.skills)
+  const ssoRecommendations =
+    importedSkills?.status === "imported"
+      ? getImportedRecommendations(importedSkills)
       : [];
 
-  const ssoNames = new Set(ssoEntries.map(([name]) => normalizeName(name)));
-  const recommendedFromSso = ssoEntries.filter(
-    ([name]) => !startedNames.has(normalizeName(name))
+  const ssoNames = new Set(
+    ssoRecommendations.map((recommendation) => normalizeName(recommendation.competency))
+  );
+  const recommendedFromSso = ssoRecommendations.filter(
+    (recommendation) => !startedNames.has(normalizeName(recommendation.competency))
   );
   const recommendedFromLocal = localRecommended
     .map(normalizeStoredRecommendation)
@@ -115,10 +117,11 @@ export default function Modules({ mode }) {
         <div className="module-types">
           {activeTab === "recommended" && (
             <ModuleList emptyText="Нет рекомендованных модулей">
-              {recommendedFromSso.map(([skillName], idx) => (
+              {recommendedFromSso.map((recommendation, idx) => (
                 <Module
-                  key={`sso-${normalizeName(skillName)}-${idx}`}
-                  competency={skillName}
+                  key={`sso-${normalizeName(recommendation.competency)}-${idx}`}
+                  competency={recommendation.competency}
+                  explainGoal={recommendation.explainGoal}
                   progress={0}
                   mode="recommended"
                 />
@@ -146,6 +149,7 @@ export default function Modules({ mode }) {
                   mode={mode}
                   progress={session.progress}
                   progressBaseline={session.progress_baseline}
+                  fallbackAttempts={session.attempts_count}
                 />
               ))}
             </ModuleList>
@@ -161,6 +165,7 @@ export default function Modules({ mode }) {
                   mode={mode}
                   progress={session.progress ?? 1}
                   progressBaseline={session.progress_baseline}
+                  fallbackAttempts={session.attempts_count}
                 />
               ))}
             </ModuleList>
@@ -250,6 +255,38 @@ function normalizeStoredRecommendation(recommendation) {
       recommendation.explanation?.reason ||
       null,
   };
+}
+
+function getImportedRecommendations(importedSkills) {
+  const moduleRecommendations = Array.isArray(importedSkills?.module_recommendations)
+    ? importedSkills.module_recommendations
+    : [];
+
+  if (moduleRecommendations.length) {
+    return moduleRecommendations
+      .map(normalizeImportedRecommendation)
+      .filter(Boolean);
+  }
+
+  return Object.keys(importedSkills?.skills || {})
+    .map((competency) => ({
+      competency,
+      explainGoal: externalProgressExplanation(),
+    }));
+}
+
+function normalizeImportedRecommendation(recommendation) {
+  const normalized = normalizeStoredRecommendation(recommendation);
+  if (!normalized) return null;
+
+  return {
+    ...normalized,
+    explainGoal: normalized.explainGoal || externalProgressExplanation(),
+  };
+}
+
+function externalProgressExplanation() {
+  return "Модуль рекомендован на основании анализа задач, с которыми возникли трудности на внешней платформе.";
 }
 
 function cleanupRecommendedModulesStorage() {

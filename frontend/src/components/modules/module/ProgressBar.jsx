@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { wsService } from "../../../services/websocket";
 
 const PROGRESS_CACHE_KEY = "latest_user_progress_payload";
+const FALLBACK_PROGRESS_PER_ATTEMPT = 0.03;
+const FALLBACK_PROGRESS_LIMIT = 0.15;
 
 function ProgressBar({
   progress,
@@ -10,11 +12,20 @@ function ProgressBar({
   mode,
   competency,
   progressBaseline,
+  fallbackAttempts = 0,
 }) {
   const useLiveProgress = mode === "listen";
   const [liveProgress, setLiveProgress] = useState(() =>
-    chooseProgressValue(progress, competency, useLiveProgress, progressBaseline)
+    chooseProgressValue(
+      progress,
+      competency,
+      useLiveProgress,
+      progressBaseline,
+      fallbackAttempts
+    )
   );
+  const fallbackAttemptCountRef = useRef(toAttemptCount(fallbackAttempts));
+  const seenFallbackAttemptIdsRef = useRef(new Set());
 
   const normalizedCompetency = useMemo(
     () => normalizeSkillName(competency),
@@ -22,10 +33,17 @@ function ProgressBar({
   );
 
   useEffect(() => {
+    fallbackAttemptCountRef.current = toAttemptCount(fallbackAttempts);
     setLiveProgress(
-      chooseProgressValue(progress, competency, useLiveProgress, progressBaseline)
+      chooseProgressValue(
+        progress,
+        competency,
+        useLiveProgress,
+        progressBaseline,
+        fallbackAttempts
+      )
     );
-  }, [progress, competency, useLiveProgress, progressBaseline]);
+  }, [progress, competency, useLiveProgress, progressBaseline, fallbackAttempts]);
 
   useEffect(() => {
     if (!competency || !useLiveProgress) return;
@@ -33,6 +51,7 @@ function ProgressBar({
     const handler = (payload) => {
       const event = unwrapProgressEvent(payload);
       if (!event) return;
+      if (event.mode && event.mode !== "module") return;
 
       cacheProgressEvent(event);
 
@@ -40,9 +59,21 @@ function ProgressBar({
         resolveProgressValue(event, competency),
         progressBaseline
       );
-      if (nextProgress === null || nextProgress === undefined) return;
 
-      setLiveProgress(nextProgress);
+      setLiveProgress((previousProgress) => {
+        if (
+          nextProgress !== null &&
+          nextProgress !== undefined &&
+          nextProgress > Number(previousProgress || 0)
+        ) {
+          return nextProgress;
+        }
+
+        const fallbackProgress = nextFallbackProgress(event);
+        if (fallbackProgress === null) return previousProgress;
+
+        return Math.max(Number(previousProgress || 0), fallbackProgress);
+      });
     };
 
     wsService.on("user_progress", handler);
@@ -51,6 +82,23 @@ function ProgressBar({
       wsService.off("user_progress", handler);
     };
   }, [competency, normalizedCompetency, useLiveProgress, progressBaseline]);
+
+  function nextFallbackProgress(event) {
+    const attemptId = event.attempt_id;
+
+    if (attemptId) {
+      if (seenFallbackAttemptIdsRef.current.has(attemptId)) {
+        return fallbackProgressFromAttempts(fallbackAttemptCountRef.current);
+      }
+
+      seenFallbackAttemptIdsRef.current.add(attemptId);
+      fallbackAttemptCountRef.current += 1;
+    } else {
+      fallbackAttemptCountRef.current += 1;
+    }
+
+    return fallbackProgressFromAttempts(fallbackAttemptCountRef.current);
+  }
 
   const progressValue = toPercent(liveProgress);
   const isIndeterminate = progressValue === null;
@@ -115,24 +163,32 @@ function chooseProgressValue(
   progress,
   competency,
   useLiveProgress = false,
-  progressBaseline
+  progressBaseline,
+  fallbackAttempts = 0
 ) {
   const propProgress = resolveProgressValue(progress, competency);
   const hasBaseline = isFiniteProgress(progressBaseline);
+  const fallbackProgress = fallbackProgressFromAttempts(fallbackAttempts);
 
-  if (!useLiveProgress) return propProgress;
+  if (!useLiveProgress) {
+    return propProgress && propProgress > 0 ? propProgress : fallbackProgress;
+  }
 
   const cachedProgress = readCachedProgress(competency);
 
   if (hasBaseline) {
-    return propProgress ?? applyProgressBaseline(cachedProgress, progressBaseline);
+    const baselineProgress =
+      propProgress ?? applyProgressBaseline(cachedProgress, progressBaseline);
+    return baselineProgress && baselineProgress > 0
+      ? baselineProgress
+      : fallbackProgress;
   }
 
   if (cachedProgress !== null && (propProgress === null || propProgress === 0)) {
     return cachedProgress;
   }
 
-  return propProgress ?? cachedProgress;
+  return propProgress ?? cachedProgress ?? fallbackProgress;
 }
 
 function progressFromSkillState(skillState) {
@@ -266,6 +322,20 @@ function isFiniteProgress(value) {
 
 function clampProgress(value) {
   return Math.min(1, Math.max(0, value));
+}
+
+function fallbackProgressFromAttempts(attemptsCount) {
+  const attempts = toAttemptCount(attemptsCount);
+  if (attempts <= 0) return 0;
+
+  return clampProgress(
+    Math.min(attempts * FALLBACK_PROGRESS_PER_ATTEMPT, FALLBACK_PROGRESS_LIMIT)
+  );
+}
+
+function toAttemptCount(value) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? Math.max(0, Math.floor(numeric)) : 0;
 }
 
 function toPercent(value) {

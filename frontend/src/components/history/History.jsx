@@ -347,6 +347,7 @@ export default function History({mode, name, attempt, restoredState, code, title
                   mode={'listen'}
                   progress={progress}
                   progressBaseline={restoredState?.progress_baseline}
+                  fallbackAttempts={restoredState?.attempts?.length || 0}
                 />
               </div>
             </div>

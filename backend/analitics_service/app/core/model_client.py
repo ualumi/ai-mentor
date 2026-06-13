@@ -60,8 +60,7 @@ def build_input(task: str, code: str) -> str:
     return "\n\n".join(parts)
 
 
-#async def analyze_code(task: str | None, code: str) -> dict:
-async def analyze_code(code: str, task=DEFAULT_TASK) -> dict:
+async def analyze_code(code: str, task: str | None = None) -> dict:
     """
     Асинхронный анализ кода.
     Возвращает dict (JSON), готовый к отправке в Redis.
@@ -72,8 +71,7 @@ async def analyze_code(code: str, task=DEFAULT_TASK) -> dict:
     if model is None or tokenizer is None:
         raise RuntimeError("Model is not loaded")
 
-    #task_text = task.strip() if task else DEFAULT_TASK
-    task_text = DEFAULT_TASK
+    task_text = task.strip() if task else DEFAULT_TASK
     if not code or not code.strip():
         return {
             "error": "Empty code"

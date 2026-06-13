@@ -21,7 +21,6 @@ async def generate_hint(code: str) -> str:
 
 from app.core.model_client import analyze_code
 
-async def generate_analysis(code: str) -> dict:
-    return await analyze_code(code)
-
+async def generate_analysis(code: str, condition: str | None = None) -> dict:
+    return await analyze_code(code, task=condition)
 

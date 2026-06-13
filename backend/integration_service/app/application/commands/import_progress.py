@@ -301,6 +301,7 @@ async def import_progress(email: str):
         or progress_payload.get("progress", {}).get("module_recommendations")
         or recommendations
     )
+    module_recommendations = _with_external_explanations(module_recommendations)
     skills = _skills_from_recommendations(module_recommendations)
 
     await EventBus.publish(
@@ -401,6 +402,39 @@ def _skills_from_recommendations(recommendations: list) -> dict:
         for recommendation in recommendations
         if isinstance(recommendation, dict) and recommendation.get("main_competency")
     }
+
+
+def _with_external_explanations(recommendations: list) -> list:
+    enriched = []
+
+    for recommendation in recommendations or []:
+        if not isinstance(recommendation, dict):
+            continue
+
+        recommendation = dict(recommendation)
+        explanation = recommendation.get("explanation")
+
+        fallback = (
+            "Модуль рекомендован на основании анализа задач, "
+            "с которыми возникли трудности на внешней платформе."
+        )
+        recommendation["explain_goal"] = (
+            recommendation.get("explain_goal")
+            or (explanation or {}).get("reason")
+            or fallback
+        )
+
+        if not isinstance(explanation, dict):
+            explanation = {}
+        recommendation["explanation"] = {
+            **explanation,
+            "reason": explanation.get("reason") or recommendation["explain_goal"],
+            "source": "external_progress",
+        }
+
+        enriched.append(recommendation)
+
+    return enriched
 
 
 def _integration_user_id(email: str) -> str:

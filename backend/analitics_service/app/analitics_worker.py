@@ -28,9 +28,7 @@ async def _handle_analytics_message(message):
     mode = payload.get("mode")
     source = payload.get("source")
 
-    condition = None
-    if condition_description:
-        condition = condition_description.get("description")
+    condition = _extract_condition_text(condition_description)
 
     if condition:
         print("condition received", condition)
@@ -40,7 +38,7 @@ async def _handle_analytics_message(message):
     if not user_id or not code:
         return
 
-    analysis = await generate_analysis(code)
+    analysis = await generate_analysis(code, condition=condition)
 
     if "analysis" in analysis:
         analysis = analysis["analysis"]
@@ -65,6 +63,41 @@ async def _handle_analytics_message(message):
     )
 
     print(f"analytics_response sent for {user_id}")
+
+
+def _extract_condition_text(condition) -> str | None:
+    if not condition:
+        return None
+
+    if isinstance(condition, str):
+        return condition
+
+    if not isinstance(condition, dict):
+        return str(condition)
+
+    parts = []
+    description = condition.get("description")
+    if isinstance(description, dict):
+        parts.extend(
+            str(value)
+            for value in (
+                description.get("title"),
+                description.get("description"),
+                description.get("task_context"),
+            )
+            if value
+        )
+    elif description:
+        parts.append(str(description))
+
+    for key in ("task_context", "requirements", "constraints", "tests"):
+        value = condition.get(key)
+        if isinstance(value, list):
+            parts.extend(str(item) for item in value if item)
+        elif value:
+            parts.append(str(value))
+
+    return "\n".join(parts) if parts else None
 
 
 async def analitics_worker():
