@@ -53,7 +53,7 @@ export default function TasksPanel({ mode, restoredState }) {
                 }
                 style={{ cursor: "pointer" }}
               >
-                <p>{condition}</p>
+                <p>{formatConditionTitle(condition)}</p>
               </div>
 
 
@@ -83,6 +83,59 @@ import Attempt from "../history/Attempt";
 import { getLearningState } from "../../api/learningService";
 import { useAuth } from "../../context/AuthContext";
 import { ChevronDown } from "lucide-react";
+
+const LOADING_CONDITION_KEY = "__loading_condition__";
+
+
+
+function getConditionTitle(condition) {
+  if (condition === null || condition === undefined) return null;
+
+  if (typeof condition === "object") {
+    const description = condition.description;
+    const title = typeof description === "object"
+      ? description?.title || description?.description
+      : description;
+
+    return normalizeConditionTitle(
+      title || condition.title || condition.task_title || condition.name
+    );
+  }
+
+  const raw = String(condition).trim();
+  if (!raw || raw.toLowerCase() === "null") return null;
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === "object") {
+      return getConditionTitle(parsed);
+    }
+  } catch {
+    // condition can be plain text from analytics_response
+  }
+
+  return normalizeConditionTitle(raw);
+}
+
+function normalizeConditionTitle(value) {
+  if (!value) return null;
+
+  const firstLine = String(value)
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .find(Boolean);
+
+  return firstLine || null;
+}
+
+function getConditionKey(condition) {
+  const title = getConditionTitle(condition);
+  return title || LOADING_CONDITION_KEY;
+}
+
+function formatConditionTitle(condition) {
+  return condition === LOADING_CONDITION_KEY ? "загрузка..." : condition;
+}
 
 export default function TasksPanel({ restoredState }) {
   const { token } = useAuth();
@@ -122,7 +175,7 @@ export default function TasksPanel({ restoredState }) {
   const groupedAttempts = useMemo(() => {
     if (!attempts.length) return {};
     return attempts.reduce((acc, attempt) => {
-      const condition = attempt.condition;
+      const condition = getConditionKey(attempt.condition);
       if (!acc[condition]) acc[condition] = [];
       acc[condition].push(attempt);
       return acc;
@@ -130,7 +183,9 @@ export default function TasksPanel({ restoredState }) {
   }, [attempts]);
 
   const selectedAttempt = attempts.find(a => a.attempt_id === selectedAttemptId);
-  const activeCondition = selectedAttempt?.condition;
+  const activeCondition = selectedAttempt
+    ? getConditionKey(selectedAttempt.condition)
+    : null;
 
   // 🔹 если просмотр attempt, автоматически раскрываем условие
   useEffect(() => {
@@ -162,9 +217,6 @@ export default function TasksPanel({ restoredState }) {
 
   return (
     <div className="taskspanel">
-      {/*<div className="sidebar-label">
-        <h2 className="menu-caption">Текущая задача</h2>
-      </div>*/}
 
       {isAttemptView && (
         <button className="item back-button" onClick={handleBackToModule}>
@@ -172,7 +224,7 @@ export default function TasksPanel({ restoredState }) {
         </button>
       )}
 
-      {/*{!isAttemptView && <ModuleTask restoredState={localRestoredState} />}*/}
+  
 
       <div className="module-session">
         {!attempts.length && (
@@ -184,18 +236,7 @@ export default function TasksPanel({ restoredState }) {
         <div className="modiles-reversed">
           {Object.entries(conditionsToRender).map(([condition, conditionAttempts]) => (
             <div key={condition} className="condition-block">
-              {/*<div
-                className={`item item-light module-task-item-history ${
-                  condition === activeCondition ? "active-condition" : ""
-                }`}
-                onClick={() => {
-                  if (isAttemptView) return;
-                  setOpenCondition(prev => (prev === condition ? null : condition));
-                }}
-                style={{ cursor: "pointer" }}
-              >
-                <p>{condition}</p>
-              </div>*/}
+
 
               <div
                 className={`item item-light module-task-item-history ${
@@ -203,8 +244,9 @@ export default function TasksPanel({ restoredState }) {
                 }`}
                 style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
               >
-                {/* 🔥 ИКОНКА */}
+
                 <ChevronDown
+                  className="condition-toggle"
                   size={18}
                   style={{
                     cursor: "pointer",
@@ -220,13 +262,12 @@ export default function TasksPanel({ restoredState }) {
                     );
                   }}
                 />
-                <p>{condition}</p>
+                <p className="condition-title">{formatConditionTitle(condition)}</p>
 
                 
               </div>
 
-              {/*{(isAttemptView || openCondition === condition) && (
-                <div className="attempts-list">*/}
+
                 <div
                   className="attempts-list"
                   style={{
@@ -248,7 +289,7 @@ export default function TasksPanel({ restoredState }) {
                     );
                   })}
                 </div>
-              {/*)}*/}
+
             </div>
           ))}
         </div>

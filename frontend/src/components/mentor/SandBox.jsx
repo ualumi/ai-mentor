@@ -97,7 +97,7 @@ import ModuleTask from "../modules/module/ModuleTask";
   );
 }*/}
 
-export default function SandBox({ mode, name, attempt, restoredState, code, titletask, isSidebarOpen, selectedAttemptId}) {
+export default function SandBox({ mode, name, attempt, restoredState, code, titletask, isSidebarOpen, selectedAttemptId, conditionHistory}) {
   const [hideHints, setHideHints] = useState(false);
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
   const [analysis, setAnalysis] = useState([]);
@@ -192,7 +192,7 @@ export default function SandBox({ mode, name, attempt, restoredState, code, titl
         <ModuleTask />
       </div>}
       {/* 🔥 PANEL */}
-      <div className={s["section-panel"]}>
+      <div className={s["section-panel"]} id="panel">
         <div className={s["section-panel-main"]}>
 
           {/*{mode === "free" && (
@@ -229,6 +229,7 @@ export default function SandBox({ mode, name, attempt, restoredState, code, titl
           hideHints={hideHints} 
           taskCode={code}
           key={isSidebarOpen ? "open" : "closed"}
+          conditionHistory={conditionHistory}
           restoredState={restoredState}
         />
 

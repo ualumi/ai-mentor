@@ -222,29 +222,29 @@ async def get_user_activity(
 
 from sqlalchemy import func, distinct
 
-'''@app.get("/attempts/total")
+@app.get("/attempts/total/{token}")
 async def get_attempts_total(token: str, db=Depends(get_session)):
-
-    # 🔐 Декодируем токен
+    # Декодируем токен
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        #user_id = str(payload["user_id"])
         user_id = str(payload["sub"])
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token expired")
     except jwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-    # 📊 1. Общее количество попыток
-    #total_attempts_result = await db.execute(
-    #    select(func.count()).where(Attempt.user_id == user_id)
-    #)
-
+    # Берем все попытки пользователя
+    # Берем только попытки без learning_session_id
     res = await db.execute(
-    select(AttemptAlias).where(AttemptAlias.user_id == user_id)
+        select(AttemptAlias)
+        .where(AttemptAlias.user_id == user_id)
+        .where(AttemptAlias.learning_session_id.is_(None))  # <-- фильтр на NULL
     )
-    total_attempts =  len(res.scalars().all())
+    attempts = res.scalars().all()
+    total_attempts =  len(attempts)
     #total_attempts = total_attempts_result.scalar() or 0
-
+    print("total_attempts", total_attempts)
     # 📊 2. Количество уникальных learning_session_id (исключаем NULL)
     total_sessions_result = await db.execute(
         select(func.count(distinct(Attempt.learning_session_id)))

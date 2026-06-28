@@ -17,13 +17,17 @@ export function SSOCallback() {
 
     const ssoLogin = async () => {
       try {
-        /*const res = await fetch(`http://localhost:8012/api/integration/sso?token=${token}`, {
+        /*const res = await fetch(`/api/integration/sso?token=${token}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token }),
         });*/
         const res = await fetch(
+<<<<<<< HEAD
             `/api/integration/api/integration/sso?token=${token}`
+=======
+            `/api/integration/sso?token=${token}`
+>>>>>>> frontend-dev
         );
         if (!res.ok) throw new Error("SSO login failed");
 

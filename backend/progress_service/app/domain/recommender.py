@@ -1,48 +1,9 @@
-'''def build_recommendations(progress: dict) -> list[dict]:
-    """
-    Генерирует рекомендации на основе прогресса.
-    """
-    recommendations = []
+from app.domain.module_builder import build_module_candidates
 
-    for comp, state in progress.items():
-        if state["level"] < 0.4 and state["evidence_count"] >= 2:
-            recommendations.append({
-                "type": "module",
-                "competency": comp,
-                "reason": "low_confidence",
-                "priority": "high"
-            })
 
-    return recommendations'''
+def build_module_recommendations(user_id: str, user_progress: dict) -> list[dict]:
+    return build_module_candidates(user_progress, user_id=user_id)
 
-def build_recommendations(progress: dict) -> list[dict]:
-    recs = []
 
-    for comp, state in progress.items():
-        ema = state["ema"]
-        trend = state["trend"]
-        attempts = state["attempts"]
-        mastery = state["mastery"]
-
-        if ema < 0.5 and attempts >= 2:
-            recs.append({
-                "type": "module",
-                "competency": comp,
-                "priority": "high"
-            })
-
-        elif 0.5 <= ema < 0.75 and abs(trend) < 0.05:
-            recs.append({
-                "type": "practice",
-                "competency": comp,
-                "priority": "medium"
-            })
-
-        elif mastery:
-            recs.append({
-                "type": "challenge",
-                "competency": comp,
-                "priority": "low"
-            })
-
-    return recs
+def build_recommendations(user_id: str, user_progress: dict) -> list[dict]:
+    return build_module_recommendations(user_id, user_progress)

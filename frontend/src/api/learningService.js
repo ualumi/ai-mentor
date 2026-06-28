@@ -1,4 +1,4 @@
-const LEARNING_SERVICE = "/api/learning/";
+const LEARNING_SERVICE = "/api/learning";
 
 export const startLearningSession = async (competency, token) => {
   const res = await fetch(

@@ -238,9 +238,9 @@ import { useEffect } from "react";
 import HistoryTaskViewer from "./HistoryTaskViewer";
 import { wsService } from "../../services/websocket"; // 🔥 ДОБАВИЛ
 
-export default function History({mode, name, attempt, restoredState, code, titletask, isSidebarOpen,selectedAttemptId, conditionHistory}) {
+export default function History({mode, name, attempt, restoredState, code, titletask, isSidebarOpen,selectedAttemptId, conditionHistory, taskDescription}) {
   console.log(conditionHistory)
-  
+  console.log("taskDescription", taskDescription)
   const [selectedAttempt, setSelectedAttempt] = useState(null);
 
   const handleSelectAttempt = (attemptId) => {
@@ -316,12 +316,14 @@ export default function History({mode, name, attempt, restoredState, code, title
   console.log(restoredState)
   return (
     <div className="">
-      {/* 🔥 HEADER */}
-      {mode === "free" && <h1 className={s["section-caption"]}>Самостоятельная практика</h1>}
+      {/* 🔥 HEADER 
+      {mode === "free" && }*/}
       {mode === "free" && (
           titletask 
-              ? <h1 className={s["section-caption"]}>Задача: {titletask}</h1>
-              : <h1 style={{display: "none"}}></h1>
+              ? <div  id="progress" className={s["progress"]}><h1 className={s["section-caption"]} style={{margin: 0}}>Задача: {titletask}</h1>
+                <p className="weak-case-item" style={{margin: 0, fontSize:11.5}}>{taskDescription}</p>
+              </div>
+              : <h1 className={s["section-caption"]}>Самостоятельная практика</h1>
       )}
 
       {mode === "module" && (
@@ -342,8 +344,10 @@ export default function History({mode, name, attempt, restoredState, code, title
                 {/*<ProgressBar progress={restoredState?.attempts?.length || 0} />*/}
                 <Module
                   competency={moduleName}
-                  mode={"free"}
+                  mode={'listen'}
                   progress={progress}
+                  progressBaseline={restoredState?.progress_baseline}
+                  fallbackAttempts={restoredState?.attempts?.length || 0}
                 />
               </div>
             </div>
@@ -370,14 +374,27 @@ export default function History({mode, name, attempt, restoredState, code, title
           <p class="history-label tasks-label">Текущая задача</p>
           <div
             className="item item-light module-task-item-history"
-            onClick={() =>
+            /*onClick={() =>
               navigate(`/module/${sessionId}`, {
                 state: {
                   competency: name,
                   restoredState
                 }
               })
-            }
+            }*/
+           onClick={() => {
+            navigate(`/module/${sessionId}`, {
+              state: {
+                competency: name,
+                restoredState
+              }
+            });
+            
+            // Ждем пока завершится навигация
+            //setTimeout(() => {
+            //  window.location.reload();
+            //}, 0);
+          }}
             style={{ cursor: "pointer" }}
           >
             <p>{condition.description}</p>

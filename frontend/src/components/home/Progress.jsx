@@ -1,252 +1,3 @@
-
-
-{/*import {
-  Chart as ChartJS,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  Tooltip,
-  Legend,
-} from "chart.js";
-import { Bar } from "react-chartjs-2";
-import { useProgress } from "../../hooks/useProgress"; // ← твой хук
-
-ChartJS.register(
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  Tooltip,
-  Legend
-);
-
-export default function ProgressChart() {
-  const { data, isLoading, error } = useProgress();
-
-  // -------------------------
-  // Loading / Error
-  // -------------------------
-  if (isLoading) return <div className='item'>Loading...</div>;
-  if (error) return <div className='item'>Здесь будет Ваш прогресс на платформе</div>;
-
-  // -------------------------
-  // Transform data
-  // -------------------------
-  const progress = data?.progress || {};
-
-  const labels = Object.keys(progress);
-
-  const values = Object.values(progress).map((item) => item.ema);
-
-  // -------------------------
-  // Chart config
-  // -------------------------
-  const chartData = {
-    labels,
-    datasets: [
-      {
-        label: "Освоение компетенций",
-        data: values,
-        backgroundColor: "#3B68FF",
-      },
-    ],
-  };
-
-  const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        display: false,
-      },
-    },
-    scales: {
-      y: {
-        display:false,
-        beginAtZero: true,
-        max: 1,
-      },
-    },
-  };
-
-  return (
-    <div className="modules-container progress-container">
-      <Bar data={chartData} options={options} />
-    </div>
-  );
-}*/}
-
-{/*import {
-  Chart as ChartJS,
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  Tooltip,
-  Legend,
-} from "chart.js";
-import { Bar } from "react-chartjs-2";
-import { useProgress } from "../../hooks/useProgress";
-
-ChartJS.register(
-  BarElement,
-  CategoryScale,
-  LinearScale,
-  Tooltip,
-  Legend
-);
-
-// 🔥 ПЛАГИН ДЛЯ ЛЕЙБЛОВ
-{/*const labelsPlugin = {
-  id: "customLabels",
-  afterDatasetsDraw(chart) {
-    const { ctx, data, scales } = chart;
-
-    ctx.save();
-    ctx.font = "12px sans-serif";
-    ctx.fillStyle = "#aaa";
-    ctx.textAlign = "left";
-    ctx.textBaseline = "middle";
-
-    data.datasets[0].data.forEach((value, index) => {
-      const y = scales.y.getPixelForValue(index);
-
-      const label = data.labels[index];
-
-      // 🔥 позиция текста слева от бара
-      ctx.fillText(label, 8, y);
-    });
-
-    ctx.restore();
-  },
-};
-
-export default function ProgressChart() {
-  const { data, isLoading, error } = useProgress();
-
-  if (isLoading) return <div className='item'>Loading...</div>;
-  if (error) return <div className='item'>Здесь будет Ваш прогресс на платформе</div>;
-
-  const progress = data?.progress || {};
-
-  const labels = Object.keys(progress);
-  const values = Object.values(progress).map((item) => item.ema);
-
-  const chartData = {
-    labels,
-    datasets: [
-      {
-        data: values,
-        backgroundColor: "#3B68FF",
-        borderRadius: 8,
-        borderSkipped: false,
-        categoryPercentage: 0.4,
-      },
-    ],
-  };
-
-  const options = {
-    responsive: true,
-    indexAxis: "y",
-
-    plugins: {
-      legend: { display: false },
-    },
-
-    layout: {
-      padding: {
-        left: 120, // 🔥 ОТСТУП ПОД ТЕКСТ
-      },
-    },
-
-    scales: {
-      x: {
-        display: false,
-        beginAtZero: true,
-        max: 1,
-      },
-      y: {
-        display: false, // 🔥 УБРАЛИ ОСЬ
-      },
-    },
-  };
-
-  return (
-    <div className="modules-container progress-container">
-      <Bar data={chartData} options={options} plugins={[labelsPlugin]} />
-    </div>
-  );
-}*/}
-
-{/*export default function ProgressChart() {
-  const { data, isLoading, error } = useProgress();
-
-  if (isLoading) return <div className='item'>Loading...</div>;
-  if (error) return <div className='item'>Здесь будет Ваш прогресс на платформе</div>;
-
-  const progress = data?.progress || {};
-
-  const labels = Object.keys(progress);
-  const values = Object.values(progress).map((item) => item.ema);
-
-  const chartData = {
-    labels,
-    datasets: [
-      {
-        data: values,
-        backgroundColor: "#3B68FF",
-        borderRadius: 8,
-        borderSkipped: false,
-
-        // 🔥 плотнее столбцы
-        categoryPercentage: 0.3,
-        barPercentage: 0.6,
-        // или можно вместо них:
-        // barThickness: 14
-      },
-    ],
-  };
-
-  const options = {
-    responsive: true,
-    indexAxis: "y",
-
-    plugins: {
-      legend: { display: false },
-    },
-
-    layout: {
-      padding: {
-        left: 0,
-      },
-    },
-
-    scales: {
-      x: {
-        display: false,
-        beginAtZero: true,
-        max: 1,
-      },
-
-      y: {
-        display: true,       // 🔥 включаем
-        position: "right",   // 🔥 переносим вправо
-
-        grid: {
-          display: false,    // чтобы не было линий
-        },
-
-        ticks: {
-          display: false,    // если не хочешь подписи оси
-        },
-      },
-    },
-  };
-
-  return (
-    <div className="modules-container progress-container">
-      <Bar data={chartData} options={options} />
-    </div>
-  );
-}*/}
-
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -255,39 +6,50 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-
-ChartJS.register(
-  CategoryScale,
-  LinearScale,   // 🔥 ЭТО И ЕСТЬ "linear"
-  BarElement,
-  Tooltip,
-  Legend
-);
-
 import { Bar } from "react-chartjs-2";
 import { useProgress } from "../../hooks/useProgress";
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 export default function Progress() {
   const { data, isLoading, error } = useProgress();
 
-  if (isLoading) return <div className='item'>Loading...</div>;
-  if (error) return <div className='item'>Здесь будет Ваш прогресс на платформе</div>;
+  if (isLoading) return <div className="item">Loading...</div>;
+  if (error) {
+    return (
+      <div className="item">
+        Здесь будет Ваш прогресс на платформе
+      </div>
+    );
+  }
 
-  const progress = data?.progress || {};
+  const skills = extractSkillProgress(data);
+  const rows = Object.entries(skills)
+    .map(([name, state]) => ({
+      label: formatSkillName(name),
+      value: progressValue(state),
+    }))
+    .filter((row) => Number.isFinite(row.value))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 8);
 
-  const labels = Object.keys(progress);
-  const values = Object.values(progress).map((item) => item.ema);
+  if (!rows.length) {
+    return (
+      <div className="modules-container progress-container">
+        <div className="item">Здесь будет Ваш прогресс на платформе</div>
+      </div>
+    );
+  }
 
   const chartData = {
-    labels,
+    labels: rows.map((row) => row.label),
     datasets: [
       {
-        data: values,
-        backgroundColor: "#3B68FF",
+        data: rows.map((row) => row.value),
+        backgroundImage: "linear-gradient(90deg, #3b68ff, #6f90ff)",
+        backgroundColor: "#3b68ff",
         borderRadius: 8,
         borderSkipped: false,
-
-        // 🔥 фиксируем ширину столбцов
         barThickness: 10,
         maxBarThickness: 10,
       },
@@ -296,35 +58,28 @@ export default function Progress() {
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false,
     indexAxis: "y",
-
     plugins: {
       legend: { display: false },
-    },
-
-    layout: {
-      padding: {
-        left: 0,
+      tooltip: {
+        callbacks: {
+          label: (context) => `${Math.round(context.raw * 100)}%`,
+        },
       },
     },
-
     scales: {
       x: {
         display: false,
         beginAtZero: true,
         max: 1,
       },
-
       y: {
         display: true,
-        position: "right", // 🔥 ось справа
-
-        grid: {
-          display: false,
-        },
-
+        position: "right",
+        grid: { display: false },
         ticks: {
-          display: true, // 🔥 показываем подписи
+          display: true,
           padding: 8,
         },
       },
@@ -336,4 +91,67 @@ export default function Progress() {
       <Bar data={chartData} options={options} />
     </div>
   );
+}
+
+function extractSkillProgress(data) {
+  const progress = data?.progress ?? data ?? {};
+
+  if (progress.skills && typeof progress.skills === "object") {
+    return progress.skills;
+  }
+
+  if (data?.skills && typeof data.skills === "object") {
+    return data.skills;
+  }
+
+  return Object.fromEntries(
+    Object.entries(progress).filter(([, value]) => isSkillState(value))
+  );
+}
+
+function progressValue(state) {
+  if (typeof state === "number") return normalizeProgressNumber(state);
+  if (!state || typeof state !== "object") return Number.NaN;
+
+  return firstFiniteNumber(
+    state.bkt_mastery,
+    state.mastery,
+    state.ema_mastery,
+    state.ema,
+    state.progress
+  );
+}
+
+function normalizeProgressNumber(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return Number.NaN;
+  return numeric > 1 ? numeric / 100 : numeric;
+}
+
+function firstFiniteNumber(...values) {
+  for (const value of values) {
+    const numeric = normalizeProgressNumber(value);
+    if (Number.isFinite(numeric)) return Math.min(1, Math.max(0, numeric));
+  }
+
+  return Number.NaN;
+}
+
+function isSkillState(value) {
+  if (typeof value === "number") return true;
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+
+  return [
+    "bkt_mastery",
+    "mastery",
+    "ema_mastery",
+    "ema",
+    "progress",
+  ].some((key) => Number.isFinite(Number(value[key])));
+}
+
+function formatSkillName(name) {
+  return String(name || "")
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 }

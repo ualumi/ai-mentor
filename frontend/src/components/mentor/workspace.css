@@ -344,6 +344,8 @@
 }
 
 
+
+
 .tooltip-wrapper {
   position: relative;
   display: inline-block;
@@ -381,4 +383,130 @@
 
 .tooltip-wrapper:hover .tooltip-text {
   transform: translateY(-50%) translateX(0);
+}
+
+.spin {
+  animation: spin 1s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  /*display: inline-block;*/
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  60% {
+    transform: rotate(220deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.intro-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: start;
+  justify-content: end;
+  
+  z-index: 9999;
+}
+
+.intro-content {
+  background: #1E1F21;
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 20px;
+  margin-right: 20px;
+    /* Добавляем анимацию */
+    animation: fadeIn 0.3s ease-in;
+}
+
+.joyride-tooltip {
+  background: #2F3032;
+  padding: 20px;
+  border-radius: 12px;
+  color: white;
+  /*border-radius: 10px;
+  padding: 15px;*/
+  font-size: 12px;
+  font-family: "Stolz regular";
+  max-width: 250px;
+}
+
+.react-joyride__arrow {
+  color: #2F3032 !important;
+}
+
+.joyride-footer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  margin-top: 10px;
+  gap: 5px;
+}
+
+.joyride-back {
+  cursor: pointer !important;
+  background: #444547;
+  opacity: 1
+}
+
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95); /* Небольшое увеличение для плавности */
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.module-next-button-wrapper {
+  position: relative;
+  display: inline-flex;
+  flex:1;
+
+}
+
+
+.module-next-button-hint {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #222;
+  color: #fff;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.module-next-button-wrapper:hover .module-next-button-hint,
+.module-next-button-wrapper:focus-within .module-next-button-hint {
+  opacity: 1;
+}
+
+.item.end {
+  justify-self: end;
+  display: flex;
+}
+
+.react-joyride__beacon span {
+  border-color: #3B68FF !important;
+}
+
+.react-joyride__beacon span:nth-child(2) {
+  background-color: #3B68FF !important;
+}
+
+.react-joyride__beacon:focus {
+  border: none !important;
+  outline: none !important;
 }

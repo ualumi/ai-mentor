@@ -4,3 +4,10 @@ uvicorn
 httpx
 asyncio
 aiohttp
+
+accelerate
+peft
+trl
+transformers
+safetensors
+sentencepiece

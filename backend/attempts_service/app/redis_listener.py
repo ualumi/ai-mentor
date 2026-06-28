@@ -126,11 +126,15 @@ async def redis_listener():
         attempt_id = payload.get("attempt_id")
         user_id = payload.get("user_id")
 
+        if _is_external_progress_import(payload):
+            continue
+
         if not attempt_id or not user_id:
             continue
 
         user_id = str(user_id) 
         channel = msg["channel"].decode() if isinstance(msg["channel"], bytes) else msg["channel"]
+        learning_session_id = payload.get("learning_session_id")
 
         async with AsyncSessionLocal() as db:
 
@@ -155,10 +159,8 @@ async def redis_listener():
                 attempt = Attempt(
                     attempt_id=attempt_id,
                     user_id=user_id,
-                    learning_session_id=payload.get("learning_session_id"),
+                    learning_session_id=learning_session_id,
                 )
-
-                learning_session_id = payload.get("learning_session_id")
 
                 db.add(attempt)
                 await db.commit()
@@ -236,6 +238,13 @@ async def redis_listener():
             await db.commit()
 
             print(f"✏️ Attempt {attempt_id} updated from {channel}, learning_session_id: {learning_session_id}, condition: {attempt.condition}")
+
+def _is_external_progress_import(payload: dict) -> bool:
+    return (
+        payload.get("mode") == "import_progress"
+        or payload.get("source") == "integration_import_progress"
+    )
+
 
 '''import json
 from sqlalchemy import select

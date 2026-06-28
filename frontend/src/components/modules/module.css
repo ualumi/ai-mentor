@@ -101,13 +101,19 @@
     gap: 10px;
     align-items: center;
     flex: 1;
+    min-width: 0;
 }
 
 .modules-description {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
     flex: 1;
+    min-width: 0;
+}
+
+.progress-info .modules-description {
+    gap: 15px;
 }
 
 .jol {
@@ -135,6 +141,18 @@
     font-size: 13px;
     color: #ffff;
     opacity: 1;
+    padding-bottom: 10px;
+}
+
+.module-title {
+    display: block;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    hyphens: manual;
+    line-height: 1.25;
+    padding-bottom: 10px !important;
 }
 
 .menu-item-processflag {
@@ -148,11 +166,24 @@
     padding: 0;
 }
 
+.module-explain-goal {
+    margin: -6px 0 0;
+    color: rgba(255, 255, 255, 0.58);
+    font-size: 11px;
+    line-height: 1.35;
+    white-space: normal;
+    opacity: 0.5;
+}
+
 .disabled {
     background-color: #2F3032;
     box-shadow: none;
     cursor: not-allowed;
     opacity: 0.5;
+}
+
+.disabled:hover {
+    background-color: #2F3032;
 }
 
 .buttons-module {
@@ -174,6 +205,25 @@
     border: none;
     white-space: initial;
     display: flex;
+}
+
+.taskspanel .module-task-item-history {
+    flex-direction: row-reverse;
+}
+
+.module-task-item-history .condition-title {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow-wrap: anywhere;
+}
+
+.module-task-item-history .condition-toggle {
+    flex: 0 0 auto;
 }
 
 .attempts-list {
@@ -199,6 +249,7 @@
     margin-bottom: 10px;
     display: flex;
     flex-direction: column;
+    min-height: 70px;
 }
 
 .module-next-button {

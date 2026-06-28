@@ -83,7 +83,7 @@ export function RunCodeButton({
   return (
     <div className="tooltip-wrapper">
       <button
-        className={`item item-primary ${className}`}
+        className={`item item-primary item-run-button ${className}`}
         onClick={handleRun}
         disabled={executeMutation.isPending}
       >

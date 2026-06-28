@@ -103,11 +103,21 @@ services:
     build:
       context: ./mentor_service
     container_name: mentor_service
+    gpus: all
     ports:
       - "8006:8006"
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
+      MENTOR_MODEL_ID: disemenova/qwen2.5-7b-ai-mentor
+      MENTOR_MAX_SEQ_LENGTH: 1024
+      MENTOR_MAX_NEW_TOKENS: 256
+      MENTOR_TEMPERATURE: 0.7
+      MENTOR_REPETITION_PENALTY: 1.1
+      MENTOR_LOAD_IN_4BIT: "true"
+      MENTOR_EAGER_LOAD: "true"
     depends_on:
       - redis
     networks:
@@ -122,6 +132,9 @@ services:
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      
+      NVIDIA_VISIBLE_DEVICES: all
+      NVIDIA_DRIVER_CAPABILITIES: compute,utility
     depends_on:
       - redis
     networks:
@@ -136,6 +149,11 @@ services:
     environment:
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      PROGRESS_LOG_PATH: /app/data/progress_service.log
+      PROGRESS_EVENT_LOG_PATH: /app/data/progress_service_events.jsonl
+      PROGRESS_DB_PATH: /app/data/progress_service.sqlite3
+    volumes:
+      - ./progress_service/data:/app/data
     depends_on:
       - redis
     networks:
@@ -175,20 +193,20 @@ services:
       - mentor-net
 
   nginx:
-    image: nginx:alpine
+    build:
+      context: ../frontend
     container_name: nginx
     ports:
       - "80:80"
-    volumes:
-      - ../frontend/nginx.conf:/etc/nginx/conf.d/default.conf
-      - ../frontend/dist:/usr/share/nginx/html
     depends_on:
       - user_service
       - learning_service
-      - attempts_service
-      - progress_service
-      - integration_service
       - scaffolding_service
+      - task_manager
+      - sandbox_service
+      - progress_service
+      - attempts_service
+      - integration_service
     networks:
       - mentor-net
 

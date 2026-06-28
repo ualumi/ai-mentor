@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const INTEGRATION_SERVICE = "http://localhost:8012/api/integration";
+const INTEGRATION_SERVICE = "/api/integration";
 
 export default function WeakCases() {
   const { token, isSSO } = useAuth();
@@ -107,7 +107,11 @@ import { useAuth } from "../../context/AuthContext";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+<<<<<<< HEAD
 const INTEGRATION_SERVICE = "/api/integration/api/integration";
+=======
+const INTEGRATION_SERVICE = "/api/integration";
+>>>>>>> frontend-dev
 
 export default function WeakCases() {
   const { token, isSSO } = useAuth();
@@ -183,6 +187,7 @@ export default function WeakCases() {
       state: {
         title: task.title,
         code: task.last_code,
+        description: task.description,
       },
     });
   };
@@ -215,8 +220,8 @@ export default function WeakCases() {
       </div>
 
       {!showAll && weakCases.length > 3 && (
-        <button onClick={() => setShowAll(true)}>
-          Другие задачи
+        <button className="item tab-history-item" onClick={() => setShowAll(true)}>
+          <p className="home-summary-block-label-link">Другие задачи</p>
         </button>
       )}
     </div>

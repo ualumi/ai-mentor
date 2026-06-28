@@ -1,20 +1,66 @@
-'''from typing import Dict
+from collections import defaultdict
+from typing import Dict, List
 
-# session_id -> {competency_name -> {evidence_count, avg_confidence, trend}}
-USER_PROGRESS: Dict[str, Dict[str, dict]] = {}'''
 
-from typing import Dict, List, Any
+# competency -> related competency -> weight
+COMPETENCY_GRAPH = defaultdict(lambda: defaultdict(float))
 
-# 1. Raw данные от аналитики (не интерпретируем!)
+# source competency -> target competency -> relation type -> weight
+TYPED_COMPETENCY_GRAPH = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
+
+# raw competency label -> canonical competency label
+SKILL_ALIASES: Dict[str, str] = {}
+
+# canonical competency -> metadata about known aliases and semantic matching
+SKILL_REGISTRY: Dict[str, dict] = {}
+
+# source competency -> target competency -> inferred relation statistics
+SKILL_RELATION_STATS = defaultdict(lambda: defaultdict(dict))
+
+# user_id -> competency -> related competency -> weight
+USER_COMPETENCY_GRAPHS = defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
+
+# user_id -> source competency -> target competency -> relation type -> weight
+USER_TYPED_COMPETENCY_GRAPHS = defaultdict(
+    lambda: defaultdict(lambda: defaultdict(lambda: defaultdict(float)))
+)
+
+# user_id -> source competency -> target competency -> inferred relation statistics
+USER_SKILL_RELATION_STATS = defaultdict(lambda: defaultdict(lambda: defaultdict(dict)))
+
+# inferred embedding hierarchy for canonical competencies
+SKILL_HIERARCHY: Dict[str, dict] = {}
+
+# user_id -> action/module key -> value estimate
+USER_ACTION_STATS = defaultdict(
+    lambda: defaultdict(
+        lambda: {
+            "count": 0,
+            "value": 0.0,
+        }
+    )
+)
+
+# user_id -> bandit action key -> LinUCB matrices/vectors
+USER_BANDIT_STATS = defaultdict(dict)
+
+# user_id -> raw analysis payloads
 RAW_ANALYSIS: Dict[str, List[dict]] = {}
 
-# 2. Унифицированные evidence (через адаптер)
+# user_id -> normalized evidence items
 EVIDENCE_STORE: Dict[str, List[dict]] = {}
 
-# 3. Агрегированный прогресс по компетенциям
-# session_id -> competency -> state
-USER_PROGRESS: Dict[str, Dict[str, dict]] = {}
+# user_id -> {"skills": ..., "clusters": ...}
+USER_PROGRESS = {}
 
-
-# 4. Рекомендации (derived state)
+# user_id -> latest module recommendations
 USER_RECOMMENDATIONS: Dict[str, List[dict]] = {}
+
+# user_id -> pending recommendation waiting for the next attempt result
+PENDING_ACTIONS = {}
+
+# user_id:learning_session_id -> selected module context
+ACTIVE_MODULES = {}
+
+# user_id -> historical recommendations and rewards
+RECOMMENDATION_HISTORY: Dict[str, List[dict]] = defaultdict(list)

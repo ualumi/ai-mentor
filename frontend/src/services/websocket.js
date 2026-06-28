@@ -22,15 +22,6 @@ class WebSocketService {
   // --------------------------------------------------
   // CONNECT
   // --------------------------------------------------
-  //connect(url = "ws://localhost:8004/ws/2") {
-  
-  /*connect(token) {
-    if (!token) {
-      throw new Error("No auth token provided for WebSocket connection");
-    }
-
-    const url = `ws://localhost:8004/ws?token=${token}`;
-    this.url = url;*/
     connect(token) {
       if (token) {
         this.token = token;
@@ -40,7 +31,8 @@ class WebSocketService {
         throw new Error("No auth token provided");
       }
 
-      const url = `/api/ws?token=${this.token}`;
+      const wsProtocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+      const url = `${wsProtocol}//${window.location.host}/ws?token=${this.token}`;
       this.url = url;
 
     // 🔒 Если уже открыт — ничего не делаем

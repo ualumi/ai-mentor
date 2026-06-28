@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
-const LEARNING_SERVICE = "/api/learning/";
+const LEARNING_SERVICE = "/api/learning";
 
 export default function StartModuleButton({ competency }) {
 

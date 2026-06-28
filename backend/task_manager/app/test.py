@@ -204,7 +204,7 @@ async def test_module_mode():
 
 
 #asyncio.run(test_module_mode())
-session_id = asyncio.run(test_module_mode())
+#session_id = asyncio.run(test_module_mode())
 
 async def test_switch_sessions(first_session_id):
 
@@ -273,11 +273,11 @@ async def test_switch_sessions(first_session_id):
 
         print("\n🏁 SESSION SWITCH TEST FINISHED")
 
-asyncio.run(test_switch_sessions(session_id))
+#asyncio.run(test_switch_sessions(session_id))
 
 print("\n🔍 Проверка /state")
 
-r_state = requests.get(
+'''r_state = requests.get(
     f"{LEARNING_SERVICE}/learning/session/{session_id}/state",
     headers={"Authorization": f"Bearer {token}"}
 )
@@ -286,7 +286,13 @@ assert r_state.status_code == 200, f"/state failed: {r_state.status_code}, {r_st
 
 state = r_state.json()
 
-print("📦 STATE:", json.dumps(state, indent=2))
+print("📦 STATE:", json.dumps(state, indent=2))'''
+
+history_resp = requests.get(f"{ATTEMPTS_SERVICE}/attempts/total/{token}")
+assert history_resp.status_code == 200
+history_data = history_resp.json()
+
+print("📖 Attempts тотал:", history_data)
 
 '''# -------------------------------
 # 2️⃣ Тест эндпоинта истории попыток

@@ -58,9 +58,6 @@ export default function CodeEditor({
     return () => observer.disconnect();
   }, []);
 
-  // -----------------------------
-  // 🔥 РЕАКЦИЯ НА САЙДБАР
-  // -----------------------------
 
 
   // -----------------------------
@@ -158,7 +155,10 @@ export default function CodeEditor({
   );
 }*/}
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> frontend-dev
 import { useCode } from './CodeContext';
 import { useState, useRef, useEffect } from "react";
 import Editor, { useMonaco } from "@monaco-editor/react";
@@ -410,4 +410,7 @@ export default function CodeEditor({
     </div>
   );
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> frontend-dev

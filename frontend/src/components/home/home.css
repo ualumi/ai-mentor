@@ -8,7 +8,7 @@
     height: 100vh;
     overflow-y: scroll;
     overflow-x: hidden;
-    margin-left: 75px;
+    margin-left: 65px;
 }
 
 .home-description {
@@ -327,7 +327,7 @@ animation: shimmer 6s linear infinite;
   flex-direction: column;
   justify-content: left;
   align-items: start;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
   overflow: visible;
 }
 
@@ -367,11 +367,18 @@ animation: shimmer 6s linear infinite;
 }
 
 .weak-cases-list {
-  display: flex;
+  /*display: flex;
   gap: 7px;
   background-color: #1E1F21;
   padding: 12px;
-  border-radius: 12px;
+  border-radius: 12px;*/
+  display: grid;
+    grid-auto-flow: row;   /* Элементы заполняют колонки сверху вниз */
+    grid-template-columns: repeat(3, auto); /* Фиксируем 3 строки (макс 3 элемента в колонке) */
+    gap: 7px;
+    background-color: #1E1F21;
+    padding: 12px;
+    border-radius: 12px;
 }
 
 .weak-case-code {

@@ -1,166 +1,111 @@
-
 import { useQuery } from '@tanstack/react-query';
 import "../../App.css";
 import "./module.css";
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-const LEARNING_SERVICE = "/api/learning/";
-const INTEGRATION_SERVICE = "/api/integration/api/integration";
+const LEARNING_SERVICE = "/api/learning";
+const INTEGRATION_SERVICE = "/api/integration";
 
-import icon1 from "../../assets/module-icons/Scale.svg";
-import icon2 from "../../assets/module-icons/Box2.svg";
-import icon3 from "../../assets/module-icons/Layers.svg";
-
-import ProgressBar from "./module/ProgressBar";
 import Module from "./module/Module";
 import { useAuth } from "../../context/AuthContext";
-import { data, NavLink } from "react-router-dom";
-
-const icons = [icon1, icon2, icon3];
+import { NavLink } from "react-router-dom";
 
 export default function Modules({ mode }) {
-
   const containerClass =
     mode === "history" ? "history-container" : "modules-container";
 
   const { token, isSSO } = useAuth();
-
-  const [activeTab, setActiveTab] = useState(
-    isSSO ? "recommended" : "active"
-  );
+  const [activeTab, setActiveTab] = useState(isSSO ? "recommended" : "active");
 
   useEffect(() => {
     setActiveTab(isSSO ? "recommended" : "active");
   }, [isSSO]);
 
-  // 🔥 localStorage recommended
-  const [localRecommended, setLocalRecommended] = useState([]);
-
   useEffect(() => {
+    cleanupRecommendedModulesStorage();
+  }, []);
+
+  const activeSessionsQuery = useSessionsQuery(token, "active");
+  const completedSessionsQuery = useSessionsQuery(token, "completed");
+  const importedSkillsQuery = useImportedSkillsQuery(isSSO);
+
+  const localRecommended = useMemo(() => {
     try {
       const stored = JSON.parse(localStorage.getItem("recommended_modules") || "[]");
-      setLocalRecommended(Array.isArray(stored) ? stored : []);
-    } catch (e) {
-      console.error("Failed to parse local recommended modules", e);
-      setLocalRecommended([]);
+      return Array.isArray(stored) ? stored : [];
+    } catch {
+      return [];
     }
   }, []);
 
-  console.log(token);
-  console.log('isSSO', isSSO);
-
-  // ---------------------------
-  // ACTIVE sessions
-  // ---------------------------
-  const { data: sessions, isLoading: loadingSessions, error: sessionsError } = useQuery({
-    queryKey: ['activeSessions'],
-    queryFn: async () => {
-      const res = await fetch(`${LEARNING_SERVICE}my?status=active`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error("Failed to fetch sessions");
-      return res.json();
-      console.log("RES" ,res.json())
-    },
-  });
-  console.log("DATA", sessions)
-
-  // ---------------------------
-  // SSO recommended
-  // ---------------------------
-  const { data: importedSkills, isLoading: loadingImported, error: importedError } = useQuery({
-    queryKey: ['importedSkills'],
-    queryFn: async () => {
-      if (!isSSO) return null;
-
-      const user = JSON.parse(localStorage.getItem("user"));
-
-      if (!user?.email) {
-        throw new Error("No user email found");
-      }
-
-      const res = await fetch(`${INTEGRATION_SERVICE}/import-progress`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: user.email,
-        }),
-      });
-
-      if (!res.ok) {
-        const text = await res.text();
-        console.error("IMPORT ERROR:", text);
-        throw new Error("Failed to fetch imported skills");
-      }
-
-      return res.json();
-    },
-    enabled: !!isSSO,
-  });
-
-  if (loadingSessions || loadingImported) {
-    return <div className='item'>Загрузка модулей...</div>;
+  if (activeSessionsQuery.isLoading || completedSessionsQuery.isLoading) {
+    return <div className="item">Загрузка модулей...</div>;
   }
 
-  if (sessionsError || importedError) {
+  if (activeSessionsQuery.error || completedSessionsQuery.error) {
     return (
-      <div className='item'>
-        Ошибка загрузки: {sessionsError?.message || importedError?.message}
+      <div className="item">
+        Ошибка загрузки: {
+          activeSessionsQuery.error?.message ||
+          completedSessionsQuery.error?.message
+        }
       </div>
     );
   }
 
-  // 🔥 фильтрация
-  const activeNames = new Set(
-    (sessions || []).map(s => s.competency)
+  const activeSessions = activeSessionsQuery.data || [];
+  const completedSessions = completedSessionsQuery.data || [];
+  const importedSkills = importedSkillsQuery.error ? null : importedSkillsQuery.data;
+
+  const startedNames = new Set([
+    ...activeSessions.map((session) => normalizeName(session.competency)),
+    ...completedSessions.map((session) => normalizeName(session.competency)),
+  ]);
+
+  const ssoRecommendations =
+    importedSkills?.status === "imported"
+      ? getImportedRecommendations(importedSkills)
+      : [];
+
+  const ssoNames = new Set(
+    ssoRecommendations.map((recommendation) => normalizeName(recommendation.competency))
   );
-
-  const filteredLocalRecommended = localRecommended.filter(
-    (name) => !activeNames.has(name)
+  const recommendedFromSso = ssoRecommendations.filter(
+    (recommendation) => !startedNames.has(normalizeName(recommendation.competency))
   );
-
-  const ssoNames = importedSkills?.skills
-    ? Object.keys(importedSkills.skills)
-    : [];
-
-  const finalLocalRecommended = filteredLocalRecommended.filter(
-    (name) => !ssoNames.includes(name)
-  );
-
-  console.log(filteredLocalRecommended);
-  console.log(finalLocalRecommended);
+  const recommendedFromLocal = localRecommended
+    .map(normalizeStoredRecommendation)
+    .filter(Boolean)
+    .filter((recommendation) => {
+      const normalized = normalizeName(recommendation.competency);
+      return !startedNames.has(normalized) && !ssoNames.has(normalized);
+    });
 
   return (
     <div className={`modules-block ${isSSO ? "modules-block-sso" : "modules-block-default"}`}>
-
       <div className={containerClass}>
-
-        {mode ==! "free" && (
+        {mode !== "free" && (
           <div className="home-summary-block-label">
             <h3 className="home-label module-label">Модули</h3>
-            <NavLink to="/module" className={"home-summary-block-label-link"}>
+            <NavLink to="/module" className="home-summary-block-label-link">
               перейти
             </NavLink>
           </div>
         )}
 
-        <ul className='module-type-list'>
+        <ul className="module-type-list">
           <li
             className={`module-type-list-item ${activeTab === "recommended" ? "module-type-list-item-active" : ""}`}
             onClick={() => setActiveTab("recommended")}
           >
             Recommended
           </li>
-
           <li
             className={`module-type-list-item ${activeTab === "active" ? "module-type-list-item-active" : ""}`}
             onClick={() => setActiveTab("active")}
           >
             Active
           </li>
-
           <li
             className={`module-type-list-item ${activeTab === "finished" ? "module-type-list-item-active" : ""}`}
             onClick={() => setActiveTab("finished")}
@@ -169,83 +114,199 @@ export default function Modules({ mode }) {
           </li>
         </ul>
 
-        <div className='module-types'>
-
-          {/* ---------------- RECOMMENDED ---------------- */}
+        <div className="module-types">
           {activeTab === "recommended" && (
-            <div className='modules-container modules-container-reccomended'>
+            <ModuleList emptyText="Нет рекомендованных модулей">
+              {recommendedFromSso.map((recommendation, idx) => (
+                <Module
+                  key={`sso-${normalizeName(recommendation.competency)}-${idx}`}
+                  competency={recommendation.competency}
+                  explainGoal={recommendation.explainGoal}
+                  progress={0}
+                  mode="recommended"
+                />
+              ))}
 
-              {(importedSkills?.status === "imported" || finalLocalRecommended.length > 0) && (
-                <>
-                  {/*<div className="home-summary-block-label">
-                    <h3 className="home-summary-block-label-text">
-                      Рекомендованные модули
-                    </h3>
-                    <NavLink to="/module" className={"home-summary-block-label-link"}>
-                      перейти
-                    </NavLink>
-                  </div>*/}
-
-                  <div className='modules-container scroll-container'>
-
-                    {/* SSO */}
-                    {importedSkills?.status === "imported" &&
-                      Object.entries(importedSkills.skills).map(([skillName, progress], idx) => (
-                        <Module
-                          key={`sso-${idx}`}
-                          competency={skillName}
-                          progress={0}
-                          mode={'module'}
-                          //isRecommended={true}
-                        />
-                      ))
-                    }
-
-                    {/* LOCAL STORAGE */}
-                    {finalLocalRecommended.map((name, idx) => (
-                      <Module
-                        key={`local-${idx}`}
-                        competency={name}
-                        progress={0}
-                        mode={mode}
-                      />
-                    ))}
-
-                  </div>
-                </>
-              )}
-
-            </div>
+              {recommendedFromLocal.map((recommendation, idx) => (
+                <Module
+                  key={`local-${normalizeName(recommendation.competency)}-${idx}`}
+                  competency={recommendation.competency}
+                  explainGoal={recommendation.explainGoal}
+                  progress={0}
+                  mode="recommended"
+                />
+              ))}
+            </ModuleList>
           )}
 
-          {/* ---------------- ACTIVE ---------------- */}
           {activeTab === "active" && (
-            <div className='modules-container scroll-container'>
-              {sessions && sessions.length > 0 ? (
-                sessions.map((session) => (
-                  <Module
-                    key={session.session_id}
-                    competency={session.competency}
-                    session={session}
-                    mode={mode}
-                    progress={session.progress} // если Module поддерживает прогресс
-                  />
-                ))
-              ) : (
-                <div className='item'>Нет активных модулей</div>
-              )}
-            </div>
+            <ModuleList emptyText="Нет активных модулей">
+              {activeSessions.map((session) => (
+                <Module
+                  key={session.session_id}
+                  competency={session.competency}
+                  session={session}
+                  mode={mode}
+                  progress={session.progress}
+                  progressBaseline={session.progress_baseline}
+                  fallbackAttempts={session.attempts_count}
+                />
+              ))}
+            </ModuleList>
           )}
 
-          {/* ---------------- FINISHED ---------------- */}
           {activeTab === "finished" && (
-            <div className='item'>
-              Завершённые модули появятся здесь
-            </div>
+            <ModuleList emptyText="Нет завершенных модулей">
+              {completedSessions.map((session) => (
+                <Module
+                  key={session.session_id}
+                  competency={session.competency}
+                  session={session}
+                  mode={mode}
+                  progress={session.progress ?? 1}
+                  progressBaseline={session.progress_baseline}
+                  fallbackAttempts={session.attempts_count}
+                />
+              ))}
+            </ModuleList>
           )}
-
         </div>
       </div>
     </div>
   );
+}
+
+function ModuleList({ children, emptyText }) {
+  const items = Array.isArray(children) ? children.filter(Boolean) : [children].filter(Boolean);
+
+  return (
+    <div className="modules-container modules-container-reccomended">
+      <div className="modules-container scroll-container">
+        {items.length > 0 ? items : <div className="item">{emptyText}</div>}
+      </div>
+    </div>
+  );
+}
+
+function useSessionsQuery(token, status) {
+  return useQuery({
+    queryKey: ["learningSessions", status, token],
+    queryFn: async () => {
+<<<<<<< HEAD
+      const res = await fetch(`${LEARNING_SERVICE}my?status=active`, {
+=======
+      const res = await fetch(`${LEARNING_SERVICE}/learning/my?status=${status}`, {
+>>>>>>> frontend-dev
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to fetch sessions");
+      return res.json();
+    },
+    enabled: !!token,
+  });
+}
+
+function useImportedSkillsQuery(isSSO) {
+  return useQuery({
+    queryKey: ["importedSkills"],
+    queryFn: async () => {
+      if (!isSSO) return null;
+
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user?.email) throw new Error("No user email found");
+
+      const res = await fetch(`${INTEGRATION_SERVICE}/import-progress`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: user.email }),
+      });
+
+      if (!res.ok) throw new Error("Failed to fetch imported skills");
+      return res.json();
+    },
+    enabled: !!isSSO,
+    retry: false,
+  });
+}
+
+function normalizeName(name) {
+  return String(name || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[-/\s]+/g, "_");
+}
+
+function normalizeStoredRecommendation(recommendation) {
+  if (typeof recommendation === "string") {
+    return null;
+  }
+
+  if (!recommendation || typeof recommendation !== "object") return null;
+
+  const competency =
+    recommendation.competency ||
+    recommendation.main_competency ||
+    recommendation.module?.main_competency;
+
+  if (!competency) return null;
+
+  return {
+    competency,
+    explainGoal:
+      recommendation.explainGoal ||
+      recommendation.explain_goal ||
+      recommendation.explanation?.module_reason ||
+      recommendation.explanation?.reason ||
+      null,
+  };
+}
+
+function getImportedRecommendations(importedSkills) {
+  const moduleRecommendations = Array.isArray(importedSkills?.module_recommendations)
+    ? importedSkills.module_recommendations
+    : [];
+
+  if (moduleRecommendations.length) {
+    return moduleRecommendations
+      .map(normalizeImportedRecommendation)
+      .filter(Boolean);
+  }
+
+  return Object.keys(importedSkills?.skills || {})
+    .map((competency) => ({
+      competency,
+      explainGoal: externalProgressExplanation(),
+    }));
+}
+
+function normalizeImportedRecommendation(recommendation) {
+  const normalized = normalizeStoredRecommendation(recommendation);
+  if (!normalized) return null;
+
+  return {
+    ...normalized,
+    explainGoal: normalized.explainGoal || externalProgressExplanation(),
+  };
+}
+
+function externalProgressExplanation() {
+  return "Модуль рекомендован на основании анализа задач, с которыми возникли трудности на внешней платформе.";
+}
+
+function cleanupRecommendedModulesStorage() {
+  try {
+    const stored = JSON.parse(localStorage.getItem("recommended_modules") || "[]");
+    if (!Array.isArray(stored)) {
+      localStorage.setItem("recommended_modules", "[]");
+      return;
+    }
+
+    const cleaned = stored
+      .map(normalizeStoredRecommendation)
+      .filter(Boolean);
+
+    localStorage.setItem("recommended_modules", JSON.stringify(cleaned));
+  } catch {
+    localStorage.setItem("recommended_modules", "[]");
+  }
 }

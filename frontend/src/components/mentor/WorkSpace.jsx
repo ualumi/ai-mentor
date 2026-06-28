@@ -1,6 +1,5 @@
 
 
-
 import SandBox from "./SandBox";
 import { useQuery } from "@tanstack/react-query";
 import { CodeProvider } from "../CodeContext";
@@ -15,10 +14,105 @@ import { wsService } from "../../services/websocket";
 import { useAuth } from "../../context/AuthContext";
 import CheckTaskButton from "../modules/module/CheckTaskButton";
 import NextStepButton from "../modules/module/NextStepButton";
+import { Joyride } from 'react-joyride';
+import ToolTip from "./ToolTip";
 
-const ATTEMPTS_SERVICE = "/api/attempts/";
+const ATTEMPTS_SERVICE = "/api/attempts";
 
 export default function WorkSpace({ mode, isSidebarOpen }) {
+  const [showIntroModal, setShowIntroModal] = useState(() => {
+    return localStorage.getItem("has_seen_intro") !== "true";
+  });
+
+  const [runTour, setRunTour] = useState(false);
+  const [shouldStartTour, setShouldStartTour] = useState(false);
+
+  const finishIntro = () => {
+    localStorage.setItem("has_seen_intro", "true");
+    setShowIntroModal(false);
+    setRunTour(false);
+    setShouldStartTour(false);
+  };
+
+  useEffect(() => {
+    if (!showIntroModal && shouldStartTour) {
+      const timer = setTimeout(() => {
+        setRunTour(true);
+      }, 0);
+
+      return () => clearTimeout(timer);
+    }
+  }, [showIntroModal, shouldStartTour]);
+
+  
+
+  const steps = [
+    {
+      target: "#progress",
+      content: "Блок с условием текущего задания",
+    },
+    {
+      target: ".task-condition",
+      content: "Здесь указано условие задачи в рамках темы модуля. После успешного решения текущей задачи, можете перейти к следующей, нажав на кнопку 'Следующий шаг'",
+    },
+    {
+      target: "#panel",
+      content: "Панель действий с кодом: запустить, отправить на ревью и т.д.",
+      placement: "right",
+    },
+    {
+      target: ".item-run-button",
+      content: "Запустите код, чтобы проверить решение. Вывод будет отображен в терминале",
+      placement: "right",
+    },
+    {
+      target: ".submitcodebutton",
+      content: "Отправьте код на ревью, чтобы получить обратную связь от ИИ",
+      placement: "right",
+      disableBeacon: true,
+      spotlightClicks: true,
+      disableOverlayClose: true,
+    },
+    {
+      target: ".recomendation-item-active",
+      content: "Мы подготовили для вас короткий совет по коду, а также подсказку, какой материал поможет лучше разобраться в теме.",
+      placement: "left",
+    },
+    {
+      target: ".mentor-tab-active",
+      content: "Вкладка с подсказкой от ИИ",
+      placement: "top",
+    },
+    {
+      target: ".recommendation-tab-active",
+      content: "Вкладка с рекомендациями по обучению",
+      placement: "top",
+    },
+    {
+      target: ".workspace-tab.has-notification",
+      content: "Здесь находится детальный фидбек по вашему решению, нажмите на вкладку 'Ревью', чтобы посмотреть",
+      placement: "bottom",
+    },
+    {
+      target: ".review-blocks",
+      content: "Здесь представлен разбор вашего решения: что получилось хорошо, что можно улучшить, а также конкретные советы, которые помогут скорректировать код.",
+      placement: "left",
+    },
+    {
+      target: "#code",
+      content: "Чтобы вернуться к редактору, нажмите на вкладку 'Код'",
+      placement: "bottom",
+    },
+    {
+      target: ".editor-wrapper",
+      content: "Это редактор кода, здесь вы будете писать свои решения",
+      placement: "left",
+    },  
+  ];
+
+  //const [runTour, setRunTour] = useState(false);
+
+
   const { token } = useAuth();
 
   const location = useLocation();
@@ -31,6 +125,7 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
 
   const initialCode = taskData?.code;
   const taskTitle = taskData?.title;
+  const taskDescription = taskData?.description;
   const selectedAttemptId = taskData?.selectedAttemptId;
   const competency = taskData?.competency;
   const restoredStateFromRoute = taskData?.restoredState;
@@ -41,6 +136,9 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
   const [reviewData, setReviewData] = useState([]);
   const [activeTab, setActiveTab] = useState("code");
   const [stableRestoredState, setStableRestoredState] = useState(null);
+  const sessionIdForWs = stableRestoredState?.session?.session_id || (
+    mode === "module" ? id : null
+  );
 
   const hasReview = reviewData.length > 0;
 
@@ -58,21 +156,21 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
   const [wsReady, setWsReady] = useState(false);
 
   useEffect(() => {
-    if (!stableRestoredState?.session?.session_id) return;
+    if (!sessionIdForWs) return;
 
     const initSession = async () => {
       await wsService.connect(token); // ⬅️ гарантируем соединение
-      console.log("type set_session", stableRestoredState.session.session_id)
-      wsService.send({
+      console.log("type set_session", sessionIdForWs)
+      await wsService.send({
         type: "set_session",
-        learning_session_id: stableRestoredState.session.session_id
+        learning_session_id: sessionIdForWs
       });
 
       setWsReady(true);
     };
 
     initSession();
-  }, [stableRestoredState, token]);
+  }, [sessionIdForWs, token]);
   
 
   // -----------------------------
@@ -233,18 +331,70 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
   // 🔹 DERIVED DATA
   // -----------------------------
   const conditionHistory = attempt?.condition ?? null;
-  console.log (conditionHistory)
+  console.log ("conditionHistory" , conditionHistory)
   // -----------------------------
   // 🔹 UI
   // -----------------------------
-  console.log(mode)
+  console.log('showIntroModal',showIntroModal)
   return (
     <CodeProvider initialCode={attempt?.code || initialCode}>
+      {showIntroModal && (
+        <div className="intro-modal">
+          <div className="intro-content">
+            <button className="item end" onClick={() => {
+                finishIntro();
+              }}
+            >
+              ✕
+            </button>
+            <h3 className="home-summary-block-label-text">Навигация на платформе</h3>
+            
+            <p className="home-summary-block-label-link">Пройдите короткий обзор</p>
+
+            <button className="module-next-button module-button" onClick={() => {
+              localStorage.setItem("has_seen_intro", "true");
+              setShowIntroModal(false);
+              setRunTour(true);
+              setShouldStartTour(true);
+            }}>
+              Пройти
+            </button>
+
+            
+          </div>
+        </div>
+      )}
+
+      <Joyride
+        steps={steps}
+        run={runTour}
+        continuous
+        showSkipButton
+        showProgress
+        tooltipComponent={ToolTip}   // 🔥 ВАЖНО
+        styles={{
+          options: {
+            zIndex: 10000,
+            BackgroundColor: '#1E1F21',
+            primaryColor: "#3B68FF"
+          },
+          spotlight: {
+            borderRadius: "12px",
+          },
+        }}
+        callback={(data) => {
+          const { status } = data;
+
+          if (status === "finished" || status === "skipped") {
+            finishIntro();
+          }
+        }}
+      />
       <div className="free-mode">
 
         <div className={mode}>
 
-          {/* HISTORY */}
+
           {mode && (
             <div className="history-wrapper">
               <History
@@ -255,6 +405,7 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
                 restoredState={stableRestoredState}
                 code={initialCode}
                 titletask={taskTitle}
+                taskDescription={taskDescription}
                 isSidebarOpen={isSidebarOpen}
                 selectedAttemptId={selectedAttemptId}
                 conditionHistory={conditionHistory}
@@ -262,10 +413,10 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
             </div>
           )}
 
-          {/* MAIN */}
+
           <div className="code-section">
 
-            {/* MODULE HEADER */}
+
             {mode === "module" && (
               <div className="module-task-header">
                 <ModuleTask  key={id} conditionHistory={conditionHistory} attempt={attempt}
@@ -273,13 +424,14 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
               </div>
             )}
 
-            {/* TABS */}
+
             <div className="workspace-tabs">
               <button
                 className={`workspace-tab ${
                   activeTab === "code" ? "workspace-tab-active" : ""
                 }`}
                 onClick={() => setActiveTab("code")}
+                id="code"
               >
                 Код
               </button>
@@ -293,9 +445,14 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
               >
                 Ревью
               </button>
+              <button className="workspace-tab workspace-tab-active" style={{flex:'none'}} onClick={() => {
+              localStorage.setItem("has_seen_intro", "true");
+              setShowIntroModal(true);
+              setRunTour(true);
+            }}>?</button>
             </div>
 
-            {/* CONTENT */}
+
             {activeTab === "code" ? (
               <SandBox
                 key={id}
@@ -307,6 +464,7 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
                 titletask={taskTitle}
                 isSidebarOpen={isSidebarOpen}
                 selectedAttemptId={selectedAttemptId}
+                conditionHistory={conditionHistory}
               />
             ) : (
               <Review
@@ -320,7 +478,7 @@ export default function WorkSpace({ mode, isSidebarOpen }) {
           </div>
         </div>
 
-        {/* RECOMMENDATION */}
+
         <Recommendation
           key={id}
           mode={attempt ? "history" : mode}
