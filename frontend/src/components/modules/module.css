@@ -152,6 +152,7 @@
     word-break: normal;
     hyphens: manual;
     line-height: 1.25;
+    padding-bottom: 10px !important;
 }
 
 .menu-item-processflag {
